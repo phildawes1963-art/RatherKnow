@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /mirrors
+Disallow: /results/
+
+Sitemap: https://ratherknow.com/sitemap.xml

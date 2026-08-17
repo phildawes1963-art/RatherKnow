@@ -1,0 +1,30 @@
+{
+  "note": "Single exported route config for ratherknow.com — consumed by the head component, the pre-render/SSG step, the sitemap generator and robots.txt. Titles are bare; the head component appends ' · Rather Know' except on '/'. All canonicals are self-referential: https://ratherknow.com{path}.",
+  "site": {
+    "name": "Rather Know",
+    "descriptor": "a study of how you choose",
+    "base_url": "https://ratherknow.com",
+    "default_og_image": "/og/ratherknow-og.png",
+    "attribution": "An independent study by My Mirror Report."
+  },
+  "routes": [
+    {"path": "/", "title": "Rather Know — a study of how you choose", "suffix": false, "description": "Four psychometric instruments that measure how you choose in relationships. Free, anonymous, and honest about their own evidence.", "indexable": true, "jsonld": ["WebSite", "Organization"]},
+    {"path": "/promise", "title": "The promise", "description": "Seven promises and ten refusals, published in full.", "indexable": true, "jsonld": ["BreadcrumbList"]},
+    {"path": "/methodology", "title": "Methodology", "description": "Every instrument's evidence tier, scoring, and stated weaknesses — in full.", "indexable": true, "jsonld": ["BreadcrumbList"]},
+    {"path": "/safety", "title": "Safety", "description": "If you're afraid of someone, that isn't a pattern to work on. Here's where to go.", "indexable": true, "jsonld": ["BreadcrumbList"]},
+    {"path": "/learn", "title": "Learn", "description": "Essays on patterns, choosing, and what an assessment is actually for.", "indexable": true, "jsonld": ["BreadcrumbList"]},
+    {"path": "/learn/{slug}", "dynamic": true, "slugs": ["the-interference", "the-signal-box", "why-you-keep-choosing-the-same-type", "dont-waste-the-breakup", "the-assessment-that-knows-its-place"], "meta_source": "frontend/learn/miLearn.js (per-article title/description — strip the '| Mirror Index' suffix)", "indexable": true, "jsonld": ["Article", "BreadcrumbList"]},
+    {"path": "/flag-check", "title": "Flag Check — a reflection", "description": "It reads you, not them. A reflection, not a measure.", "indexable": true, "jsonld": ["BreadcrumbList"]},
+    {"path": "/samples", "title": "Sample results", "description": "One fabricated profile, run through all four mirrors — the exact shape of what you get, before you give it twenty-five minutes.", "indexable": true, "jsonld": ["BreadcrumbList"], "port_from": "frontend/pages-mirror/MirrorSamples.js"},
+    {"path": "/faq", "title": "Questions, answered", "description": "What it costs, what it can and cannot tell you, and what happens to your answers — plainly.", "indexable": true, "jsonld": ["FAQPage", "BreadcrumbList"], "port_from": "frontend/pages-mirror/MirrorFaq.js"},
+    {"path": "/take/essential", "title": "Essential Mirror", "description": "Who you are — and who you say you want. 100 items, two lenses, the Delta between them. Free and anonymous.", "indexable": true},
+    {"path": "/take/closeness", "title": "Closeness Mirror", "description": "How you are when you're close to someone. 36 items, about 5 minutes. Free and anonymous.", "indexable": true},
+    {"path": "/take/personality", "title": "Personality Mirror", "description": "A validated five-factor profile — sixteen primary factors, five global dimensions. Free and anonymous.", "indexable": true},
+    {"path": "/take/eq", "title": "EI Mirror", "description": "A Goleman four-domain emotional intelligence read. 140 items. Free and anonymous.", "indexable": true},
+    {"path": "/mirrors", "title": "Your mirrors", "description": "Everything you've measured, in one place.", "indexable": false, "robots_disallow": true},
+    {"path": "/results/{sessionId}", "dynamic": true, "indexable": false, "robots_disallow": true, "note": "per-session result pages — never indexed"},
+    {"path": "/archetypes", "title": "The six archetypes", "description": "Six relationship archetypes, two lenses, one honest read of who you actually need.", "indexable": true, "jsonld": ["BreadcrumbList"], "port_from": "frontend/archetypes/MirrorIndexArchetypes.js — restyle to the Rather Know design language"},
+    {"path": "/archetypes/{slug}", "dynamic": true, "slugs": ["the-rock", "the-challenger", "the-empath", "the-voyager", "the-diplomat", "the-torchbearer"], "meta_source": "frontend/archetypes/miSeo.js (MI_SEO payload — rewrite canonical + brand for Rather Know)", "indexable": true, "jsonld": ["Article", "BreadcrumbList"], "port_from": "frontend/archetypes/MirrorIndexArchetypeDetail.js"}
+  ],
+  "reserved": ["/red-flags", "/pathway", "/pricing", "/for-coaches", "/for-creators", "/partners/terms", "/r/{partner_code}", "/privacy", "/terms", "/cookies"]
+}

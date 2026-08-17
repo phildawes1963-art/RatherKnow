@@ -1,0 +1,64 @@
+{
+  "instrument": "MI-AS-36",
+  "bank_version": "1.0.0",
+  "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Slightly disagree",
+    "Neither",
+    "Slightly agree",
+    "Agree",
+    "Strongly agree"
+  ],
+  "instructions": {
+    "title": "How you are when you're close to someone",
+    "paragraphs": [
+      "These questions are about how you tend to be in romantic relationships in general — across the ones you've had, not one in particular. It matters that you answer generally, because that's what makes the result mean something.",
+      "If you're not seeing anyone at the moment, answer as you usually are when you're close to someone. If you've had little relationship experience, answer as you think you'd be — that's useful too.",
+      "There are no right answers, and nothing here is a diagnosis. It takes about five minutes."
+    ]
+  },
+  "order": [34, 28, 15, 27, 22, 35, 17, 10, 29, 18, 32, 16, 24, 7, 23, 21, 8, 2, "VAL-IR", 33, 14, 26, 9, 11, 6, 20, 3, 31, 13, 5, 19, 36, 25, 4, 30, 12, 1],
+  "validity": [
+    { "id": "VAL-IR", "expected": 2, "text": "Please choose \"Disagree\" for this one." }
+  ],
+  "inconsistency_pairs": [[7, 9], [25, 27], [34, 35]],
+  "items": [
+    { "id": 1, "dim": "ANX", "facet": "A1", "key": "F", "text": "The possibility of being left stays somewhere in my mind." },
+    { "id": 2, "dim": "ANX", "facet": "A1", "key": "F", "text": "I brace myself for relationships ending, even when things are going well." },
+    { "id": 3, "dim": "ANX", "facet": "A1", "key": "R", "text": "I don't spend much time wondering whether a relationship will last." },
+    { "id": 4, "dim": "ANX", "facet": "A2", "key": "F", "text": "I suspect I put more into relationships than the other person does." },
+    { "id": 5, "dim": "ANX", "facet": "A2", "key": "R", "text": "I assume that someone who chooses to be with me means it." },
+    { "id": 6, "dim": "ANX", "facet": "A2", "key": "R", "text": "When someone tells me they care about me, I take it at face value." },
+    { "id": 7, "dim": "ANX", "facet": "A3", "key": "F", "text": "I look for signs that things between us are still all right." },
+    { "id": 8, "dim": "ANX", "facet": "A3", "key": "F", "text": "I pick up quickly on any change in how warm someone is towards me." },
+    { "id": 9, "dim": "ANX", "facet": "A3", "key": "R", "text": "I can go a good while without needing any particular sign that things are fine." },
+    { "id": 10, "dim": "ANX", "facet": "A4", "key": "F", "text": "When something feels unresolved with someone close to me, it takes over my thinking." },
+    { "id": 11, "dim": "ANX", "facet": "A4", "key": "F", "text": "A short silence from someone I'm close to can stay with me for hours." },
+    { "id": 12, "dim": "ANX", "facet": "A4", "key": "R", "text": "When a message goes unanswered, I get on with my day." },
+    { "id": 13, "dim": "ANX", "facet": "A5", "key": "F", "text": "When I sense someone pulling back, I press harder to close the distance." },
+    { "id": 14, "dim": "ANX", "facet": "A5", "key": "R", "text": "If someone needs space, I can give it without needing things settled first." },
+    { "id": 15, "dim": "ANX", "facet": "A5", "key": "R", "text": "When I'm unsure where I stand, I can sit with that rather than seek an answer straight away." },
+    { "id": 16, "dim": "ANX", "facet": "A6", "key": "F", "text": "I expect that if someone saw all of me, they'd think less of me." },
+    { "id": 17, "dim": "ANX", "facet": "A6", "key": "R", "text": "How a partner is treating me doesn't much change how I feel about myself." },
+    { "id": 18, "dim": "ANX", "facet": "A6", "key": "R", "text": "Someone who got to know me properly would like what they found." },
+    { "id": 19, "dim": "AVO", "facet": "V1", "key": "F", "text": "I get uneasy when someone wants to be very close to me emotionally." },
+    { "id": 20, "dim": "AVO", "facet": "V1", "key": "F", "text": "I'd rather keep a certain distance, even with someone I love." },
+    { "id": 21, "dim": "AVO", "facet": "V1", "key": "R", "text": "I'm comfortable being emotionally close to a partner." },
+    { "id": 22, "dim": "AVO", "facet": "V2", "key": "F", "text": "There are things about me I'd keep from a partner indefinitely." },
+    { "id": 23, "dim": "AVO", "facet": "V2", "key": "R", "text": "I'm comfortable letting a partner see me at my lowest." },
+    { "id": 24, "dim": "AVO", "facet": "V2", "key": "R", "text": "I say what I'm actually feeling to the person I'm with." },
+    { "id": 25, "dim": "AVO", "facet": "V3", "key": "F", "text": "I'd sooner deal with a difficulty on my own than take it to a partner." },
+    { "id": 26, "dim": "AVO", "facet": "V3", "key": "F", "text": "Leaning on a partner for something important doesn't come easily to me." },
+    { "id": 27, "dim": "AVO", "facet": "V3", "key": "R", "text": "When something's gone wrong, going to my partner is my first instinct." },
+    { "id": 28, "dim": "AVO", "facet": "V4", "key": "F", "text": "Being looked after makes me want to change the subject." },
+    { "id": 29, "dim": "AVO", "facet": "V4", "key": "R", "text": "I can accept help from a partner without feeling I owe something." },
+    { "id": 30, "dim": "AVO", "facet": "V4", "key": "R", "text": "I like being taken care of when I'm unwell or struggling." },
+    { "id": 31, "dim": "AVO", "facet": "V5", "key": "F", "text": "When things get tense between us, my instinct is to go quiet." },
+    { "id": 32, "dim": "AVO", "facet": "V5", "key": "F", "text": "Under pressure in a relationship, I withdraw before I explain." },
+    { "id": 33, "dim": "AVO", "facet": "V5", "key": "R", "text": "When there's friction, I'd rather stay in the room and work it out." },
+    { "id": 34, "dim": "AVO", "facet": "V6", "key": "F", "text": "The idea of two lives becoming fully entwined makes me uneasy." },
+    { "id": 35, "dim": "AVO", "facet": "V6", "key": "R", "text": "I like the feeling of my life being bound up with someone else's." },
+    { "id": 36, "dim": "AVO", "facet": "V6", "key": "R", "text": "Building something jointly with a partner appeals to me more than keeping things separate." }
+  ]
+}

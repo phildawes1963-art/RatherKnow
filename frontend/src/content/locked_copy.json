@@ -1,0 +1,139 @@
+{
+  "_note": "LOCKED COPY REGISTER (MI-CLR-001 §5). Verbatim, claims-register-governed. Never edit inline in JSX. Hash-tested in CI by tests/test_locked_copy.py — changing any string here fails the build until tests/locked_copy_hashes.json is deliberately regenerated.",
+  "attribution": "An independent study by My Mirror Report.",
+  "tier_statements": {
+    "essential": "Built on attachment theory, a validated five-factor measure and Goleman's EQ framework. The archetype instrument itself is developmental: the questions are ours, and their properties are still being established.",
+    "closeness": "The two dimensions come from a large and well-replicated research tradition. The questions are ours, written for this instrument, and their properties are still being established.",
+    "personality": "A validated five-factor profile.",
+    "eq": "A Goleman four-domain emotional intelligence read."
+  },
+  "tier_chips": {
+    "essential": "Developmental",
+    "closeness": "Developmental",
+    "personality": "Established",
+    "eq": "Established"
+  },
+  "promise_opening": "We cannot find you love. Nobody can. Every promise we make is about you, because that’s the only person we can honestly make one about.",
+  "promises": [
+    {
+      "title": "Every promise is about you.",
+      "body": "We cannot find you love. Nobody can. No output here will ever predict another person’s behaviour, promise a meeting, or put a date on anything. We make promises about the one person we can honestly make them about: you."
+    },
+    {
+      "title": "Free to start.",
+      "body": "Free. No card required. And not a trial — nothing expires, nothing converts, nothing quietly becomes a subscription while you’re not looking."
+    },
+    {
+      "title": "It ends.",
+      "body": "Anything paid runs three months, then it stops. No renewal, nothing to cancel. The practice is finite and completable — it is designed to be finished and left, not to retain you."
+    },
+    {
+      "title": "A ceiling, in writing.",
+      "body": "There is a maximum price here — one ceiling for the whole practice, and it will be published on this page before anything is purchasable. That is a standing public commitment, not a price point: once the figure is up, raising it would be a reputational event, and we know it."
+    },
+    {
+      "title": "No urgency.",
+      "body": "No countdowns, no scarcity, no places-are-limited, no time-limited pricing. A decision made under pressure isn’t a decision — it’s a capture. Everything here will still be here tomorrow."
+    },
+    {
+      "title": "No upsell.",
+      "body": "No inner circle, no mastermind, no next level. And nobody here will phone you."
+    },
+    {
+      "title": "No number we cannot justify.",
+      "body": "No compatibility percentages. No banded scores before norms exist to justify them. Every instrument publishes its evidence tier in full — including the word “developmental” where it applies to our own."
+    }
+  ],
+  "refusals": [
+    "A promise about another person",
+    "A timeline or an outcome",
+    "An unjustifiable number",
+    "A clinical label — of you, or of anyone you describe",
+    "A treatment claim",
+    "A shame construction",
+    "Urgency or scarcity",
+    "An unsubstantiated superlative",
+    "“Validated”, applied to a developmental instrument",
+    "A verdict on anyone who hasn’t taken the assessment"
+  ],
+  "refusals_intro": "Ten classes of claim that are banned outright — in our copy, in anything machine-written, and in every partner’s promotion. Any output containing one of these is rejected, whoever wrote it.",
+  "promise_close": [
+    "Two more, behind the scenes. Your data is never sold, never shared, and never used to train any model — contractually, not aspirationally. And anything machine-written is disclosed, plainly, where it appears.",
+    "It’s a self-reflection instrument, not a clinical tool. It informs conversations; it does not replace professionals."
+  ],
+  "safety": {
+    "headline": "If you’re ever afraid of someone, that isn’t a pattern to work on.",
+    "paragraphs": [
+      "Everything on this site is about patterns — noticing them, measuring them, deciding what to do with them. One category is exempt from all of that, and it matters that we say so plainly.",
+      "Control, coercion, monitoring, isolation, and fear of a specific person are not flags to weigh, not material for reflection, and not something any instrument here should be used on. They are a different category with a different answer, and the answer is support from people whose job this is."
+    ],
+    "floor": "Fear of a specific person is always information — and never something to talk yourself out of.",
+    "outside_uk": "Outside the UK, the equivalent services in your country are the right first step — most countries run a national domestic abuse line and a crisis line. Nothing on this site is a substitute for them, and nothing you read here should ever be a reason to stay somewhere you’re afraid.",
+    "exit_link": "If you’re afraid of someone, start here",
+    "routes": [
+      { "name": "In immediate danger", "detail": "Call 999.", "contact": "999" },
+      { "name": "National Domestic Abuse Helpline (Refuge)", "detail": "Free, confidential, 24 hours a day. For women; they will help anyone find the right service.", "contact": "0808 2000 247", "link": "https://www.nationaldahelpline.org.uk" },
+      { "name": "Respect Men’s Advice Line", "detail": "Confidential support for men experiencing domestic abuse.", "contact": "0808 8010 327", "link": "https://mensadviceline.org.uk" },
+      { "name": "Galop", "detail": "Support for LGBT+ people experiencing abuse or violence.", "contact": "0800 999 5428", "link": "https://galop.org.uk" },
+      { "name": "Samaritans", "detail": "Whatever you’re carrying, any hour, any day.", "contact": "116 123", "link": "https://www.samaritans.org" }
+    ]
+  },
+  "flag_check": {
+    "descriptor": "a reflection, not a measure",
+    "label": "Flag Check · A reflection, not a measure",
+    "subtitle": "It reads you, not them.",
+    "safety_split": "Control, coercion, monitoring, isolation, and fear of a specific person are not material for reflection. If that’s where you are, this isn’t the page —",
+    "safety_split_lead": "One category is exempt from everything below.",
+    "intro_paragraphs": [
+      "Eight situations people recognise. Not one of them asks you to rate, diagnose or describe another person — every question is about what you noticed, when, and what you did with it.",
+      "There's no score at the end, no band, no grade. What you get back is a reflection of your own noticing pattern, and a framework for what to do with an observation that isn't “leave” and isn't “let it go”."
+    ],
+    "intro_meta": [
+      "9 questions · about 3 minutes · anonymous, no account",
+      "Answer from your own history, across relationships — not about any one person."
+    ],
+    "prompt": "Have you been somewhere like this?",
+    "disclosure": "A reflection, not a measure. No score was produced, nothing was graded, and nothing here is a diagnosis — these questions never asked about anyone but you.",
+    "safety_yes_lead": "You said part of this is about someone you’re afraid of. Then set the reflection aside — it isn’t the point.",
+    "safety_yes_body": "Fear of a specific person is always information — and never something to talk yourself out of. Nothing on this page is a reason to stay anywhere you’re afraid, and working on your “noticing” is not the assignment. The right next step is people whose job this is:",
+    "safety_unsure_body": "You weren’t sure whether some of this is about someone you’re afraid of. That uncertainty deserves respect rather than analysis — if any part of you is checking, the checking itself is worth taking seriously. Fear of a specific person is always information.",
+    "graduated_note": "One category is exempt from graduation: anything involving fear, control or coercion is not a yellow flag to explore. It has a different answer, and it’s on",
+    "stages": [
+      ["Notice", "observe the behaviour, without conclusion"],
+      ["Reflect", "is this a pattern or an incident? does it recur?"],
+      ["Engage", "raise it, if it's worth raising"],
+      ["Decide", "and only then"]
+    ],
+    "cta_body": "The thing underneath the noticing — what you’re drawn to, what you excuse, and the gap between who you are and who you say you want — is measurable. That’s the Essential Mirror.",
+    "cta_label": "Take the Essential Mirror — free",
+    "patterns": {
+      "reprice": {
+        "title": "You see it early, and you let it count.",
+        "body": "On your own account, when something has felt off you've tended to notice it at the time and let it change how you read what came next. That's a noticing pattern that works. The risk for you isn't blindness — it's the opposite: letting a single observation become a verdict before it's a pattern. One instance is human; repetition is information.",
+        "position": "Your work mostly lives at Reflect: pattern or incident? Does it recur? You can afford to ask, because you don’t lose the observation by waiting."
+      },
+      "explain": {
+        "title": "You see it early — and find a reason it’s fine.",
+        "body": "On your own account, the noticing itself works: things registered at the time. What happened next is the interesting part — the observation got explained, softened, or priced back down. That isn't foolishness; it's what investment does. Seeing clearly and letting it count are different skills, and the second one is buildable.",
+        "position": "Your work sits between Notice and Reflect: keeping the observation alive long enough to check whether it repeats. Not as a verdict — as a record. An observation written down is much harder to renegotiate."
+      },
+      "late": {
+        "title": "It tends to arrive in hindsight.",
+        "body": "On your own account, the pattern mostly became visible afterwards, looking back. Two things are true about that. Slow-arriving things are genuinely hard to see from inside — they arrive gradually, dressed as something good, while you're invested. And hindsight isn't failure; it's data about where your attention wasn't pointed.",
+        "position": "Your work starts at Notice: logging what you observe in real time, without needing it to mean anything yet. Noticing without conclusion is the whole first stage — the rest can wait."
+      },
+      "mixed": {
+        "title": "Your noticing changes with the situation.",
+        "body": "No single pattern dominated your answers — by your own account, sometimes things counted early, sometimes they got explained away or only arrived in hindsight. That's common, and it usually means the noticing depends on how invested you are. Which is itself worth knowing.",
+        "position": "Your work spans Notice and Reflect: observe in real time, then check honestly whether the observation survives your own investment."
+      },
+      "insufficient": {
+        "title": "Not much to reflect back — and that’s an honest result.",
+        "body": "Most of your answers said these situations haven't come up, or aren't recallable. We won't invent a pattern out of thin data — that would be a horoscope, and you were promised otherwise. If more of your history surfaces later, this takes three minutes to do again.",
+        "position": "If and when something does register, the framework below is the shape of what to do with it — starting with Notice: observation without conclusion."
+      }
+    }
+  },
+  "disclaimer": "It’s a self-reflection instrument, not a clinical tool. It informs conversations; it does not replace professionals.",
+  "honest_line": "It can’t find you anyone. Nothing can."
+}
