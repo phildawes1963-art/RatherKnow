@@ -8,11 +8,16 @@ plus the Flag Check as an unscored fifth door, a cross-check view, and a content
 Methodology, Safety, FAQ, Learn, Samples, archetype SEO pages). Locked copy is governed by the claims
 register (MI-CLR-001 §5) and hash-tested in CI.
 
-## Blocking decision — resolved
-The accounts-vs-anonymity conflict was resolved as **option 1: optional/no accounts**. The app is
-anonymous by design: no email, no login, no profile. Sessions resume from `localStorage`
-(`mi2.sessions`, `mi2.reflections`) and results are retrievable by their `/results/{sessionId}` URL.
-"Free. Anonymous. No account, no card." survives intact — no register change was needed.
+## Blocking decision — resolved twice
+1. **Initial build** shipped anonymous (option 1), promise intact.
+2. **Reversed by the client on 2026-06 (option 2, in writing):** accounts are now required to take
+   the four instruments. Signup captures exactly **name, email, password, situation**
+   (Single & dating / In a relationship / Post-breakup). The gate sits **before** the questions.
+   No email is ever sent — results appear on screen and are retrieved by logging in.
+   The **Flag Check stays open** with no account, deliberately.
+   Consequently the register was updated deliberately (hashes regenerated): "anonymous" is gone from
+   the promise, replaced by a specific data claim (`data_claim`) and an explicit account claim
+   (`account_claim`); promise 02 now states plainly that an account is needed and why.
 
 ## Architecture
 - **Frontend** — React (CRA) + React Router + react-helmet-async. `mirror.css` tokens preserved.
@@ -40,6 +45,15 @@ Search-led discovery, essay-led trust.
 6. Safety exit reachable from every instrument page.
 
 ## Implemented (2026-06)
+- **Auth layer** — `backend/auth.py`: bcrypt password hashing, 30-day PyJWT access tokens (Bearer,
+  stored in `localStorage` key `rk.token`), `/api/auth/register|login|me|claim|me/sessions`,
+  per-email brute-force lockout (5 attempts / 15 min). Registration captures name, email, password
+  and situation; the situation is stamped on every session as `situation_at_start`.
+  `POST /api/v2/assessments` and all session read/write/complete routes require the owner's token —
+  another account gets 403. The Flag Check reflection endpoints stay open.
+  Frontend: `lib/auth.js` (AuthProvider), `pages/Auth.js` (shared register/login), `ProtectedRoute`
+  on `/take/:instrument`, `/mirrors`, `/results/:id`; anonymous local sessions are claimed on signup.
+  Archetypes now sit in the top nav.
 - **Phase 1** — All four scorers, item banks and the norms snapshot ported verbatim. Locked-copy
   register + hash/lint test green. Mongo schema with versioned immutable results.
 - **Phase 2** — Anonymous session model (no auth needed), assessment runner with per-item autosave,
@@ -60,8 +74,9 @@ Search-led discovery, essay-led trust.
 - Submit sitemap; confirm archetype pages indexed.
 
 **P1**
-- Optional account layer (email + magic link via Resend) purely as *retrieval* — "keep my report" —
-  strictly opt-in so the anonymity promise stays true. Blocked on the pricing decision.
+- Use the captured `situation` to shape report framing — currently it is stored and shown, but the
+  report copy does not yet differ by Single & dating / In a relationship / Post-breakup.
+- Password reset. There is no email provider wired, so today a forgotten password is unrecoverable.
 - Learn essay on the Delta (`/learn/relationship-delta`) — referenced but not yet authored.
 - Object storage for illustration/diploma/OG assets and the audio demo.
 

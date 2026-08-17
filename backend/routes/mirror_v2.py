@@ -1,16 +1,18 @@
-"""Mirror v2 — the remodel. Anonymous, free, sessionised instruments.
+"""Mirror v2 — the remodel. Free, sessionised instruments.
 
 Four instruments: essential (50×2 archetype), personality (P150 Likert core),
-eq (EI Mirror 140), closeness (new MI-AS-36). No account required; the client
-holds its session ids. Collection: mirror_v2_sessions.
+eq (EI Mirror 140), closeness (new MI-AS-36). Starting an instrument requires an
+account (name, email, situation) so results are retrievable by logging in; the
+Flag Check reflection stays open to everyone. Collection: mirror_v2_sessions.
 """
 import uuid
 import logging
 from datetime import datetime, timezone
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List, Optional
 from database import db
+from auth import get_current_user, assert_session_owner
 
 from services.essential_scoring import (
     SELF_ASSESSMENT_QUESTIONS, IDEAL_PARTNER_QUESTIONS, ARCHETYPES,
@@ -182,7 +184,7 @@ async def list_instruments():
 
 
 @router.post("/assessments")
-async def start_assessment(data: StartRequest):
+async def start_assessment(data: StartRequest, user: dict = Depends(get_current_user)):
     if data.instrument not in INSTRUMENTS:
         raise HTTPException(status_code=404, detail="Unknown instrument")
     session = {
@@ -191,6 +193,8 @@ async def start_assessment(data: StartRequest):
         "status": "in_progress",
         "started_at": datetime.now(timezone.utc).isoformat(),
         "responses": {},
+        "user_id": str(user["_id"]),
+        "situation_at_start": user.get("situation"),
     }
     if data.instrument == "closeness":
         session["bank_version"] = load_bank()["bank_version"]
@@ -199,18 +203,22 @@ async def start_assessment(data: StartRequest):
 
 
 @router.get("/assessments/{session_id}")
-async def get_assessment(session_id: str):
+async def get_assessment(session_id: str, user: dict = Depends(get_current_user)):
     session = await db.mirror_v2_sessions.find_one({"id": session_id}, {"_id": 0})
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
+    await assert_session_owner(session, user)
     return _session_payload(session)
 
 
 @router.put("/assessments/{session_id}/responses")
-async def put_responses(session_id: str, data: ResponsesPut):
-    session = await db.mirror_v2_sessions.find_one({"id": session_id}, {"_id": 0, "id": 1, "instrument": 1, "status": 1})
+async def put_responses(session_id: str, data: ResponsesPut, user: dict = Depends(get_current_user)):
+    session = await db.mirror_v2_sessions.find_one(
+        {"id": session_id}, {"_id": 0, "id": 1, "instrument": 1, "status": 1, "user_id": 1}
+    )
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
+    await assert_session_owner(session, user)
     if session["status"] == "complete":
         raise HTTPException(status_code=409, detail="Session already complete")
     meta = INSTRUMENTS[session["instrument"]]
@@ -351,10 +359,11 @@ def _score_eq(responses: dict) -> dict:
 
 
 @router.post("/assessments/{session_id}/complete")
-async def complete_assessment(session_id: str):
+async def complete_assessment(session_id: str, user: dict = Depends(get_current_user)):
     session = await db.mirror_v2_sessions.find_one({"id": session_id}, {"_id": 0})
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
+    await assert_session_owner(session, user)
     if session["status"] == "complete" and session.get("result"):
         return session["result"]
     responses = session.get("responses", {})
@@ -380,17 +389,21 @@ async def complete_assessment(session_id: str):
     await db.results.update_one(
         {"session_id": session_id},
         {"$setOnInsert": {"session_id": session_id, "instrument": instrument,
-                          "algo_version": ALGO_VERSION, "result": result}},
+                          "algo_version": ALGO_VERSION, "result": result,
+                          "user_id": session.get("user_id")}},
         upsert=True,
     )
     return result
 
 
 @router.get("/assessments/{session_id}/result")
-async def get_result(session_id: str):
-    session = await db.mirror_v2_sessions.find_one({"id": session_id}, {"_id": 0, "result": 1, "status": 1})
+async def get_result(session_id: str, user: dict = Depends(get_current_user)):
+    session = await db.mirror_v2_sessions.find_one(
+        {"id": session_id}, {"_id": 0, "result": 1, "status": 1, "user_id": 1}
+    )
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
+    await assert_session_owner(session, user)
     if session["status"] != "complete" or not session.get("result"):
         raise HTTPException(status_code=409, detail="Session not complete")
     return session["result"]
@@ -421,11 +434,13 @@ def _headline(session: dict) -> str:
 
 
 @router.post("/mirrors/summary")
-async def mirrors_summary(data: SummaryRequest):
+async def mirrors_summary(data: SummaryRequest, user: dict = Depends(get_current_user)):
     ids = data.session_ids[:10]
     out = []
     if ids:
-        cursor = db.mirror_v2_sessions.find({"id": {"$in": ids}}, {"_id": 0, "answers": 0})
+        cursor = db.mirror_v2_sessions.find(
+            {"id": {"$in": ids}, "user_id": str(user["_id"])}, {"_id": 0, "answers": 0}
+        )
         async for session in cursor:
             out.append({
                 "session_id": session["id"],
@@ -647,12 +662,13 @@ def _build_findings(by_instrument: dict) -> list:
 
 
 @router.post("/mirrors/findings")
-async def mirrors_findings(data: SummaryRequest):
+async def mirrors_findings(data: SummaryRequest, user: dict = Depends(get_current_user)):
     ids = data.session_ids[:10]
     by_instrument = {}
     if ids:
         cursor = db.mirror_v2_sessions.find(
-            {"id": {"$in": ids}, "status": "complete"}, {"_id": 0, "instrument": 1, "result": 1}
+            {"id": {"$in": ids}, "status": "complete", "user_id": str(user["_id"])},
+            {"_id": 0, "instrument": 1, "result": 1},
         )
         async for session in cursor:
             if session.get("result"):

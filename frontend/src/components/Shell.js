@@ -3,17 +3,19 @@ import { Helmet } from 'react-helmet-async';
 import '../styles/mirror.css';
 import { SITE, isIndexable } from '../lib/siteMeta';
 import { ATTRIBUTION, DISCLAIMER, SAFETY, REGISTER } from '../content/register';
+import { useAuth } from '../lib/auth';
 
 const NAV = [
+  { to: '/archetypes', label: 'Archetypes' },
   { to: '/promise', label: 'Promise' },
   { to: '/learn', label: 'Learn' },
   { to: '/methodology', label: 'Methodology' },
   { to: '/safety', label: 'Safety' },
-  { to: '/mirrors', label: 'Your mirrors' },
 ];
 
 export default function Shell({ title, description, children, minimal = false, jsonLd, ogImage }) {
   const { pathname } = useLocation();
+  const { user, logout } = useAuth();
   const canonical = `${SITE.baseUrl}${pathname}`;
   const fullTitle = title ? `${title} · ${SITE.name}` : `${SITE.name} — ${SITE.descriptor}`;
   const image = `${SITE.baseUrl}${ogImage || SITE.ogImage}`;
@@ -59,13 +61,29 @@ export default function Shell({ title, description, children, minimal = false, j
                   {n.label}
                 </Link>
               ))}
-              <Link
-                to="/take/essential"
-                data-testid="nav-start"
-                className="text-sm bg-[#1C1C18] text-[#F6F6F2] px-4 py-2 rounded-sm hover:opacity-85"
-              >
-                Start free
-              </Link>
+              {user ? (
+                <>
+                  <Link to="/mirrors" data-testid="nav-your-mirrors" className="hidden sm:inline text-sm text-[#3B3B34] hover:text-[#1C1C18]">
+                    Your mirrors
+                  </Link>
+                  <button onClick={logout} data-testid="nav-logout" className="text-sm text-[#6E6E66] hover:text-[#1C1C18]">
+                    Log out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" data-testid="nav-login" className="text-sm text-[#3B3B34] hover:text-[#1C1C18]">
+                    Log in
+                  </Link>
+                  <Link
+                    to="/register"
+                    data-testid="nav-start"
+                    className="text-sm bg-[#1C1C18] text-[#F6F6F2] px-4 py-2 rounded-sm hover:opacity-85"
+                  >
+                    Start free
+                  </Link>
+                </>
+              )}
             </nav>
           </div>
         </header>
@@ -94,6 +112,11 @@ export default function Shell({ title, description, children, minimal = false, j
                 A relationship assessment for people who’d rather know than be reassured.
               </p>
               <p className="mt-4 text-xs text-[#6E6E66]" data-testid="footer-attribution">{ATTRIBUTION}</p>
+              {user && (
+                <p className="mt-3 text-xs text-[#6E6E66]" data-testid="footer-signed-in">
+                  Signed in as {user.name} · {user.situation_label}
+                </p>
+              )}
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.1em] text-[#6E6E66] mb-3">The instruments</p>

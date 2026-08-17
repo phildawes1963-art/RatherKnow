@@ -67,10 +67,17 @@ async def get_status_checks():
     return status_checks
 
 from routes.mirror_v2 import router as mirror_v2_router
+from auth import router as auth_router, ensure_indexes
 
 # Include the router in the main app
 app.include_router(api_router)
 app.include_router(mirror_v2_router)
+app.include_router(auth_router)
+
+
+@app.on_event("startup")
+async def startup_indexes():
+    await ensure_indexes()
 
 app.add_middleware(
     CORSMiddleware,

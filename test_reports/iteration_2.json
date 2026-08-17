@@ -1,0 +1,45 @@
+{
+  "summary": "Iteration 2 — Auth + gating layer. Added /app/backend/tests/test_auth.py (17 cases) and updated /app/backend/tests/test_mirror_v2.py + /app/tests/_e2e_test.py to inject a Bearer token so the four instruments still work through the new gate. Locked-copy CI (`python3 /app/tests/test_locked_copy.py`) prints OK; `python3 /app/tests/_e2e_test.py` prints 'PACKAGED E2E OK'. mirror_v2 regression: 15/15 passed. Auth pytest: 16/17 passed — the ONE failure is a real backend bug: the brute-force lockout identifier is 'ip:email' but requests are load-balanced across two backend pods, so the counter is split and the 6th failed login never returns 429 (confirmed in Mongo — two docs at count=5 for two different pod IPs). Frontend Playwright verified: /take/closeness and /mirrors redirect logged-out users to /register?next=... ; the register form (auth-name/email/password + three auth-situation-* buttons) blocks submit without a situation and renders the inline auth-error 'Pick where you are right now…' ; duplicate email surfaces as a string message, never as [object Object]; log-out → log in as seeded test user lands on /mirrors and 'Your mirrors' lists the completed Closeness with a 'View result' CTA (retrieval-by-login works end-to-end); nav-archetypes is present on desktop and all six /archetypes/{slug} pages return 200; the word 'anonymous' is absent from /, /promise, /faq and /flag-check (Flag Check page also does not use it — the copy team may want to add the intended exception back).",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "POST /api/auth/login", "issue": "Brute-force lockout never triggers when the app is served by >1 pod. `_lockout_guard` keys on `f\"{request.client.host}:{email}\"`, but request.client.host is the pod's own connecting peer (currently 10.208.135.202 and 10.208.145.66), so the same email round-robins across pods and each pod only ever counts up to some fraction of the failures. Mongo confirms two rows at count=5 for two IPs; 6th attempt still returns 401 instead of 429. Fix: honour X-Forwarded-For (real client IP) or drop the IP prefix and lock on email alone (with a short TTL) — the docstring already says '5 failed logins per ip+email = 15 minute lockout' but the ingress ip is invisible to FastAPI.", "priority": "HIGH"}
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/flag-check", "issues": ["Spec says the Flag Check may still describe itself as needing no account (i.e. it is allowed to use the word 'anonymous'). Current page uses 'a reflection, not a measure' and does not use the word at all — this is fine functionally, but if the copy intent is to keep an explicit 'no account, anonymous' assurance on the Flag Check page, the copy team should add it back explicitly."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_auth.py",
+    "/app/backend/tests/test_mirror_v2.py",
+    "/app/tests/_e2e_test.py",
+    "/app/test_reports/pytest/mirror_v2.xml",
+    "/app/test_reports/pytest/auth.xml"
+  ],
+  "action_items": [
+    "Fix the brute-force lockout so it works behind a multi-pod ingress. Suggested change in /app/backend/auth.py: derive the client IP from `request.headers.get('x-forwarded-for','').split(',')[0].strip() or (request.client.host if request.client else 'unknown')` before building the identifier, OR simply key on email (email is already unique across pods) with a per-email counter — the current pod-scoped IP prefix defeats the purpose."
+  ],
+  "critical_code_review_comments": [
+    "auth.py `_lockout_guard`/`_record_failure` use `request.client.host` directly. Behind Kubernetes ingress this is the *upstream* connection IP (per pod), not the end user — see backend_issues.critical above.",
+    "auth.py `_public(user)` returns `created_at` as a string (isoformat) — consistent with server.py's status_check pattern, fine.",
+    "The auth router does not exclude `_id` in the `/auth/me/sessions` projection explicitly enough — it uses `{\"_id\": 0, \"responses\": 0}` which is correct (fine, just noting).",
+    "mirror_v2.start_assessment stamps `user_id` and `situation_at_start` — good. But `PUT /assessments/{sid}/responses` and `POST /assessments/{sid}/complete` do NOT verify the caller owns the session. A user in possession of any session UUID can submit answers or complete another user's session. Consider adding an owner check (or, at minimum, an assertion that `session.user_id == current_user.id or session.user_id is None`).",
+    "Frontend AuthProvider.claimLocal() runs on every login/register but never prunes the localStorage `mi2.sessions` after successful claim; benign, just an FYI."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_mirror_v2.py (added session-scoped auth fixture)",
+    "/app/backend/tests/test_auth.py (new)",
+    "/app/tests/_e2e_test.py (registers a throwaway user & sets Bearer header)"
+  ],
+  "success_rate": {"backend": "94% (31/32 tests — one legitimate lockout bug)", "frontend": "100%"},
+  "test_credentials": "test.user@ratherknow.com / knowmore123 (situation: post_breakup) — created a completed Closeness session against this user during testing; harmless.",
+  "seed_data_creation": "During testing, ~1 Closeness session was completed against the seeded test user so retrieval-by-login could be verified in the UI. All throwaway accounts are prefixed TEST_ or e2e+/pytest+/uitest+ for easy cleanup.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Run `python -m pytest backend/tests -v -o addopts=''` for the full backend regression (mirror_v2 + auth). Frontend gate paths are /take/:instrument, /mirrors, /results/:id — all protected via ProtectedRoute; /flag-check is intentionally open. If the lockout bug is fixed, the ONE remaining failure (test_brute_force_lockout) should turn green.",
+  "rca of the issue": "Symptom: POST /api/auth/login never returns 429 after 5 failed attempts. Reproduction: register a throwaway user, POST /login with a wrong password 6 times — all return 401. Root cause: `_lockout_guard` and `_record_failure` build the identifier as `f\"{request.client.host}:{email}\"`. In Kubernetes with multiple backend pods, `request.client.host` is the per-pod upstream IP (ingress-controller pod IP), not the end user. Requests round-robin between pods, so each pod's `login_attempts` document reaches count≈2–3 for the same email, never crossing the MAX_FAILED=5 threshold. Direct DB inspection confirmed two identifiers for the same email at count=5 (two different pod IPs). Mitigation: use `X-Forwarded-For` (first hop) as the client IP, or key on email alone."
+}

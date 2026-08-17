@@ -135,7 +135,7 @@ export default function Archetypes() {
             >
               Meet your archetype — free
             </Link>
-            <p className="text-xs text-[#6E6E66] text-center">Two lenses · about 25 minutes · anonymous</p>
+            <p className="text-xs text-[#6E6E66] text-center">Two lenses · about 25 minutes · free</p>
           </aside>
         </div>
 

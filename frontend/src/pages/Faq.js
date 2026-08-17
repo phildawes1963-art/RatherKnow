@@ -10,7 +10,12 @@ const FAQS = [
   },
   {
     q: 'Do I need an account?',
-    a: 'No. Everything runs anonymously — no email, no sign-up, no profile. Your results are linked to this browser, which cuts both ways: nobody can identify you, and we can’t recover a result for you either. Clear your browser storage and the link to your results goes with it, so save the result URL if you want to keep it.',
+    a: 'For the four instruments, yes — three fields: a name, an email and where you are right now (single & dating, in a relationship, or post-breakup). That last one changes how the report is written, which is the point of asking. No card, no social login, and nothing is emailed at you: results appear on screen and stay retrievable by logging back in. The Flag Check needs no account at all.',
+    links: [{ to: '/register', label: 'Create an account — free' }],
+  },
+  {
+    q: 'Why ask for an email if you don’t email me?',
+    a: 'So the report is still there when you come back — that’s the whole reason. There is no profile, no matching, and we never ask who you’re assessing. Your answers are never sold, never shared and never used to train any model.',
   },
   {
     q: 'Can it tell me whether my partner is right for me?',

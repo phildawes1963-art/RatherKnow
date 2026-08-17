@@ -21,7 +21,7 @@
     },
     {
       "title": "Free to start.",
-      "body": "Free. No card required. And not a trial — nothing expires, nothing converts, nothing quietly becomes a subscription while you’re not looking."
+      "body": "Free. No card required. And not a trial — nothing expires, nothing converts, nothing quietly becomes a subscription while you’re not looking. An account is needed to begin: a name, an email, and where you are right now. That is the whole of it, and it exists so the report can be written for you and handed back when you return."
     },
     {
       "title": "It ends.",
@@ -58,7 +58,7 @@
   ],
   "refusals_intro": "Ten classes of claim that are banned outright — in our copy, in anything machine-written, and in every partner’s promotion. Any output containing one of these is rejected, whoever wrote it.",
   "promise_close": [
-    "Two more, behind the scenes. Your data is never sold, never shared, and never used to train any model — contractually, not aspirationally. And anything machine-written is disclosed, plainly, where it appears.",
+    "Two more, behind the scenes. We never ask who you’re assessing, and there is no profile and no matching — the only person described here is you. Your data is never sold, never shared, and never used to train any model — contractually, not aspirationally. And anything machine-written is disclosed, plainly, where it appears.",
     "It’s a self-reflection instrument, not a clinical tool. It informs conversations; it does not replace professionals."
   ],
   "safety": {
@@ -89,7 +89,7 @@
       "There's no score at the end, no band, no grade. What you get back is a reflection of your own noticing pattern, and a framework for what to do with an observation that isn't “leave” and isn't “let it go”."
     ],
     "intro_meta": [
-      "9 questions · about 3 minutes · anonymous, no account",
+      "9 questions · about 3 minutes · no account needed",
       "Answer from your own history, across relationships — not about any one person."
     ],
     "prompt": "Have you been somewhere like this?",
@@ -134,6 +134,8 @@
       }
     }
   },
+  "data_claim": "We never ask who you’re assessing. No profile, no matching, no browsing other people, no verdict on anyone who hasn’t taken the assessment. Your answers are never sold, never shared, and never used to train any model — contractually, not aspirationally.",
+  "account_claim": "Three fields — a name, an email, and where you are right now. No card, no social login, and nothing emailed at you: your results appear on screen and stay retrievable by logging back in.",
   "disclaimer": "It’s a self-reflection instrument, not a clinical tool. It informs conversations; it does not replace professionals.",
   "honest_line": "It can’t find you anyone. Nothing can."
 }

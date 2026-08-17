@@ -24,6 +24,23 @@ EXPECTED = {
 def s():
     sess = requests.Session()
     sess.headers.update({"Content-Type": "application/json"})
+    # Register a throwaway user and set Bearer token for gated instrument endpoints
+    import uuid as _u
+    email = f"pytest+{_u.uuid4().hex[:10]}@ratherknow.com"
+    r = sess.post(f"{BASE_URL}/api/auth/register", json={
+        "name": "Pytest User", "email": email, "password": "knowmore123",
+        "situation": "single_dating",
+    }, timeout=30)
+    assert r.status_code == 200, r.text
+    token = r.json()["access_token"]
+    sess.headers.update({"Authorization": f"Bearer {token}"})
+    return sess
+
+
+@pytest.fixture(scope="session")
+def s_noauth():
+    sess = requests.Session()
+    sess.headers.update({"Content-Type": "application/json"})
     return sess
 
 

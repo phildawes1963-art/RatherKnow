@@ -1,29 +1,46 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Shell from '../components/Shell';
-import { API, INSTRUMENTS, readSessions, readReflections } from '../lib/mirrorTheme';
-import { FLAG } from '../content/register';
+import { API, INSTRUMENTS, readSessions, readReflections, saveSession } from '../lib/mirrorTheme';
+import { authHeaders, useAuth } from '../lib/auth';
+import { FLAG, REGISTER } from '../content/register';
 
 export default function Mirrors() {
   const [summaries, setSummaries] = useState(null);
   const [findings, setFindings] = useState(null);
-  const sessions = readSessions();
+  const { user } = useAuth();
   const flagCheckId = readReflections().flag_check;
-  const ids = Object.values(sessions);
 
   useEffect(() => {
-    if (ids.length === 0) {
-      setSummaries([]);
-      setFindings([]);
-      return;
-    }
-    const post = (path) =>
-      fetch(`${API}${path}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_ids: ids }),
-      }).then((r) => r.json());
+    if (user === null) return;
     (async () => {
+      let ids = Object.values(readSessions());
+      if (user) {
+        try {
+          const res = await fetch(`${API}/api/auth/me/sessions`, { headers: authHeaders() });
+          const data = await res.json();
+          const mine = data.sessions || [];
+          // A completed session always wins over an abandoned one, newest first.
+          const best = {};
+          mine.forEach((s) => {
+            const held = best[s.instrument];
+            if (!held || (s.status === 'complete' && held.status !== 'complete')) best[s.instrument] = s;
+          });
+          Object.values(best).forEach((s) => saveSession(s.instrument, s.session_id));
+          ids = [...new Set([...ids, ...mine.map((s) => s.session_id)])];
+        } catch { /* fall back to local ids */ }
+      }
+      if (ids.length === 0) {
+        setSummaries([]);
+        setFindings([]);
+        return;
+      }
+      const post = (path) =>
+        fetch(`${API}${path}`, {
+          method: 'POST',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ session_ids: ids }),
+        }).then((r) => r.json());
       try {
         const summary = await post('/api/v2/mirrors/summary');
         setSummaries(summary.sessions || []);
@@ -37,10 +54,13 @@ export default function Mirrors() {
         setFindings([]);
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
-  const byInstrument = Object.fromEntries((summaries || []).map((s) => [s.instrument, s]));
+  const byInstrument = {};
+  (summaries || []).forEach((s) => {
+    const held = byInstrument[s.instrument];
+    if (!held || (s.status === 'complete' && held.status !== 'complete')) byInstrument[s.instrument] = s;
+  });
   const completeCount = (summaries || []).filter((s) => s.status === 'complete').length;
 
   return (
@@ -51,8 +71,8 @@ export default function Mirrors() {
           The cross-check.
         </h1>
         <p className="mt-4 text-base text-[#3B3B34] max-w-2xl leading-relaxed">
-          Four instruments, held on this device only — no account, no profile. Where they agree, that’s signal. Where
-          they disagree, that’s not an error: it’s a finding, and usually the more interesting one.
+          Four instruments, kept for you and retrievable by logging in. Where they agree, that’s signal. Where they
+          disagree, that’s not an error: it’s a finding, and usually the more interesting one.
         </p>
         {completeCount >= 2 && (
           <p className="mt-3 text-sm text-[#5B7284]" data-testid="mirrors-crosscheck-note">
@@ -127,9 +147,8 @@ export default function Mirrors() {
           </div>
         )}
 
-        <p className="mt-10 text-xs text-[#6E6E66] leading-relaxed max-w-xl">
-          Results live in this browser, tied to no identity. Keep the result link if you want to come back to it — clear
-          your browsing data and the link to them goes with it, which is the price of not asking who you are.
+        <p className="mt-10 text-xs text-[#6E6E66] leading-relaxed max-w-xl" data-testid="mirrors-retrieval-note">
+          {REGISTER.data_claim}
         </p>
       </div>
     </Shell>

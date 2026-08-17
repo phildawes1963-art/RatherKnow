@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Shell from '../components/Shell';
 import { API, instrumentByKey, readSessions, saveSession, clearSession } from '../lib/mirrorTheme';
+import { authHeaders } from '../lib/auth';
+import { REGISTER } from '../content/register';
 
 export default function Runner() {
   const { instrument } = useParams();
@@ -23,7 +25,7 @@ export default function Runner() {
       const existing = readSessions()[instrument];
       if (existing) {
         try {
-          const res = await fetch(`${API}/api/v2/assessments/${existing}`);
+          const res = await fetch(`${API}/api/v2/assessments/${existing}`, { headers: authHeaders() });
           if (res.ok) {
             const data = await res.json();
             if (!alive) return;
@@ -49,7 +51,7 @@ export default function Runner() {
   const putAnswer = useCallback((sessionId, itemId, value, ms, rev) => {
     fetch(`${API}/api/v2/assessments/${sessionId}/responses`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ responses: [{ item_id: itemId, value, ms, rev }] }),
     }).catch(() => {});
   }, []);
@@ -68,9 +70,10 @@ export default function Runner() {
     try {
       const res = await fetch(`${API}/api/v2/assessments`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ instrument }),
       });
+      if (!res.ok) throw new Error('start failed');
       const data = await res.json();
       saveSession(instrument, data.session_id);
       setPayload(data);
@@ -125,7 +128,7 @@ export default function Runner() {
   const complete = async () => {
     setBusy(true);
     try {
-      const res = await fetch(`${API}/api/v2/assessments/${payload.session_id}/complete`, { method: 'POST' });
+      const res = await fetch(`${API}/api/v2/assessments/${payload.session_id}/complete`, { method: 'POST', headers: authHeaders() });
       if (!res.ok) throw new Error('complete failed');
       navigate(`/results/${payload.session_id}`);
     } catch {
@@ -171,8 +174,8 @@ export default function Runner() {
               </div>
               <div className="mt-8 border-t border-[#E4E4DE] pt-5 text-sm text-[#6E6E66] space-y-1.5">
                 <p>{meta.items} · {meta.minutes}</p>
-                <p>No timer, no pressure. Stop whenever you like — your progress is saved on this device.</p>
-                <p>Anonymous. No account required.</p>
+                <p>No timer, no pressure. Stop whenever you like — your progress is saved as you go.</p>
+                <p>{REGISTER.account_claim}</p>
               </div>
               <div className="mt-9 flex items-center gap-5">
                 <button

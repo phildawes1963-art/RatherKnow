@@ -29,7 +29,7 @@ export default function Landing() {
   return (
     <Shell
       title=""
-      description="Four psychometric instruments that measure how you choose in relationships. Free, anonymous, and honest about their own evidence."
+      description="Four psychometric instruments that measure how you choose in relationships. Free, and honest about their own evidence."
       jsonLd={jsonLd}
     >
       <section className="max-w-6xl mx-auto px-5 sm:px-8 pt-20 pb-16 sm:pt-28 sm:pb-24">
@@ -44,11 +44,11 @@ export default function Landing() {
         </h1>
         <p className="mi2-fade-slow mt-7 text-base md:text-lg text-[#3B3B34] leading-relaxed max-w-2xl">
           Most people make the largest decision of their lives with no instrument at all. These four measure the one
-          variable you control: how you choose. Free. Anonymous. No account, no card, no matching — and no promises
-          about anyone but you.
+          variable you control: how you choose. Free, no card, no matching, no profiles — three fields to begin, and no
+          promises about anyone but you.
         </p>
         <div className="mi2-fade-slow mt-9 flex flex-wrap items-center gap-4">
-          <Link to="/take/essential" data-testid="hero-start" className="bg-[#1C1C18] text-[#F6F6F2] px-6 py-3 rounded-sm text-sm hover:opacity-85">
+          <Link to="/register?next=%2Ftake%2Fessential" data-testid="hero-start" className="bg-[#1C1C18] text-[#F6F6F2] px-6 py-3 rounded-sm text-sm hover:opacity-85">
             Start with the Essential Mirror
           </Link>
           <Link to="/methodology" data-testid="hero-methodology" className="text-sm text-[#3B3B34] underline underline-offset-4 hover:text-[#1C1C18]">
@@ -132,7 +132,7 @@ export default function Landing() {
               person. No score, no band: <em>{FLAG.descriptor}</em>, and a framework for what to do with an
               observation that isn’t “leave” and isn’t “let it go”.
             </p>
-            <p className="mt-3 text-xs text-[#6E6E66]">Free · about 3 minutes · anonymous</p>
+            <p className="mt-3 text-xs text-[#6E6E66]">Free · about 3 minutes · no account needed</p>
           </div>
           <Link
             to="/flag-check"

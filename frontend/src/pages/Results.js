@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import Shell from '../components/Shell';
 import FindingsTeaser from '../components/FindingsTeaser';
 import { API } from '../lib/mirrorTheme';
+import { authHeaders } from '../lib/auth';
 import ClosenessResult from './results/ClosenessResult';
 import EssentialResult from './results/EssentialResult';
 import PersonalityResult from './results/PersonalityResult';
@@ -30,7 +31,7 @@ export default function Results() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`${API}/api/v2/assessments/${sessionId}/result`);
+        const res = await fetch(`${API}/api/v2/assessments/${sessionId}/result`, { headers: authHeaders() });
         if (!res.ok) throw new Error();
         setResult(await res.json());
       } catch {
