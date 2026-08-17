@@ -3,6 +3,9 @@ import os
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List, Literal
 
+import hashlib
+import secrets
+
 import bcrypt
 import jwt
 from bson import ObjectId
@@ -10,6 +13,7 @@ from fastapi import APIRouter, HTTPException, Request, Depends
 from pydantic import BaseModel, EmailStr, Field
 
 from database import db
+from email_service import send_email, password_reset_html
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
@@ -23,6 +27,11 @@ SITUATION_LABELS = {
 }
 MAX_FAILED = 5
 LOCKOUT = timedelta(minutes=15)
+RESET_TTL = timedelta(minutes=60)
+
+
+def _hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
 async def assert_session_owner(session: dict, user: dict):
@@ -68,6 +77,15 @@ class LoginRequest(BaseModel):
 
 class ClaimRequest(BaseModel):
     session_ids: List[str] = Field(default_factory=list)
+
+
+class ForgotRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetRequest(BaseModel):
+    token: str = Field(min_length=20, max_length=200)
+    password: str = Field(min_length=8, max_length=128)
 
 
 def _public(user: dict) -> dict:
@@ -187,6 +205,44 @@ async def me(user: dict = Depends(get_current_user)):
     return {"user": _public(user)}
 
 
+@router.post("/forgot-password")
+async def forgot_password(data: ForgotRequest):
+    """Always answers the same way — an attacker learns nothing about who has an account."""
+    email = data.email.lower().strip()
+    user = await db.users.find_one({"email": email})
+    if user:
+        token = secrets.token_urlsafe(32)
+        await db.password_resets.delete_many({"user_id": str(user["_id"])})
+        await db.password_resets.insert_one({
+            "user_id": str(user["_id"]),
+            "token_hash": _hash_token(token),
+            "expires_at": (datetime.now(timezone.utc) + RESET_TTL).isoformat(),
+            "used": False,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+        reset_url = f"{os.environ['APP_BASE_URL']}/reset-password?token={token}"
+        await send_email(
+            to=user["email"],
+            subject="Set a new password for Rather Know",
+            html=password_reset_html(name=user["name"], reset_url=reset_url),
+        )
+    return {"sent": True}
+
+
+@router.post("/reset-password")
+async def reset_password(data: ResetRequest):
+    record = await db.password_resets.find_one({"token_hash": _hash_token(data.token), "used": False})
+    if not record or datetime.fromisoformat(record["expires_at"]) < datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="That reset link has expired or already been used.")
+    user = await db.users.find_one({"_id": ObjectId(record["user_id"])})
+    if not user:
+        raise HTTPException(status_code=400, detail="That reset link is no longer valid.")
+    await db.users.update_one({"_id": user["_id"]}, {"$set": {"password_hash": hash_password(data.password)}})
+    await db.password_resets.update_one({"_id": record["_id"]}, {"$set": {"used": True}})
+    await db.login_attempts.delete_one({"identifier": user["email"]})
+    return {"user": _public(user), "access_token": create_access_token(str(user["_id"]), user["email"])}
+
+
 @router.patch("/me/situation")
 async def update_situation(data: dict, user: dict = Depends(get_current_user)):
     situation = data.get("situation")
@@ -225,3 +281,5 @@ async def ensure_indexes():
     await db.users.create_index("email", unique=True)
     await db.login_attempts.create_index("identifier")
     await db.mirror_v2_sessions.create_index("user_id")
+    await db.password_resets.create_index("token_hash")
+    await db.password_resets.create_index("user_id")

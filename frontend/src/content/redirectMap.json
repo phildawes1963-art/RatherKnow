@@ -1,0 +1,48 @@
+{
+  "note": "301, permanent, single hop, at host or edge — never a client-side JS hop. Source of truth for both sides: the old domain's Cloudflare Worker (edge/worker.js, RATHERKNOW_CUTOVER flag) and the new site's expectations. Legacy signed-in MI app surfaces (/mirror-index/login, /dashboard, /journal, /onboarding, /quiz/*) are NOT redirected — they stay on mymirrorreport.com until decommissioned.",
+  "base": "https://ratherknow.com",
+  "host_rules": [
+    "ratherknow.co.uk/* -> 301 https://ratherknow.com/* (whole domain, path preserved)",
+    "www.ratherknow.com/* -> 301 https://ratherknow.com/* (single canonical host)"
+  ],
+  "exact": {
+    "/mirror": "/",
+    "/mirror/promise": "/promise",
+    "/mirror/methodology": "/methodology",
+    "/mirror/safety": "/safety",
+    "/mirror/learn": "/learn",
+    "/mirror/flag-check": "/flag-check",
+    "/mirror/samples": "/samples",
+    "/mirror/faq": "/faq",
+    "/mirror/mirrors": "/mirrors",
+    "/mirror-index": "/",
+    "/mirror-index/learn": "/learn",
+    "/mirror-index/how-it-works": "/take/essential",
+    "/mirror-index/methodology": "/methodology",
+    "/mirror-index/science": "/methodology",
+    "/mirror-index/reliability": "/methodology",
+    "/mirror-index/why": "/promise",
+    "/mirror-index/philosophy": "/promise",
+    "/mirror-index/archetypes": "/archetypes",
+    "/mirror-index/quiz-select": "/",
+    "/mirror-index/pricing": "/",
+    "/mirror-index/samples": "/samples",
+    "/mirror-index/reports": "/",
+    "/mirror-index/faq": "/faq",
+    "/mirror-index/about": "/methodology",
+    "/mirror-index/for-business": "/",
+    "/mirror-index/post-breakup": "/learn"
+  },
+  "prefix": [
+    {"from": "/mirror/learn/", "to": "/learn/", "keep_rest": true},
+    {"from": "/mirror/take/", "to": "/take/", "keep_rest": true},
+    {"from": "/mirror/results/", "to": "/", "keep_rest": false, "note": "anonymous sessions live in the old DB and do not carry over"},
+    {"from": "/mirror-index/learn/", "to": "/learn/", "keep_rest": true},
+    {"from": "/mirror-index/archetypes/", "to": "/archetypes/", "keep_rest": true}
+  ],
+  "gaps_accepted": {
+    "samples": "BUILT — /samples exists (MirrorSamples.js in the package); redirect is 1:1",
+    "faq": "BUILT — /faq exists (MirrorFaq.js in the package, with FAQPage JSON-LD); redirect is 1:1",
+    "pricing": "redirect to / now; build /pricing within the first month (NOTE: the £78 ceiling claim PF-05 is still unconfirmed in the claims register — do not publish it)"
+  }
+}

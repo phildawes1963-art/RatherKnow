@@ -18,6 +18,8 @@ import Mirrors from '@/pages/Mirrors';
 import Archetypes from '@/pages/Archetypes';
 import ArchetypeDetail from '@/pages/ArchetypeDetail';
 import Auth from '@/pages/Auth';
+import { ForgotPassword, ResetPassword } from '@/pages/PasswordReset';
+import LegacyRedirect from '@/pages/LegacyRedirect';
 
 function App() {
   return (
@@ -36,11 +38,16 @@ function App() {
             <Route path="/flag-check" element={<FlagCheck />} />
             <Route path="/register" element={<Auth mode="register" />} />
             <Route path="/login" element={<Auth mode="login" />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/take/:instrument" element={<ProtectedRoute><Runner /></ProtectedRoute>} />
             <Route path="/results/:sessionId" element={<ProtectedRoute><Results /></ProtectedRoute>} />
             <Route path="/mirrors" element={<ProtectedRoute><Mirrors /></ProtectedRoute>} />
             <Route path="/archetypes" element={<Archetypes />} />
             <Route path="/archetypes/:slug" element={<ArchetypeDetail />} />
+            <Route path="/mirror/*" element={<LegacyRedirect />} />
+            <Route path="/mirror-index/*" element={<LegacyRedirect />} />
+            <Route path="*" element={<LegacyRedirect />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>

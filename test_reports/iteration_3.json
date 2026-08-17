@@ -1,0 +1,36 @@
+{
+  "summary": "Iteration 3 — Password reset, situation-aware reports, /learn/the-delta, and cutover redirects all verified. Added /app/backend/tests/test_iteration3.py (13 tests, all passing). Full backend suite: 44/44 green (`python -m pytest backend/tests -v -o addopts=''`). Regression scripts: `python3 tests/test_locked_copy.py` -> 'LOCKED COPY OK'; `python3 tests/_e2e_test.py` -> 'PACKAGED E2E OK'. Cutover tooling: `python3 scripts/build_redirects.py` wrote 26 exact + 5 prefix rules into frontend/public/_redirects (SPA fallback LAST) and docs/edge/nginx_redirects.conf. `python3 scripts/verify_redirects.py --from https://example.invalid` exits 1 with 31 explicit failures (no false success). Frontend Playwright verified: /forgot-password submits and shows forgot-sent; /reset-password with no token shows reset-no-token; mismatched confirm shows reset-error 'Those two don’t match.'; minting a valid token in Mongo lets ResetPassword UI set a new pw and lands the user on /mirrors with rk.token in localStorage; /learn/the-delta renders h1 'The Delta: the gap between who you are and who you say you want' and links to /archetypes, /promise, /methodology, /take/essential (all resolve). /learn index lists the-delta and it is in frontend/public/sitemap.xml (1 occurrence). All 16 legacy in-app fallback routes resolve to the correct destination via LegacyRedirect (including /mirror/take/essential -> /register?next=/take/essential because /take/* is gated). Situation lens rendered distinct copy for single_dating, in_relationship and post_breakup on /results/{sid}, with situation-lens-lead, situation-lens-body, and the SITUATION_DISCLAIMER 'The scoring never changes with your situation…' present. Backend parametrised test confirms IDENTICAL scoring across all three situations for all four instruments (essential/personality/eq/closeness). Flag Check page has NO situation-lens attribute (confirmed via query_selector). Ownership regression from iteration 2 stays green: PUT /assessments/{id}/responses, POST /complete and GET /result all return 403 when called with another account's Bearer. Brute-force lockout now keys on email alone — test_brute_force_lockout passes.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration3.py",
+    "/app/backend/tests/test_auth.py",
+    "/app/backend/tests/test_mirror_v2.py",
+    "/app/tests/_e2e_test.py",
+    "/app/tests/test_locked_copy.py",
+    "/app/test_reports/pytest/iteration3.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "verify_redirects.py correctly exits 1 on failure (confirmed with --from https://example.invalid); prior worry about false-success is not reproducible.",
+    "SituationLens copy uses the word 'verdict' inside a negation ('Read this as a conversation, not a verdict.') — semantically fine and reinforces the guardrail, but flagged for the copy team in case any downstream keyword-audit picks it up.",
+    "auth.py forgot_password stores only sha256(token_hash) — good. Deletes prior tokens for the user before inserting the new one (single active reset per user). Expiry stored as ISO string parsed with fromisoformat — timezone-aware, correct.",
+    "auth.py reset_password does not verify the new password differs from the old one — trivial harden, not required for spec.",
+    "LegacyRedirect.js correctly strips trailing slashes and falls through remapLink then '/'. Matches redirect_map.json rules.",
+    "sitemap.xml only contains 1 occurrence of 'the-delta' — fine, but consider auto-generating from LEARN_ARTICLES so future articles cannot drift."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration3.py (new — 13 tests: password reset happy/expired/single-use/lockout-clear/no-enumeration; ownership 403 on responses/complete/result; situation-independent scoring for all 4 instruments)"
+  ],
+  "success_rate": {"backend": "100% (44/44)", "frontend": "100% on critical flows (reset UI, delta essay, legacy redirects, situation lens, gating)"},
+  "test_credentials": "test.user@ratherknow.com / knowmore123 (post_breakup). Backend tests reset this account's password to knowmore123 at the start — but the reset-happy-path test uses throwaway TEST_ prefixed accounts, so the shared user remains usable.",
+  "seed_data_creation": "Backend suite creates ~15 TEST_ prefixed throwaway users + a few completed closeness/essential sessions and password_resets rows for negative tests. All keyed TEST_ for cleanup.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Run `python -m pytest backend/tests -v -o addopts=''` for the full regression (44 tests). Situation lens is component-driven from user.situation via /content/situationFraming.js — SITUATION_LENS keys must stay in sync with backend SITUATIONS. If a new instrument is added, the SituationLens keying `lens[instrument]` must be extended. Reset happy-path in the UI requires Mongo access to mint a token (email content isn't exposed to tests); helper pattern in the Playwright script at /tmp/uifixture.json + browser step works fine.",
+  "rca of the issue": "N/A — no bugs found this iteration. The one transient Playwright FAIL for post_breakup lens was a shared-state race between iterations (leftover token/AuthProvider state), not a product bug: an isolated retest of the same session_id + token rendered the lens correctly."
+}

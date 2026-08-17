@@ -6,7 +6,7 @@ export const SITE = {
   ogImage: '/og/ratherknow-og.png',
 };
 
-export const NOINDEX_PREFIXES = ['/mirrors', '/results/'];
+export const NOINDEX_PREFIXES = ['/mirrors', '/results/', '/register', '/login', '/forgot-password', '/reset-password'];
 
 export function isIndexable(pathname) {
   return !NOINDEX_PREFIXES.some((p) => pathname === p || pathname.startsWith(p));

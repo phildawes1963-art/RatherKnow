@@ -67,17 +67,35 @@ Search-led discovery, essay-led trust.
   `docs/route_table.json`, OG image and archetype cards served from `/public`.
 - Verified by the testing agent: backend 100%, frontend 100%, no blocking issues.
 
+- **Situation-aware reports (2026-06)** — `content/situationFraming.js` + `components/SituationLens.js`
+  render a different framing block per situation × instrument on every result page. Interpretation
+  only: scoring is provably unchanged (parametrised backend test across all four instruments), and
+  the lens states so on screen. Deliberately absent from the Flag Check.
+- **Password reset (2026-06)** — `/api/auth/forgot-password` + `/api/auth/reset-password`,
+  sha256-hashed single-use tokens with a 60-minute expiry, one active token per user, no account
+  enumeration, lockout cleared on success. Email via Emergent-managed Resend (`email_service.py`,
+  guardrail-checked server-side template). This is the **only** email the product sends — reports
+  are never emailed.
+- **Delta essay (2026-06)** — `/learn/the-delta`, the pillar-adjacent piece on the core idea, in the
+  Learn index and the sitemap.
+- **Cutover tooling (2026-06)** — `scripts/build_redirects.py` generates `frontend/public/_redirects`
+  (SPA fallback last) and `docs/edge/nginx_redirects.conf`; `docs/edge/worker.js` is the parent-domain
+  Cloudflare Worker behind `RATHERKNOW_CUTOVER`, which leaves signed-in MI surfaces on the parent;
+  `scripts/verify_redirects.py --from <origin> [--strict]` is the gate — exit 0 means safe to remove
+  `/mirror`. `pages/LegacyRedirect.js` is an in-app fallback so no legacy path ever blanks.
+
 ## Backlog
-**P0 (Phase 4 — cutover)**
-- Point ratherknow.com at this build; publish `redirect_map.json` as real 301s from
-  `mymirrorreport.com/mirror/*`; verify in production **before** removing `/mirror` from the parent.
+**P0 (Phase 4 — cutover, needs infrastructure access)**
+- Deploy `docs/edge/worker.js` on mymirrorreport.com, set `RATHERKNOW_CUTOVER=on`, point
+  ratherknow.com at this build, then run `scripts/verify_redirects.py --from https://mymirrorreport.com
+  --strict`. Only a clean pass authorises removing `/mirror` from the parent.
 - Submit sitemap; confirm archetype pages indexed.
 
 **P1**
-- Use the captured `situation` to shape report framing — currently it is stored and shown, but the
-  report copy does not yet differ by Single & dating / In a relationship / Post-breakup.
-- Password reset. There is no email provider wired, so today a forgotten password is unrecoverable.
-- Learn essay on the Delta (`/learn/relationship-delta`) — referenced but not yet authored.
+- Password reset does not check that the new password differs from the old one (harden, not urgent).
+- Sitemap learn slugs live in `docs/route_table.json`; auto-generate from `LEARN_ARTICLES` so future
+  essays can't drift out of the sitemap.
+- Learn essays for the remaining archetype clusters.
 - Object storage for illustration/diploma/OG assets and the audio demo.
 
 **P2**

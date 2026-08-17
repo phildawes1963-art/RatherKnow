@@ -162,6 +162,10 @@ export default function Auth({ mode }) {
               <Link to={`/register?next=${encodeURIComponent(next)}`} data-testid="auth-switch-register" className="underline underline-offset-4">
                 Create one — free
               </Link>
+              {' · '}
+              <Link to="/forgot-password" data-testid="auth-forgot-link" className="underline underline-offset-4">
+                Forgotten your password?
+              </Link>
             </>
           )}
         </p>

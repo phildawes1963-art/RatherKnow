@@ -2,6 +2,38 @@
 // Inline supports [label](/path) links and *emphasis*.
 export const LEARN_ARTICLES = [
   {
+    slug: 'the-delta',
+    cluster: 'The pattern',
+    readMins: 6,
+    title: 'The Delta: The Gap Between Who You Are and Who You Say You Want',
+    description:
+      'Answer the same fifty questions twice — once as yourself, once as the partner you want — and the distance between the two answers is measurable. That distance is the Delta.',
+    h1: 'The Delta: the gap between who you are and who you say you want',
+    dek: 'One idea holds this whole thing up. Answer the same fifty questions twice, and the distance between the two answers becomes something you can look at.',
+    body: [
+      { type: 'p', text: "Ask someone what they want in a partner and you get a list. Kind. Funny. Driven, but not obsessive. Ambitious, but present. The list is sincere and almost entirely useless, because it was assembled from the outside — from the things it is respectable to want. Nobody's list says *someone who will let me avoid the conversation*, and yet a great many lists mean it." },
+      { type: 'p', text: "So we stopped asking the question directly. Instead, the Essential Mirror asks you fifty questions about yourself, and then asks you the same fifty again about the partner you think you want. Same statements, same scale, two lenses. Then it subtracts one from the other." },
+      { type: 'p', text: "The number that falls out is the Delta." },
+      { type: 'h2', text: 'What a distance can do that a list cannot' },
+      { type: 'p', text: "A list is a claim. A distance is a measurement — and measurements can be argued with, which is the whole point. *Am I too picky?* is unanswerable as stated: it's a feeling wearing a question mark. But *the partner I describe sits nineteen points away from the person I am on the dimension I say matters most* is not a feeling. It's a finding, with workings you can inspect." },
+      { type: 'p', text: "It also stays honest about what it isn't. The Delta never says the gap is wrong. Some of the most durable relationships anyone has are built across a wide gap, deliberately: one person brings the calm, the other brings the weather. A gap tells you what will need translating, not what will fail." },
+      { type: 'quote', text: 'A gap is not a fault. It is the part of the measurement that carries information.' },
+      { type: 'h2', text: 'Three shapes the gap tends to take' },
+      { type: 'p', text: "*The mirror.* Almost no distance: you describe a partner who is essentially you. Comfortable, low-friction, and worth a question — whether you are choosing a companion or asking to be agreed with." },
+      { type: 'p', text: "*The complement.* A moderate, patterned distance, usually concentrated on one or two dimensions. This is the shape most people are quietly hoping for. The work is naming which differences you actually want to live with daily, rather than admire from a distance." },
+      { type: 'p', text: "*The compensation.* A wide gap, pointing in a consistent direction: you ask a partner to supply something you don't carry. Sometimes that's healthy division of labour. Sometimes it's an old belief doing the choosing — and that's where the [shadow attraction](/archetypes) tends to live, arriving dressed as chemistry at about week six." },
+      { type: 'h2', text: 'Why it has to be the same fifty questions' },
+      { type: 'p', text: "This is the part that looks like a design quirk and is actually the entire method. If we asked about you with one set of questions and about your ideal partner with another, the two answers would sit on different scales and the difference between them would mean nothing — you'd be subtracting apples from a description of apples. Identical items, identical scale, answered in two frames, is the only way the arithmetic stays honest." },
+      { type: 'p', text: "It's also why the second lens feels strange to answer, and why we say so before you start. Halfway through you will notice yourself hesitating — realising you're describing someone you have already dated, or someone you've been told you should want. That hesitation is data. Answer it as it actually is, not as it ought to be, and the Delta comes back useful rather than flattering." },
+      { type: 'h2', text: 'What we refuse to make of it' },
+      { type: 'p', text: "The Delta is not a compatibility score, because there is no second person in this instrument and there never will be. It cannot tell you whether someone you've met is right for you — it never asked about them, and [we don't make promises about other people](/promise). It is not a percentage, and it isn't graded against a population, because the norms to justify a band don't exist yet and we publish that instead of hiding it. The archetype layer around it is [developmental](/methodology): the constructs are ours and their properties are still being established. We'd rather tell you that than dress it up." },
+      { type: 'p', text: "What it does is narrower and more useful. It turns the vaguest, most circular question in your relational life — *is it me, or is it who I keep choosing?* — into two profiles and a distance between them. That's it. That's the whole idea the rest of this site is built on." },
+      { type: 'p', text: "Fifty questions, twice. About twenty-five minutes. Then you get to argue with it." },
+      { type: 'note', text: 'The Essential Mirror is a self-reflection instrument, not a clinical tool. It informs conversations; it does not replace professionals.' },
+    ],
+    cta: { title: 'Measure the distance, not the mood.', label: 'Take the Essential Mirror — free', to: '/take/essential' },
+  },
+  {
     slug: 'the-interference',
     cluster: 'The pattern',
     readMins: 4,
