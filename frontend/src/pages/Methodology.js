@@ -41,6 +41,9 @@ const SECTIONS = [
     weaknesses: [
       'Self-report: it measures how you see yourself, honestly answered or not.',
       'Norm bands are recalibrated periodically; results are comparable within a bank version.',
+      'The five global dimensions are derived, not measured: each is a weighted sum of the primary factors — global = 5.5 + Σ(weight × (sten − 5.5)) — so a composite can only be as good as the primaries feeding it, and it can legitimately differ from another 16PF-style report that uses different weights or different norms. Every report here publishes the exact equation behind each dimension.',
+      'Two composites are known to sit further from other 16PF-style instruments than the rest: Receptivity and Self-Control. We publish that residual rather than fitting the equation to a single sheet — a gain calibrated to one person would bake one person’s distortion into everyone’s score. It is flagged on the result itself.',
+      'Receptivity is the same axis that other reports publish as Tough-Mindedness, read from the opposite end: a high Receptivity and a low Tough-Mindedness are the same finding, not a contradiction.',
     ],
   },
   {

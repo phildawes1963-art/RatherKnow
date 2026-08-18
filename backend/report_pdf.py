@@ -146,6 +146,29 @@ def _essential(result, flow):
 def _personality(result, flow):
     flow += [Paragraph("Five global dimensions", S["h2"])]
     flow += [_bar_table([(g["name"], g["score"], g["label"]) for g in result["global_scores"].values()], maximum=10.0)]
+    from composites import build_composites
+    prov = build_composites(result)
+    if prov:
+        flow += [
+            Paragraph("How each global dimension is built", S["h3"]),
+            Paragraph(prov["note"], S["body"]),
+        ]
+        rows = [[Paragraph("<b>Dimension</b>", S["cellb"]), Paragraph("<b>Built from</b>", S["cellb"])]]
+        for key, g in prov["globals"].items():
+            parts = ", ".join(
+                f"{c['name']} {c['weight']:+g}" for c in g["contributions"]
+            )
+            flag = " (known residual)" if g["known_residual"] else ""
+            rows.append([Paragraph(g["name"] + flag, S["cell"]), Paragraph(parts, S["cell"])])
+        tbl = Table(rows, colWidths=[46 * mm, 114 * mm], repeatRows=1)
+        tbl.setStyle(TableStyle([
+            ("LINEBELOW", (0, 0), (-1, 0), 0.7, INK),
+            ("LINEBELOW", (0, 1), (-1, -2), 0.35, LINE),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ("LEFTPADDING", (0, 0), (0, -1), 0),
+        ]))
+        flow += [tbl, Paragraph(prov["residual_note"], S["small"])]
     flow += [
         Paragraph("Fifteen primary factors", S["h2"]),
         Paragraph("Scored 1–10 (sten) against calibrated norm bands. Five is the middle of the population.", S["small"]),

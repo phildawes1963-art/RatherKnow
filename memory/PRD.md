@@ -108,6 +108,18 @@ Search-led discovery, essay-led trust.
   run = 1, verified). Deterministic, so resume order is stable; scoring keys on item id and is
   unaffected. The Closeness Mirror's fixed balanced spec order is deliberately preserved.
 
+- **Composite provenance (2026-06, user concern re Self-Control)** — a paired standalone P150 sheet
+  disagreed with our Self-Control composite. Investigation: fed that report's own printed primaries
+  (F 10, G 4, M 9, Q3 6) into our equation → 2.7 (Low); a plain 16PF-style reversed mean → 3.25 (Low).
+  Its printed Self-Control of 6 is not reproducible from its own primaries by either method, so no
+  scoring change was made (hard rule 1; the shipped code already documents a deliberately unshipped
+  n=1 gain calibration). Instead `backend/composites.py` publishes, per global dimension, the equation
+  `5.5 + Σ(weight × (sten − 5.5))` with every contributing factor's weight, direction and sten;
+  Receptivity and Self-Control are flagged as known residuals; the Receptivity ≡ reverse of
+  Tough-Mindedness polarity is explained. Surfaced on the result page, in both PDFs and on
+  /methodology. `backend/tests/test_composites.py` locks the equations, the 1.0 gains and the
+  reference profile so no future edit can drift them silently.
+
 ## Backlog
 **P0 (Phase 4 — cutover, needs infrastructure access)**
 - Deploy `docs/edge/worker.js` on mymirrorreport.com, set `RATHERKNOW_CUTOVER=on`, point
@@ -116,6 +128,9 @@ Search-led discovery, essay-led trust.
 - Submit sitemap; confirm archetype pages indexed.
 
 **P1**
+- The paired-sheet residual on Receptivity and Self-Control is documented, not resolved. Resolving it
+  needs a real calibration sample (n ≥ 200 paired profiles), not a single sheet. Until then the
+  provenance block is the honest answer.
 - Password reset does not check that the new password differs from the old one (harden, not urgent).
 - Sitemap learn slugs live in `docs/route_table.json`; auto-generate from `LEARN_ARTICLES` so future
   essays can't drift out of the sitemap.

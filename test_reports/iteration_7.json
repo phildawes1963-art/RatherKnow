@@ -1,0 +1,35 @@
+{
+  "summary": "Iteration 7 — user concern about Self-Control score correctness. Verified scoring is UNCHANGED (P150_GLOBAL_FACTORS + GLOBAL_CALIBRATION intact, all 5 gains at 1.0). Independently reproduced the user's arithmetic claim on his printed primaries {A10,C10,E10,F10,G4,H10,I7,L7,M9,N6,O2,Q1:10,Q2:9,Q3:6,Q4:3}: our compute_global_scores returns self_control score_precise=2.7 (score 3, LOW); plain 16PF-style reversed mean ((G+Q3+(11−F)+(11−M))/4) = 3.25. Both ≤4. His standalone's Self-Control 6 is NOT reproducible from its own printed primaries by either method — confirming main agent's RCA. Added /app/backend/tests/test_iteration7_composites_api.py — 7 pytest tests, all green: composites block shape, per-contribution factor/name/weight/direction/sten/contribution math, contributions sum + 5.5 == score_precise, residual flags + polarity note, no persistence into mirror_v2_sessions.result / results collection, no composites on eq/essential/closeness, and the arithmetic-reproducibility test. Full backend regression 116/116 pytest, tests/test_locked_copy.py → LOCKED COPY OK, tests/_e2e_test.py → PACKAGED E2E OK. UI on ui.demo personality result: all 5 global-provenance-{key} disclosures render with correct equation and contributions, personality-composite-note present, receptivity carries Tough-Mindedness polarity paragraph, both receptivity + self_control show 'Known residual' caution. Methodology page contains 'derived, not measured', '5.5 + Σ', 'Receptivity', 'Self-Control', 'residual', 'Tough-Mindedness'; 'validated' still only in Established-instrument contexts (locked_copy passes). Per-result personality PDF contains 'How each global dimension is built' / 'Built from' / 'known residual' / equation (extracted via pymupdf); combined PDF at /api/v2/reports/combined.pdf same.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/auth/login", "issue": "Login rate limit (5/ip+email/15min) can cause a flaky failure when the full backend suite runs iteration_6 + iteration_7 back to back on the same ui.demo credential. Passes on rerun; not a code bug."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_iteration7_composites_api.py",
+    "/app/backend/tests/test_composites.py",
+    "/app/test_reports/pytest/iteration7.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "backend/composites.py — clean read-time provenance module. global_provenance() emits per-factor {factor,name,weight,direction,sten,contribution} where contribution=round(weight×(sten−5.5),2); contributions sorted by |contribution| desc; build_composites() returns None if factor_scores absent (safe for pre-scored/legacy sessions). RESIDUAL_KEYS=('receptivity','self_control') and POLARITY_NOTES only carry the Receptivity note (asymmetric, which is correct — Tough-Mindedness isn't a shipped label here). COMPOSITE_NOTE and RESIDUAL_NOTE state the disclosure plainly.",
+    "backend/constants/p150_data.py — P150_GLOBAL_FACTORS matches shipped 16PF-style loadings exactly; GLOBAL_CALIBRATION all 1.0. Hard rule 1 respected: no scoring change, no gain applied, no norm shift.",
+    "backend/routes/mirror_v2.py::_with_choosing — attaches `composites` only for personality (branch is instrument-gated). Read-time: verified by mongo query that mirror_v2_sessions.result and results.result never store composites or choosing. algo_version stamp preserved.",
+    "frontend PersonalityResult.js — global-provenance-{key} data-testid on all five dimensions; <details><summary>How this number is built</summary> pattern; contributions rendered with exact (raises it / lowers it) labels, sten and signed contribution; Known residual caution shows for receptivity+self_control; polarity paragraph shows only on receptivity. Numbers on screen match the API payload exactly for the sample I inspected.",
+    "report_pdf.py — 'How each global dimension is built' + 'Built from' + '(known residual)' tokens present in both per-result and combined PDFs (extracted via pymupdf). The '5.5 + Σ' greek sigma didn't extract as text (font glyph), but the plain-word equation ('weight' × 'sten') does — acceptable, not a defect.",
+    "Methodology.js — new Personality Mirror weaknesses render: derived-not-measured, equation with 5.5 + Σ, Receptivity/Self-Control residual disclosure, Tough-Mindedness polarity note. Word 'validated' still bound to Established-instrument contexts (tests/test_locked_copy.py: LOCKED COPY OK).",
+    "Arithmetic independent check (see test_arithmetic_reproduces_user_reference and test_composites.py::test_self_control_is_low_for_reference_profile): from the user's own printed primaries, self_control precise = 2.7 via our equation and 3.25 via plain 16PF reversed mean. His standalone's printed Self-Control 6 is unreproducible from its own printed primaries by either method — either that report is applying a different (undocumented) equation/norm or its printed primaries and printed composite are out of sync. Not a bug on this side."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration7_composites_api.py (NEW)"
+  ],
+  "success_rate": {"backend": "100% (116/116 pytest + locked_copy + _e2e)", "frontend": "100% (all 5 provenance disclosures + composite note + methodology weaknesses render correctly)"},
+  "test_credentials": "ui.demo@ratherknow.com / knowmore123 — all four instruments completed, personality session c92ddeea-b330-4ae2-9d80-121e888d7312",
+  "seed_data_creation": "None new. Iteration 7 tests read from the existing ui.demo personality session; no writes.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "test_iteration7_composites_api.py uses REACT_APP_BACKEND_URL and ui.demo. If /api/auth/me/sessions is nested {'sessions':[...]} the fixture unwraps it. session ids come under 'session_id' not 'id'. Result payload uses 'global_scores' (dict keyed by dim), not 'globals'. Combined PDF is /api/v2/reports/combined.pdf. If running iteration_6+iteration_7 back-to-back you may see one flaky login due to 5/15min rate limit — rerun is clean.",
+  "rca of the issue": "USER CONCERN: standalone P150 report prints Self-Control 6 (Average) for primaries {F10,G4,M9,Q3:6}. Reproduction: fed those exact primaries into compute_global_scores → self_control score 3, precise 2.7 (LOW). Also computed unweighted 16PF-style reversed mean = 3.25 (LOW). Both methods agree with the main agent's conclusion. Mitigation shipped: read-time `composites` block on every personality result exposes the equation and per-factor contributions so users can see WHERE a composite disagreement lives (equation vs primaries vs norms). Scoring, gains, norms and item bank were NOT touched, honouring hard rule 1 and the deliberate n=1 non-shipment of gain calibration."
+}

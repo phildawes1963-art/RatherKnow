@@ -16,6 +16,7 @@ from fastapi.responses import Response
 from auth import get_current_user, assert_session_owner
 from report_pdf import build_report_pdf, build_combined_pdf
 from choosing import build_choosing
+from composites import build_composites
 from crosscheck import build_convergences, build_tensions, build_synthesis
 from situation_notes import situation_note
 
@@ -409,9 +410,16 @@ def _score_eq(responses: dict) -> dict:
 
 
 def _with_choosing(result: dict) -> dict:
-    """Attach the read-time 'how you choose' translation. Never mutates the snapshot."""
+    """Attach read-time interpretation (choosing, composite provenance). Snapshot untouched."""
+    extra = {}
     choosing = build_choosing(result)
-    return {**result, "choosing": choosing} if choosing else result
+    if choosing:
+        extra["choosing"] = choosing
+    if result.get("instrument") == "personality":
+        composites = build_composites(result)
+        if composites:
+            extra["composites"] = composites
+    return {**result, **extra} if extra else result
 
 
 @router.post("/assessments/{session_id}/complete")

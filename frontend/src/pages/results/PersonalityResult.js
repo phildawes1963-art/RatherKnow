@@ -18,6 +18,8 @@ const FactorRow = ({ f }) => (
 export default function PersonalityResult({ result }) {
   const factors = Object.values(result.factor_scores);
   const globals = Object.values(result.global_scores);
+  const composites = result.composites;
+  const provenance = composites?.globals || {};
   const sd = result.validity?.social_desirability?.flag;
 
   return (
@@ -38,8 +40,14 @@ export default function PersonalityResult({ result }) {
 
       <section data-testid="personality-globals">
         <h2 className="mi2-serif text-2xl text-[#1C1C18]">The five global dimensions.</h2>
+        <p className="mt-3 text-sm text-[#6E6E66] max-w-2xl leading-relaxed">
+          Derived, not measured — each one is arithmetic on the primary factors below. Open any dimension to see
+          exactly which primaries build it, in which direction, and how much each contributed.
+        </p>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          {globals.map((g) => (
+          {globals.map((g, gi) => {
+            const prov = provenance[Object.keys(result.global_scores)[gi]];
+            return (
             <div key={g.name} className="bg-white border border-[#E4E4DE] p-5">
               <div className="flex items-baseline justify-between">
                 <p className="text-sm font-medium text-[#1C1C18]">{g.name}</p>
@@ -55,9 +63,39 @@ export default function PersonalityResult({ result }) {
                   ))}
                 </div>
               )}
+              {prov && (
+                <details className="mt-3 border-t border-[#E4E4DE] pt-3" data-testid={`global-provenance-${Object.keys(result.global_scores)[gi]}`}>
+                  <summary className="text-xs text-[#5B7284] cursor-pointer">How this number is built</summary>
+                  <p className="mt-2 text-[11px] text-[#6E6E66]">{prov.equation}</p>
+                  <ul className="mt-2 space-y-1">
+                    {prov.contributions.map((c) => (
+                      <li key={c.factor} className="text-xs text-[#3B3B34] flex justify-between gap-3">
+                        <span>{c.name} <span className="text-[#9C9C93]">({c.direction} it)</span></span>
+                        <span className="text-[#6E6E66] whitespace-nowrap">
+                          sten {c.sten} × {c.weight} = {c.contribution > 0 ? '+' : ''}{c.contribution}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  {prov.polarity_note && <p className="mt-2 text-[11px] text-[#6E6E66] leading-relaxed">{prov.polarity_note}</p>}
+                  {prov.known_residual && (
+                    <p className="mt-2 text-[11px] text-[#C8AE93] leading-relaxed">
+                      Known residual: this composite sits further from other 16PF-style instruments than the rest.
+                      Compare the primaries above before trusting the composite.
+                    </p>
+                  )}
+                </details>
+              )}
             </div>
-          ))}
+          );})}
         </div>
+        {composites && (
+          <div className="mt-5 border border-[#E4E4DE] bg-white p-6" data-testid="personality-composite-note">
+            <p className="text-[11px] uppercase tracking-[0.12em] text-[#6E6E66]">Comparing this with another report?</p>
+            <p className="mt-2 text-sm text-[#3B3B34] leading-relaxed">{composites.note}</p>
+            <p className="mt-3 text-sm text-[#3B3B34] leading-relaxed">{composites.residual_note}</p>
+          </div>
+        )}
       </section>
 
       <section data-testid="personality-factors">
