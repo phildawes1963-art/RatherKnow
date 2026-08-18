@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import Shell from '../components/Shell';
 import FindingsTeaser from '../components/FindingsTeaser';
 import SituationLens from '../components/SituationLens';
+import DownloadReport from '../components/DownloadReport';
 import { API } from '../lib/mirrorTheme';
 import { authHeaders } from '../lib/auth';
 import ClosenessResult from './results/ClosenessResult';
@@ -67,6 +68,9 @@ export default function Results() {
       <div className="max-w-3xl mx-auto px-5 sm:px-8 py-14 sm:py-20" data-testid="results-page">
         <View result={result} />
         <SituationLens instrument={result.instrument} />
+        <div className="mt-12">
+          <DownloadReport sessionId={sessionId} instrumentName={TITLES[result.instrument]?.split(' —')[0] || 'report'} />
+        </div>
         <FindingsTeaser current={currentKey} />
       </div>
     </Shell>

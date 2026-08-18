@@ -12,7 +12,10 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List, Optional
 from database import db
+from fastapi.responses import Response
 from auth import get_current_user, assert_session_owner
+from report_pdf import build_report_pdf
+from situation_notes import situation_note
 
 from services.essential_scoring import (
     SELF_ASSESSMENT_QUESTIONS, IDEAL_PARTNER_QUESTIONS, ARCHETYPES,
@@ -407,6 +410,34 @@ async def get_result(session_id: str, user: dict = Depends(get_current_user)):
     if session["status"] != "complete" or not session.get("result"):
         raise HTTPException(status_code=409, detail="Session not complete")
     return session["result"]
+
+
+@router.get("/assessments/{session_id}/report.pdf")
+async def get_report_pdf(session_id: str, user: dict = Depends(get_current_user)):
+    """The printable report. Rendered from the stored snapshot — never rescored."""
+    session = await db.mirror_v2_sessions.find_one(
+        {"id": session_id}, {"_id": 0, "result": 1, "status": 1, "user_id": 1, "instrument": 1}
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    await assert_session_owner(session, user)
+    if session["status"] != "complete" or not session.get("result"):
+        raise HTTPException(status_code=409, detail="Session not complete")
+
+    result = session["result"]
+    pdf = build_report_pdf(
+        result=result,
+        user={"name": user["name"], "email": user["email"]},
+        situation_note=situation_note(user.get("situation"), result["instrument"]),
+    )
+    slug = INSTRUMENTS[session["instrument"]]["name"].lower().replace(" ", "-")
+    filename = f"ratherknow-{slug}-{session_id[:8]}.pdf"
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
 
 
 def _headline(session: dict) -> str:

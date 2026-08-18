@@ -84,6 +84,15 @@ Search-led discovery, essay-led trust.
   `scripts/verify_redirects.py --from <origin> [--strict]` is the gate — exit 0 means safe to remove
   `/mirror`. `pages/LegacyRedirect.js` is an in-app fallback so no legacy path ever blanks.
 
+- **Printable report (2026-06)** — `GET /api/v2/assessments/{id}/report.pdf`, owner-gated, 409 unless
+  complete. `backend/report_pdf.py` renders A4 typeset pages with reportlab straight from the stored
+  snapshot (the scorer is unreachable from this path, so PDF numbers can never drift from `/result`).
+  Each report carries the tier chip and tier statement pulled from the locked register, the situation
+  framing (`situation_notes.py`), proportional bars with no invented banding, the safety floor with
+  real helpline numbers, a "what this document is not" section, and a footer stamping the
+  `algo_version` the result was scored under. `components/DownloadReport.js` on every result page;
+  deliberately absent from the Flag Check.
+
 ## Backlog
 **P0 (Phase 4 — cutover, needs infrastructure access)**
 - Deploy `docs/edge/worker.js` on mymirrorreport.com, set `RATHERKNOW_CUTOVER=on`, point
