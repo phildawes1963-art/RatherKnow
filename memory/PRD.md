@@ -93,6 +93,21 @@ Search-led discovery, essay-led trust.
   `algo_version` the result was scored under. `components/DownloadReport.js` on every result page;
   deliberately absent from the Flag Check.
 
+- **"How you choose" translation (2026-06, user-reported gap)** — `backend/choosing.py` turns each
+  instrument's stored numbers into statements about *selection behaviour* (what you reach for, what
+  you excuse, what reaches you late). Derived at read time via `_with_choosing()` — verified never
+  written into the snapshot — and rendered on every result page (`ChoosingSection.js`) and in both PDFs.
+- **Cross-check rebuilt (2026-06, user-reported gap)** — `backend/crosscheck.py` normalises every
+  available measure by construct (steadiness / closeness / repair / attunement / self-knowledge) and
+  publishes **agreements as signal** (≤0.14 apart), extra construct-aligned **tensions** (≥0.30 apart)
+  and a "How you choose — the short version" synthesis. With 2+ instruments the page can no longer be
+  just the "No tensions" line. Every body quotes the two real values it compares; the 0.14–0.30
+  dead-zone stays deliberately silent.
+- **Item interleaving (2026-06, user-reported bug)** — `_spread()` round-robins items across their
+  trait groups for essential / personality / EI, so no two same-trait items are ever adjacent (max
+  run = 1, verified). Deterministic, so resume order is stable; scoring keys on item id and is
+  unaffected. The Closeness Mirror's fixed balanced spec order is deliberately preserved.
+
 ## Backlog
 **P0 (Phase 4 — cutover, needs infrastructure access)**
 - Deploy `docs/edge/worker.js` on mymirrorreport.com, set `RATHERKNOW_CUTOVER=on`, point

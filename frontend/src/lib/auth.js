@@ -72,8 +72,20 @@ export function AuthProvider({ children }) {
     setUser(false);
   };
 
+  const updateSituation = async (situation) => {
+    const res = await fetch(`${API}/api/auth/me/situation`, {
+      method: 'PATCH',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ situation }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(formatApiErrorDetail(data.detail));
+    setUser(data.user);
+    return data.user;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, register, login, logout }}>
+    <AuthContext.Provider value={{ user, register, login, logout, updateSituation }}>
       {children}
     </AuthContext.Provider>
   );

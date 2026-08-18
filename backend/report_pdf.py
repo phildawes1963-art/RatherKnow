@@ -226,6 +226,162 @@ def _closeness(result, flow):
 BODIES = {"essential": _essential, "personality": _personality, "eq": _eq, "MI-AS-36": _closeness}
 
 
+def _choosing_block(result):
+    """The 'how you choose' translation, printed under each instrument's numbers."""
+    from choosing import build_choosing
+    block = build_choosing(result)
+    if not block:
+        return []
+    flow = [Paragraph("How you choose", S["h2"]), Paragraph(block["lead"], S["body"])]
+    for p in block["points"]:
+        flow.append(KeepTogether([Paragraph(p["title"], S["h3"]), Paragraph(p["body"], S["body"])]))
+    flow.append(Paragraph(block["closing"], S["small"]))
+    return flow
+
+
+def _stamp(result: dict) -> str:
+    completed = result.get("completed_at", "")
+    try:
+        return datetime.fromisoformat(completed).strftime("%d %B %Y")
+    except ValueError:
+        return completed[:10]
+
+
+def _safety_block():
+    return KeepTogether([
+        Paragraph("If you’re ever afraid of someone", S["h2"]),
+        Paragraph(LOCKED["safety"]["headline"], S["body"]),
+        Paragraph(LOCKED["safety"]["floor"], S["quote"]),
+        Paragraph(
+            "National Domestic Abuse Helpline 0808 2000 247 (free, 24 hours) · "
+            "Respect Men’s Advice Line 0808 8010 327 · Galop 0800 999 5428 · "
+            "Samaritans 116 123 · In immediate danger, call 999.", S["body"]),
+    ])
+
+
+def _limits_block(versions: str):
+    return KeepTogether([
+        Paragraph("What this document is not", S["h2"]),
+        Paragraph(
+            "It contains no verdict on any other person — the instruments never asked about anyone but you. "
+            "There is no compatibility score here, no clinical label, and no prediction. Results are "
+            f"snapshots: scored under {versions} and never recomputed, so if the norms change later, these "
+            "pages still say exactly what they said on the day.", S["body"]),
+        Paragraph(LOCKED["attribution"], S["small"]),
+    ])
+
+
+def build_combined_pdf(*, results: list, user: dict, findings: list, situation_notes: dict,
+                       agreements: list | None = None, synthesis: dict | None = None) -> bytes:
+    """Every finished mirror plus the cross-check, in one document."""
+    buf = io.BytesIO()
+    versions = ", ".join(sorted({r.get("algo_version", "—") for r in results})) or "—"
+    doc = BaseDocTemplate(
+        buf, pagesize=A4,
+        leftMargin=25 * mm, rightMargin=25 * mm, topMargin=22 * mm, bottomMargin=20 * mm,
+        title=f"Your mirrors — {user['name']}", author="Rather Know", subject="Combined report",
+    )
+    frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id="body")
+    today = datetime.now().strftime("%d %B %Y")
+
+    def decorate(canvas, _doc):
+        canvas.saveState()
+        canvas.setFillColor(INK)
+        canvas.setFont("Times-Roman", 10)
+        canvas.drawString(25 * mm, A4[1] - 14 * mm, "Rather Know.")
+        canvas.setFont("Helvetica", 7)
+        canvas.setFillColor(MUTED)
+        canvas.drawRightString(A4[0] - 25 * mm, A4[1] - 14 * mm, f"Your mirrors · {today}")
+        canvas.setStrokeColor(LINE)
+        canvas.setLineWidth(0.5)
+        canvas.line(25 * mm, A4[1] - 17 * mm, A4[0] - 25 * mm, A4[1] - 17 * mm)
+        canvas.line(25 * mm, 15 * mm, A4[0] - 25 * mm, 15 * mm)
+        canvas.setFont("Helvetica", 6.5)
+        canvas.drawString(25 * mm, 11 * mm, LOCKED["disclaimer"])
+        canvas.drawRightString(A4[0] - 25 * mm, 11 * mm, f"Page {_doc.page} · scored under {versions}")
+        canvas.restoreState()
+
+    doc.addPageTemplates([PageTemplate(id="all", frames=[frame], onPage=decorate)])
+
+    ordered = [r for key in ("essential", "MI-AS-36", "personality", "eq")
+               for r in results if r["instrument"] == key]
+
+    flow = [
+        Paragraph(f"PREPARED FOR {user['name'].upper()} · {today}", S["kicker"]),
+        Paragraph("Your mirrors", S["h1"]),
+        Paragraph("Everything you’ve measured, read side by side", S["lead"]),
+        Paragraph(
+            f"{len(ordered)} of four instruments completed. Where they agree, that’s signal. Where they "
+            "disagree, that’s not an error — it’s a finding, and usually the more interesting one.", S["body"]),
+    ]
+    contents = [[Paragraph("<b>Instrument</b>", S["cellb"]), Paragraph("<b>Evidence tier</b>", S["cellb"]),
+                 Paragraph("<b>Completed</b>", S["cellb"])]]
+    for r in ordered:
+        name, _, tier_key = INSTRUMENT_META[r["instrument"]]
+        contents.append([Paragraph(name, S["cell"]),
+                         Paragraph(LOCKED["tier_chips"][tier_key], S["cell"]),
+                         Paragraph(_stamp(r), S["cell"])])
+    table = Table(contents, colWidths=[70 * mm, 45 * mm, 45 * mm])
+    table.setStyle(TableStyle([
+        ("LINEBELOW", (0, 0), (-1, 0), 0.7, INK),
+        ("LINEBELOW", (0, 1), (-1, -2), 0.35, LINE),
+        ("TOPPADDING", (0, 0), (-1, -1), 5), ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+        ("LEFTPADDING", (0, 0), (0, -1), 0),
+    ]))
+    flow += [Spacer(1, 4 * mm), table]
+
+    if synthesis:
+        flow += [
+            Paragraph(synthesis["title"], S["h2"]),
+            Paragraph(synthesis["body"], S["body"]),
+            Paragraph(synthesis["footnote"], S["small"]),
+        ]
+
+    if len(ordered) >= 2:
+        flow += [
+            Paragraph("The cross-check", S["h2"]),
+            Paragraph(
+                "Two things happen when instruments that share no questions are read together. Where they agree, "
+                "that convergence is signal. Where they pull apart, that’s a finding — and it’s usually the more "
+                "interesting one. Neither is a verdict.", S["body"]),
+        ]
+        for a in (agreements or []):
+            flow.append(KeepTogether([
+                Paragraph("AGREEMENT · " + " × ".join(a.get("sources", [])).upper(), S["kicker"]),
+                Paragraph(a["title"], S["h3"]),
+                Paragraph(a["body"], S["body"]),
+            ]))
+        for f in findings:
+            flow.append(KeepTogether([
+                Paragraph("FINDING · " + " × ".join(f.get("sources", [])).upper(), S["kicker"]),
+                Paragraph(f["title"], S["h3"]),
+                Paragraph(f["body"], S["body"]),
+            ]))
+        if not findings:
+            flow.append(Paragraph(
+                "No tensions worth reporting — where your completed instruments overlap, they broadly agree. "
+                "That’s signal too, and we won’t invent a disagreement to seem insightful.", S["body"]))
+
+    for r in ordered:
+        name, tagline, tier_key = INSTRUMENT_META[r["instrument"]]
+        flow += [
+            Spacer(1, 6 * mm),
+            Paragraph(name.upper(), S["kicker"]),
+            Paragraph(tagline, S["lead"]),
+            _tier_chip(tier_key),
+            Spacer(1, 3 * mm),
+        ]
+        note = situation_notes.get(r["instrument"])
+        if note:
+            flow += [Paragraph("Read for where you are", S["h3"]), Paragraph(note, S["body"])]
+        BODIES[r["instrument"]](r, flow)
+        flow += _choosing_block(r)
+
+    flow += [Spacer(1, 8 * mm), _safety_block(), _limits_block(versions)]
+    doc.build(flow)
+    return buf.getvalue()
+
+
 def build_report_pdf(*, result: dict, user: dict, situation_note: str | None = None) -> bytes:
     instrument = result["instrument"]
     name, tagline, tier_key = INSTRUMENT_META[instrument]
@@ -278,27 +434,12 @@ def build_report_pdf(*, result: dict, user: dict, situation_note: str | None = N
         ]
 
     BODIES[instrument](result, flow)
+    flow += _choosing_block(result)
 
     flow += [
         Spacer(1, 8 * mm),
-        KeepTogether([
-            Paragraph("If you’re ever afraid of someone", S["h2"]),
-            Paragraph(LOCKED["safety"]["headline"], S["body"]),
-            Paragraph(LOCKED["safety"]["floor"], S["quote"]),
-            Paragraph(
-                "National Domestic Abuse Helpline 0808 2000 247 (free, 24 hours) · "
-                "Respect Men’s Advice Line 0808 8010 327 · Galop 0800 999 5428 · "
-                "Samaritans 116 123 · In immediate danger, call 999.", S["body"]),
-        ]),
-        KeepTogether([
-            Paragraph("What this document is not", S["h2"]),
-            Paragraph(
-                "It contains no verdict on any other person — the instrument never asked about anyone but you. "
-                "There is no compatibility score here, no clinical label, and no prediction. Results are "
-                f"snapshots: this one was scored under {result.get('algo_version', '—')} and is never recomputed, "
-                "so if the norms change later, this page still says exactly what it said on the day.", S["body"]),
-            Paragraph(LOCKED["attribution"], S["small"]),
-        ]),
+        _safety_block(),
+        _limits_block(result.get("algo_version", "—")),
     ]
 
     doc.build(flow)

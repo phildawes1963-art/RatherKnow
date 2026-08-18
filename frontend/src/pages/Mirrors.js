@@ -3,11 +3,15 @@ import { Link } from 'react-router-dom';
 import Shell from '../components/Shell';
 import { API, INSTRUMENTS, readSessions, readReflections, saveSession } from '../lib/mirrorTheme';
 import { authHeaders, useAuth } from '../lib/auth';
+import SituationSwitch from '../components/SituationSwitch';
+import DownloadCombined from '../components/DownloadCombined';
 import { FLAG, REGISTER } from '../content/register';
 
 export default function Mirrors() {
   const [summaries, setSummaries] = useState(null);
   const [findings, setFindings] = useState(null);
+  const [agreements, setAgreements] = useState([]);
+  const [synthesis, setSynthesis] = useState(null);
   const { user } = useAuth();
   const flagCheckId = readReflections().flag_check;
 
@@ -50,6 +54,8 @@ export default function Mirrors() {
       try {
         const found = await post('/api/v2/mirrors/findings');
         setFindings(found.findings || []);
+        setAgreements(found.agreements || []);
+        setSynthesis(found.synthesis || null);
       } catch {
         setFindings([]);
       }
@@ -111,32 +117,72 @@ export default function Mirrors() {
 
         {summaries !== null && completeCount >= 2 && (
           <section className="mt-14" data-testid="mirrors-findings">
-            <h2 className="mi2-serif text-2xl text-[#1C1C18]">Findings.</h2>
+            {synthesis && (
+              <div className="bg-[#1C1C18] text-[#F6F6F2] p-7 sm:p-9" data-testid="mirrors-synthesis">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-[#7E8E77]">{synthesis.title}</p>
+                <p className="mi2-serif mt-4 text-lg sm:text-xl leading-relaxed" data-testid="mirrors-synthesis-body">
+                  {synthesis.body}
+                </p>
+                <p className="mt-4 text-xs text-[#F6F6F2]/60 leading-relaxed">{synthesis.footnote}</p>
+              </div>
+            )}
+
+            <h2 className="mi2-serif mt-12 text-2xl text-[#1C1C18]">The cross-check.</h2>
             <p className="mt-3 text-sm text-[#3B3B34] max-w-2xl leading-relaxed">
-              Where your instruments disagree with each other. None of these is a verdict — each is a tension between
-              two honest measurements, and the tension is the finding.
+              Two things happen when instruments that share no questions are read together. Where they agree, that
+              convergence is signal — independent measures landing in the same place is the strongest thing here.
+              Where they pull apart, that’s a finding. Neither is a verdict.
             </p>
+
+            {agreements.length > 0 && (
+              <div className="mt-6 space-y-5" data-testid="mirrors-agreements">
+                {agreements.map((a, i) => (
+                  <div key={a.id} data-testid={`mirrors-agreement-${i + 1}`} className="bg-white border border-[#E4E4DE] border-l-2 border-l-[#7E8E77] p-6 sm:p-7">
+                    <p className="text-[11px] uppercase tracking-[0.12em] text-[#7E8E77]">
+                      Agreement · {a.sources.join(' × ')}
+                    </p>
+                    <h3 className="mi2-serif mt-2 text-xl text-[#1C1C18]">{a.title}</h3>
+                    <p className="mt-3 text-sm text-[#3B3B34] leading-relaxed">{a.body}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {findings && findings.length > 0 ? (
-              <div className="mt-6 space-y-5">
+              <div className="mt-5 space-y-5">
                 {findings.map((f, i) => (
                   <div key={f.id} data-testid={`mirrors-finding-${i + 1}`} className="bg-white border-l-2 border-[#5B7284] border border-[#E4E4DE] p-6 sm:p-7">
-                    <p className="text-[11px] uppercase tracking-[0.12em] text-[#6E6E66]">{f.sources.join(' × ')}</p>
+                    <p className="text-[11px] uppercase tracking-[0.12em] text-[#6E6E66]">
+                      Finding · {f.sources.join(' × ')}
+                    </p>
                     <h3 className="mi2-serif mt-2 text-xl text-[#1C1C18]">{f.title}</h3>
                     <p className="mt-3 text-sm text-[#3B3B34] leading-relaxed">{f.body}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="mt-6 border border-[#E4E4DE] bg-white px-6 py-5 text-sm text-[#6E6E66] leading-relaxed" data-testid="mirrors-no-findings">
-                No tensions worth reporting — where your completed instruments overlap, they broadly agree. That’s
-                signal too, and we won’t invent a disagreement to seem insightful.
+              <p className="mt-5 border border-[#E4E4DE] bg-white px-6 py-5 text-sm text-[#6E6E66] leading-relaxed" data-testid="mirrors-no-findings">
+                No tensions to report: where your completed instruments overlap, they agree — and the agreements above
+                are the result of that, not a consolation prize. We won’t invent a disagreement to seem insightful.
+              </p>
+            )}
+            {completeCount < 4 && (
+              <p className="mt-5 text-sm text-[#6E6E66] leading-relaxed" data-testid="mirrors-more-instruments">
+                The cross-check gets sharper with each instrument you add — there are more pairs to compare, and more
+                chances for two measures to disagree about you.
               </p>
             )}
           </section>
         )}
 
-        {flagCheckId && (
-          <div className="mt-10 border border-dashed border-[#D5D5CD] px-6 py-4 flex flex-wrap items-center justify-between gap-3" data-testid="mirrors-flag-check-line">
+        {summaries !== null && (
+          <div className="mt-12 space-y-5">
+            <DownloadCombined completeCount={completeCount} />
+            <SituationSwitch />
+          </div>
+        )}
+
+        {flagCheckId && (          <div className="mt-10 border border-dashed border-[#D5D5CD] px-6 py-4 flex flex-wrap items-center justify-between gap-3" data-testid="mirrors-flag-check-line">
             <p className="text-sm text-[#6E6E66]">
               You’ve also done the <strong className="text-[#3B3B34]">Flag Check</strong> — kept apart from the
               instruments above, because it’s {FLAG.descriptor}.

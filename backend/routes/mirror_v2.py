@@ -14,7 +14,9 @@ from typing import List, Optional
 from database import db
 from fastapi.responses import Response
 from auth import get_current_user, assert_session_owner
-from report_pdf import build_report_pdf
+from report_pdf import build_report_pdf, build_combined_pdf
+from choosing import build_choosing
+from crosscheck import build_convergences, build_tensions, build_synthesis
 from situation_notes import situation_note
 
 from services.essential_scoring import (
@@ -23,6 +25,7 @@ from services.essential_scoring import (
     get_compatibility_result,
 )
 from constants.p150_data import P150_PERSONALITY_ITEMS, P150_VALIDITY_ITEMS
+from services.p150_lite import P150_FACTORS
 from constants.eimirror_data import (
     EIMIRROR_QUESTIONS, EIMIRROR_DOMAINS, EIMIRROR_REVERSE_ITEMS, EIMIRROR_SCALE,
 )
@@ -76,6 +79,27 @@ INSTRUMENTS = {
 }
 
 
+def _spread(groups: list) -> list:
+    """Interleave items so same-trait questions never sit next to each other.
+
+    groups is a list of lists (one per factor / sub-dimension / archetype). Round-robin,
+    rotating the starting group each pass so no single trait ever leads twice in a row.
+    Deterministic: the order is the same on resume, and item ids are unchanged, so scoring
+    (which is keyed on id) is completely unaffected.
+    """
+    buckets = [list(g) for g in groups if g]
+    out = []
+    pass_no = 0
+    while any(buckets):
+        live = [b for b in buckets if b]
+        offset = pass_no % len(live)
+        for i in range(len(live)):
+            out.append(live[(i + offset) % len(live)].pop(0))
+        buckets = [b for b in buckets if b]
+        pass_no += 1
+    return out
+
+
 def _build_items(instrument: str):
     if instrument == "closeness":
         bank = load_bank()
@@ -89,11 +113,20 @@ def _build_items(instrument: str):
                 items.append({"id": str(iid), "text": by_id[iid]["text"]})
         return items, bank["scale"], bank["instructions"], None
     if instrument == "essential":
-        items = [{"id": f"self:{q['id']}", "text": q["text"]} for q in SELF_ASSESSMENT_QUESTIONS]
-        items += [{"id": f"ideal:{q['id']}", "text": q["text"]} for q in IDEAL_PARTNER_QUESTIONS]
+        # Same spread order in both lenses, so lens two reads as a parallel of lens one.
+        by_archetype: dict = {}
+        for q in SELF_ASSESSMENT_QUESTIONS:
+            by_archetype.setdefault(q.get("category") or q.get("archetype") or "x", []).append(q)
+        order = [q["id"] for q in _spread(list(by_archetype.values()))]
+        self_by_id = {q["id"]: q for q in SELF_ASSESSMENT_QUESTIONS}
+        ideal_by_id = {q["id"]: q for q in IDEAL_PARTNER_QUESTIONS}
+        items = [{"id": f"self:{qid}", "text": self_by_id[qid]["text"]} for qid in order if qid in self_by_id]
+        items += [{"id": f"ideal:{qid}", "text": ideal_by_id[qid]["text"]} for qid in order if qid in ideal_by_id]
+        for q in IDEAL_PARTNER_QUESTIONS:  # any ideal item without a self twin
+            if q["id"] not in order:
+                items.append({"id": f"ideal:{q['id']}", "text": q["text"]})
         interstitial = {
-            "after_index": len(SELF_ASSESSMENT_QUESTIONS) - 1,
-            "title": "Now, the second lens.",
+            "after_index": len(SELF_ASSESSMENT_QUESTIONS) - 1,            "title": "Now, the second lens.",
             "text": "You've just answered as yourself. Now answer the same kind of questions as the partner you think you want. Don't overthink it — the gap between the two sets of answers is the measurement.",
         }
         instructions = {
@@ -106,13 +139,24 @@ def _build_items(instrument: str):
         }
         return items, SCALE_5, instructions, interstitial
     if instrument == "personality":
+        # Spread across the fifteen factors, then drop a validity item in every twelfth slot.
+        by_factor = {k: [] for k in P150_FACTORS}
+        item_by_id = {q["id"]: q for q in P150_PERSONALITY_ITEMS}
+        for key, meta in P150_FACTORS.items():
+            for iid in meta["items"]:
+                if iid in item_by_id:
+                    by_factor[key].append(item_by_id[iid])
+        spread = _spread(list(by_factor.values()))
+        placed = {q["id"] for q in spread}
+        spread += [q for q in P150_PERSONALITY_ITEMS if q["id"] not in placed]
         items = []
         vi = list(P150_VALIDITY_ITEMS)
-        for i, q in enumerate(P150_PERSONALITY_ITEMS):
+        for i, q in enumerate(spread):
             items.append({"id": str(q["id"]), "text": q["text"]})
             if (i + 1) % 12 == 0 and vi:
                 v = vi.pop(0)
                 items.append({"id": str(v["id"]), "text": v["text"]})
+        items += [{"id": str(v["id"]), "text": v["text"]} for v in vi]
         instructions = {
             "title": "Your five-factor profile",
             "paragraphs": [
@@ -123,7 +167,10 @@ def _build_items(instrument: str):
         }
         return items, SCALE_5, instructions, None
     if instrument == "eq":
-        items = [{"id": str(q["id"]), "text": q["text"]} for q in EIMIRROR_QUESTIONS]
+        by_sub: dict = {}
+        for q in EIMIRROR_QUESTIONS:
+            by_sub.setdefault(q.get("sub") or q.get("domain") or "x", []).append(q)
+        items = [{"id": str(q["id"]), "text": q["text"]} for q in _spread(list(by_sub.values()))]
         instructions = {
             "title": "How you handle what you feel",
             "paragraphs": [
@@ -361,6 +408,12 @@ def _score_eq(responses: dict) -> dict:
     }
 
 
+def _with_choosing(result: dict) -> dict:
+    """Attach the read-time 'how you choose' translation. Never mutates the snapshot."""
+    choosing = build_choosing(result)
+    return {**result, "choosing": choosing} if choosing else result
+
+
 @router.post("/assessments/{session_id}/complete")
 async def complete_assessment(session_id: str, user: dict = Depends(get_current_user)):
     session = await db.mirror_v2_sessions.find_one({"id": session_id}, {"_id": 0})
@@ -368,7 +421,7 @@ async def complete_assessment(session_id: str, user: dict = Depends(get_current_
         raise HTTPException(status_code=404, detail="Session not found")
     await assert_session_owner(session, user)
     if session["status"] == "complete" and session.get("result"):
-        return session["result"]
+        return _with_choosing(session["result"])
     responses = session.get("responses", {})
     instrument = session["instrument"]
     if instrument == "closeness":
@@ -396,7 +449,7 @@ async def complete_assessment(session_id: str, user: dict = Depends(get_current_
                           "user_id": session.get("user_id")}},
         upsert=True,
     )
-    return result
+    return _with_choosing(result)
 
 
 @router.get("/assessments/{session_id}/result")
@@ -409,7 +462,51 @@ async def get_result(session_id: str, user: dict = Depends(get_current_user)):
     await assert_session_owner(session, user)
     if session["status"] != "complete" or not session.get("result"):
         raise HTTPException(status_code=409, detail="Session not complete")
-    return session["result"]
+    return _with_choosing(session["result"])
+
+
+@router.get("/reports/combined.pdf")
+async def get_combined_pdf(user: dict = Depends(get_current_user)):
+    """Every finished mirror plus the cross-check, in one printable document."""
+    cursor = db.mirror_v2_sessions.find(
+        {"user_id": str(user["_id"]), "status": "complete"},
+        {"_id": 0, "instrument": 1, "result": 1, "completed_at": 1},
+    )
+    sessions = await cursor.to_list(50)
+    if not sessions:
+        raise HTTPException(status_code=409, detail="No completed instruments to print yet")
+
+    # One result per instrument — the most recently completed. Keyed by
+    # the session-side instrument string ("closeness", "essential", …) so
+    # _build_findings can look up "closeness" consistently with the
+    # /mirrors/findings endpoint (the stored result uses "MI-AS-36").
+    best: dict = {}
+    for s in sorted(sessions, key=lambda s: s.get("completed_at") or ""):
+        best[s["instrument"]] = s["result"]
+    results = list(best.values())
+
+    findings = _build_findings(best) if len(best) >= 2 else []
+    agreements = build_convergences(best) if len(best) >= 2 else []
+    if len(best) >= 2:
+        findings = findings + build_tensions(best, findings)
+    synthesis = build_synthesis(best, findings, agreements)
+    notes = {
+        r["instrument"]: situation_note(user.get("situation"), r["instrument"])
+        for r in results
+    }
+    pdf = build_combined_pdf(
+        results=results,
+        user={"name": user["name"], "email": user["email"]},
+        findings=findings,
+        agreements=agreements,
+        synthesis=synthesis,
+        situation_notes={k: v for k, v in notes.items() if v},
+    )
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": 'attachment; filename="ratherknow-your-mirrors.pdf"'},
+    )
 
 
 @router.get("/assessments/{session_id}/report.pdf")
@@ -704,7 +801,13 @@ async def mirrors_findings(data: SummaryRequest, user: dict = Depends(get_curren
         async for session in cursor:
             if session.get("result"):
                 by_instrument[session["instrument"]] = session["result"]
+    tensions = _build_findings(by_instrument) if len(by_instrument) >= 2 else []
+    agreements = build_convergences(by_instrument) if len(by_instrument) >= 2 else []
+    if len(by_instrument) >= 2:
+        tensions = tensions + build_tensions(by_instrument, tensions)
     return {
         "instruments_complete": sorted(by_instrument.keys()),
-        "findings": _build_findings(by_instrument) if len(by_instrument) >= 2 else [],
+        "findings": tensions,
+        "agreements": agreements,
+        "synthesis": build_synthesis(by_instrument, tensions, agreements),
     }
