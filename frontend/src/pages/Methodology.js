@@ -148,6 +148,24 @@ export default function Methodology() {
           {ATTRIBUTION}
         </p>
 
+        <div className="mt-6 border border-[#E4E4DE] bg-white px-6 py-5" data-testid="methodology-spec-link">
+          <p className="text-[11px] uppercase tracking-[0.12em] text-[#6E6E66]">The full working</p>
+          <p className="mt-2 text-sm text-[#3B3B34] leading-relaxed max-w-2xl">
+            Every formula, item count, keying rule, norm band and threshold behind all four instruments and the Flag
+            Check — including exactly which of them a percentile could honestly be derived from, and which of them
+            have no population norms at all.
+          </p>
+          <a
+            href="/docs/ratherknow-scoring-spec.pdf"
+            target="_blank"
+            rel="noreferrer"
+            data-testid="methodology-spec-download"
+            className="mt-3 inline-block text-sm underline underline-offset-4 text-[#1C1C18] hover:opacity-70"
+          >
+            Read the scoring specification (PDF) →
+          </a>
+        </div>
+
         <div className="mt-6 flex flex-wrap items-center gap-5">
           <Link to="/take/essential" data-testid="methodology-cta" className="bg-[#1C1C18] text-[#F6F6F2] px-6 py-3 rounded-sm text-sm hover:opacity-85">
             Start with the Essential Mirror

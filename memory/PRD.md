@@ -120,6 +120,13 @@ Search-led discovery, essay-led trust.
   /methodology. `backend/tests/test_composites.py` locks the equations, the 1.0 gains and the
   reference profile so no future edit can drift them silently.
 
+- **Scoring specification (2026-06)** — `docs/SCORING_SPEC.md`, generated from the shipped code, with
+  a shareable PDF built by `scripts/build_scoring_spec_pdf.py` to
+  `frontend/public/docs/ratherknow-scoring-spec.pdf` and linked from /methodology. Documents every
+  item count, keying rule, formula, norm band, threshold and validity check for all four instruments
+  plus the Flag Check, and answers the percentile question per instrument: only the Personality
+  Mirror has population norms, so only it can carry a percentile without breaching refusal #3.
+
 ## Backlog
 **P0 (Phase 4 — cutover, needs infrastructure access)**
 - Deploy `docs/edge/worker.js` on mymirrorreport.com, set `RATHERKNOW_CUTOVER=on`, point
