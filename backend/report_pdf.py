@@ -119,6 +119,11 @@ def _essential(result, flow):
             f"The widest single gap is <b>{result['self']['archetype_scores'][delta['biggest']]['name']}</b>. "
             "A gap is not a fault — it is the part of the measurement that carries information.",
             S["body"]),
+        Paragraph(
+            "A zero gap is a finding too, and not a contradiction: where the archetype you named as the "
+            "partner you want shows no gap, you are describing someone who already carries as much of that "
+            "quality as you do. The named archetype is the highest score in that lens; the gap is the distance "
+            "between the lenses. They answer different questions.", S["small"]),
         _bar_table(
             [(result["self"]["archetype_scores"][k]["name"], abs(v),
               "you want more of this than you are" if v > 0 else
@@ -131,7 +136,8 @@ def _essential(result, flow):
         flow += [
             Paragraph("The shadow pull", S["h2"]),
             Paragraph(f"<b>{shadow['name']}</b> — {shadow.get('gift', '')}", S["body"]),
-            Paragraph(shadow.get("warning", ""), S["body"]),
+            Paragraph("What this pull does at the point of choosing is set out in "
+                      "“How you choose”, below.", S["small"]),
         ]
     gaps = result.get("dimension_gaps") or {}
     if gaps:
@@ -219,8 +225,10 @@ def _eq(result, flow):
 
 
 def _closeness(result, flow):
-    labels = {"anxiety": ("Reassurance", "how much ongoing signal you need that things are all right"),
-              "avoidance": ("Closeness", "how easily closeness itself comes")}
+    # Both dimensions are DISTANCE scores: high = more of the thing named, not more ease.
+    # Plotting the avoidance datum under an "ease" label inverted the chart against the prose.
+    labels = {"anxiety": ("Need for reassurance", "how much ongoing signal you need that things are all right"),
+              "avoidance": ("Distance from closeness", "how far away closeness itself sits — low means it comes easily")}
     flow += [
         Paragraph("Two dimensions, no boxes", S["h2"]),
         Paragraph(
@@ -234,6 +242,12 @@ def _closeness(result, flow):
         value = d.get("value") if d.get("status") == "scored" else None
         rows.append((f"{name}<br/><font size=7 color='#6E6E66'>{gloss}</font>", value, "of 7"))
     flow += [_bar_table(rows, maximum=7.0)]
+    avo = (result["dimensions"].get("avoidance") or {})
+    if avo.get("status") == "scored" and avo.get("value") is not None:
+        flow += [Paragraph(
+            f"Read the second bar as distance, not ease. Yours reads {avo['value']} of 7, which means closeness "
+            f"comes {'easily' if avo['value'] <= 3 else 'harder than average' if avo['value'] >= 5 else 'neither easily nor hard'} "
+            "— a short bar is closeness arriving quickly.", S["small"])]
     v = result.get("validity") or {}
     flow += [
         Paragraph("Confidence in this reading", S["h2"]),

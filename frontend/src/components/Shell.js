@@ -6,10 +6,10 @@ import { ATTRIBUTION, DISCLAIMER, SAFETY, REGISTER } from '../content/register';
 import { useAuth } from '../lib/auth';
 
 const NAV = [
+  { to: '/methodology', label: 'The instruments' },
   { to: '/archetypes', label: 'Archetypes' },
   { to: '/promise', label: 'Promise' },
   { to: '/learn', label: 'Learn' },
-  { to: '/methodology', label: 'Methodology' },
   { to: '/safety', label: 'Safety' },
 ];
 
@@ -72,7 +72,7 @@ export default function Shell({ title, description, children, minimal = false, j
                 </>
               ) : (
                 <>
-                  <Link to="/login" data-testid="nav-login" className="text-sm text-[#3B3B34] hover:text-[#1C1C18]">
+                  <Link to="/login" data-testid="nav-login" className="text-xs text-[#6E6E66] hover:text-[#1C1C18]">
                     Log in
                   </Link>
                   <Link

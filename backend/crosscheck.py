@@ -98,8 +98,8 @@ CONSTRUCT_COPY = {
     "closeness": {
         "name": "how close you let people get",
         "agree": "Two independent measures land together on how much closeness you allow. That agreement means this "
-                 "isn't a mood — it's a setting, and it's the one doing most of your selecting. You'll consistently "
-                 "read people who match it as easy, and people who don't as too much or too little.",
+                 "isn't a mood — it's a setting, and it's the one doing most of your selecting. People who match it "
+                 "may read as easy, and people who don't as too much or too little.",
         "tension": "The instruments pull apart on closeness: one finds warmth, the other finds distance. Warmth given "
                    "widely and closeness let all the way in are different capacities, and the first can substitute "
                    "for the second for years without anyone noticing. Including you.",

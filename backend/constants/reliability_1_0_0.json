@@ -1,0 +1,55 @@
+{
+  "_note": "Reliability profile for the Minimum Reportable Difference engine (rk-1.1.0 PRD §7.1, TRD T3.1). Every alpha here is a LITERATURE PLACEHOLDER, not a measured value for these item banks. Nothing ships to readers off these numbers: services/mrd.py refuses to load unless RK_ALLOW_PLACEHOLDER_ALPHA=1 is set. Replace `alpha` with measured internal consistency per scale, set placeholder=false, and bump profile_version.",
+  "profile_version": "mrd-1.0.0",
+  "placeholder": true,
+  "z": 1.645,
+  "z_note": "90% two-tailed. MRD = z * sqrt(SEM_1^2 + SEM_2^2); SEM = SD * sqrt(1 - alpha).",
+  "scale_sets": {
+    "personality_primaries": {
+      "label": "Personality primary factors",
+      "unit": "sten",
+      "sd": 2.0,
+      "alpha": 0.75,
+      "alpha_basis": "placeholder — typical 16PF-style primary-scale internal consistency",
+      "scale_min": 1,
+      "scale_max": 10
+    },
+    "personality_globals": {
+      "label": "Personality global dimensions",
+      "unit": "sten",
+      "sd": 2.0,
+      "alpha": 0.85,
+      "alpha_basis": "placeholder — composites aggregate primaries, so reliability is nominally higher",
+      "scale_min": 1,
+      "scale_max": 10,
+      "composite": true
+    },
+    "ei_subdimensions": {
+      "label": "EI sub-dimensions",
+      "unit": "1-5 mean",
+      "sd": 0.55,
+      "alpha": 0.75,
+      "alpha_basis": "placeholder — 10-item self-report sub-scales",
+      "scale_min": 1.0,
+      "scale_max": 5.0
+    },
+    "ei_domains": {
+      "label": "EI domains",
+      "unit": "1-5 mean",
+      "sd": 0.5,
+      "alpha": 0.85,
+      "alpha_basis": "placeholder — domain roll-ups of 30-40 items",
+      "scale_min": 1.0,
+      "scale_max": 5.0
+    },
+    "closeness_dimensions": {
+      "label": "Closeness dimensions",
+      "unit": "1-7 mean",
+      "sd": 1.1,
+      "alpha": 0.85,
+      "alpha_basis": "placeholder — 18-item dimensions in a well-replicated tradition; these items are ours and unmeasured",
+      "scale_min": 1.0,
+      "scale_max": 7.0
+    }
+  }
+}

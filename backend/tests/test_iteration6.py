@@ -185,13 +185,20 @@ def four_user():
 
 
 def _forbidden_terms():
-    # verdict-about-another / clinical / compatibility-score / prediction
+    # verdict-about-another / clinical / compatibility-score / prediction.
+    # Matched as whole words: bare "predict" used to collide with the legitimate
+    # "unpredictable partners" in the Essential archetype copy.
     return [
         "your partner is", "he is", "she is", "they are toxic",
         "diagnosis", "disorder", "narcissist", "attachment style is",
         "compatibility score", "you will fail", "you will succeed",
-        "predict",
+        "predict", "predicts", "prediction",
     ]
+
+
+def _contains_forbidden(blob, term):
+    import re
+    return re.search(rf"\b{re.escape(term)}\b", blob) is not None
 
 
 def test_bug1_choosing_block_present_all_four_result_endpoint(four_user):
@@ -210,7 +217,7 @@ def test_bug1_choosing_block_present_all_four_result_endpoint(four_user):
         blob = (c["lead"] + " " + c["closing"] + " " +
                 " ".join(p["title"] + " " + p["body"] for p in c["points"])).lower()
         for term in _forbidden_terms():
-            assert term not in blob, f"{inst}: forbidden phrase '{term}' in choosing copy"
+            assert not _contains_forbidden(blob, term), f"{inst}: forbidden phrase '{term}' in choosing copy"
 
 
 def test_bug1_choosing_block_present_on_complete_endpoint():
@@ -256,16 +263,19 @@ def test_bug1_choosing_quotes_real_numbers(four_user):
 
 def test_bug1_choosing_not_stored_in_snapshot(four_user):
     """The choosing block must be derived at read time, not written into the snapshot."""
-    from database import db  # backend db module
-    import asyncio
+    import os
+    from pymongo import MongoClient
     u, sids = four_user
     sid, _ = sids["closeness"]
 
-    async def _get():
-        session = await db.mirror_v2_sessions.find_one({"id": sid}, {"_id": 0, "result": 1})
-        stored = await db.results.find_one({"session_id": sid}, {"_id": 0, "result": 1})
-        return session, stored
-    session, stored = asyncio.get_event_loop().run_until_complete(_get())
+    # Sync client: asyncio.get_event_loop() raises on 3.11 inside an xdist worker.
+    client = MongoClient(os.environ["MONGO_URL"])
+    try:
+        mdb = client[os.environ["DB_NAME"]]
+        session = mdb.mirror_v2_sessions.find_one({"id": sid}, {"_id": 0, "result": 1})
+        stored = mdb.results.find_one({"session_id": sid}, {"_id": 0, "result": 1})
+    finally:
+        client.close()
     assert "choosing" not in (session.get("result") or {}), "choosing leaked into mirror_v2_sessions snapshot"
     assert "choosing" not in ((stored or {}).get("result") or {}), "choosing leaked into results snapshot"
 

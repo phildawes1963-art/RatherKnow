@@ -127,6 +127,60 @@ Search-led discovery, essay-led trust.
   plus the Flag Check, and answers the percentile question per instrument: only the Personality
   Mirror has population norms, so only it can carry a percentile without breaching refusal #3.
 
+- **Release rk-1.1.0 Phase a (2026-06)** — the user supplied `rk-1.1.0-PRD.md`, `rk-1.1.0-TRD.md` and
+  `rk-landing-and-partner-copy.md`. Phase a shipped, with two corrections and one dependency dropped.
+
+  *Corrections to the as-built spec.* The sten→percentile table in `docs/SCORING_SPEC.md` was wrong at
+  stens 4 (27, should be 23) and 7 (73, should be 77). Corrected, and `tests/test_display.py` now pins
+  the shipped table to `Φ((sten − 5.5) / 2)` so it cannot drift.
+
+  *Blocking dependency D2 (re-norm the Personality Mirror) dropped.* Its premise was that five factors
+  sat at scale endpoints "where a comparison instrument produced none". The user's own standalone P150
+  report in fact shows **six primaries at sten 10 and two at 9**, plus Independence 10 — more endpoint
+  scores than RatherKnow produced. And `services/p150_lite.py` is the same item bank (130 of the P150's
+  items, Switch module removed) scored against the same norms snapshot, so the two are directly
+  comparable and real test–retest can be computed. There is no evidence of a calibration defect. This
+  unblocks Phase b. **Answered PRD Q1: yes, shared item bank.**
+
+  *MRD engine, in shadow mode.* `backend/services/mrd.py` + `backend/constants/reliability_1_0_0.json`
+  implement SEM/MRD and the pairwise, flat-profile, distinctiveness and cluster gates. It ships in
+  **shadow**: every gate is evaluated and persisted to `result.mrd.suppressions`, and nothing is
+  withheld from any reader. `RK_MRD_MODE` flips it; `config()` refuses to load placeholder α values
+  unless `RK_ALLOW_PLACEHOLDER_ALPHA=1` acknowledges them. `GET /api/v2/diagnostics/mrd` reports the
+  would-be suppression rate.
+
+  **The shadow-mode finding, which is a product decision waiting on the user.** Across 1000
+  gate-eligible stored results the suppression rate is **1.0**. Personality primaries read flat in
+  197/213, Closeness in 490/490. On the real reference profile — range of 8 stens, six factors at the
+  ceiling — MRD 2.33 folds all fifteen primaries into a *single undifferentiated cluster* whose
+  centroid is the personal mean, so nothing in it is reportable. Enforcing these thresholds today
+  would empty the Personality Mirror and trip the PRD §9 half-refund guarantee on nearly every
+  reading. Measured α (D1) has to come first; the guarantee must not be written into copy before then.
+
+  *Also in Phase a.* Clamp recording (`constants/p150_data.py::global_factor_raw` + `composites.py::
+  clamp_events`) — on the reference profile Independence computes to **11.2** and is published as 10;
+  the clip is now visible and disqualifies the value from any population statement. Read-time
+  `commonness` block on Personality only, versioned `disp-1.0.0`, globals explicitly excluded. Copy
+  lint over the narrative modules (`tests/test_copy_lint.py`): banned prediction verbs, third-party
+  references, and a template-repeat guard. Closeness p1/p4 inversion fixed in `report_pdf.py` (the
+  avoidance datum was plotted under an "ease" label). The shadow-pull warning no longer renders twice
+  in one Essential PDF. Diplomat zero-gap artefact resolved as a presentation defect, not a scoring
+  one — a zero gap on the named ideal archetype is reachable by design and is now explained.
+
+  *Landing page rebuilt* to `rk-landing-and-partner-copy.md`: refusals moved from second to fourth,
+  the four per-instrument "Begin" buttons removed (one door in), the Flag Check moved to its own door,
+  pricing published in **USD** (Free / $14 / $29, both paid tiers marked *not yet purchasable* because
+  Stripe is not built), and the hero now shows **page one of a real report** — rendered through the
+  shipped PDF builder by `scripts/build_hero_report_image.py`, so the picture cannot drift from the
+  product. The page previously contained zero images.
+
+  *TRD R6 closed as not reproducible.* Networkidle in 0.6s, zero long tasks, domInteractive 124ms. The
+  "script injection times out" symptom was Emergent's preview-only instrumentation, absent in
+  production. Do not profile this again.
+
+  Verified: 141 backend tests green on three consecutive runs; testing agent iteration 8 reported zero
+  critical and zero frontend issues.
+
 ## Backlog
 **P0 (Phase 4 — cutover, needs infrastructure access)**
 - Deploy `docs/edge/worker.js` on mymirrorreport.com, set `RATHERKNOW_CUTOVER=on`, point
@@ -144,11 +198,29 @@ Search-led discovery, essay-led trust.
 - Learn essays for the remaining archetype clusters.
 - Object storage for illustration/diploma/OG assets and the audio demo.
 
+**P0 (rk-1.1.0 Phase b — now unblocked by dropping D2)**
+- **D1 remains: measure α for every scale.** Every MRD threshold is a literature placeholder. Nothing
+  enforces and no guarantee copy ships until these are measured. `RK_ALLOW_PLACEHOLDER_ALPHA=1` is the
+  deliberate acknowledgement that they are provisional.
+- Decide the display change on the evidence now in hand: commonness fractions are computed and
+  returned by the API (`result.commonness`, `disp-1.0.0`) but are **not yet shown in the UI**. Turning
+  them on is a copy-register change, and globals must stay excluded.
+- Snapshot the resolved narrative and rendered PDF on first render (TRD T1.1) before `display_version`
+  is ever bumped, so corrections cannot alter a delivered report.
+
 **P2**
 - Paid tier boundaries + the published price ceiling on the Promise page; one inert unlock boundary
   already assumed, no payment integration until tiers are confirmed.
 - Split `mirror_v2.py` scoring helpers into `services/mirror_v2_scoring.py`; cap batch response length.
 
 ## Open questions
+- **Does the MRD gate ever enforce?** See the shadow-mode finding above. Options: measure α and retry;
+  loosen to a 68% rather than 90% interval for within-person profile reading; or keep the gates as an
+  internal honesty check that never governs reader-facing output.
+- rk-1.1.0 PRD Q2: Essential Mirror timing — the site says 25 minutes, the funnel model assumes 13.
+  Needs real median completion time from live sessions.
+- rk-1.1.0 PRD Q5: companion avatar in or out of 1.2.
+- Partner page is written but deliberately unbuilt: the user's own sequencing note says build it after
+  the sample readings are public.
 - Do free-tier boundaries differ per instrument, or is everything free until paid tiers exist?
 - Parent attribution is currently visible in the footer — keep or clean split?

@@ -79,6 +79,16 @@ def _essential(r):
         "The two lenses were you both times.",
         f"You read as {self_p['name']}, and you described {ideal_p['name']}. Both sets of answers came from you, "
         "which is why this is a study of how you choose rather than a verdict on who's available."))
+
+    ideal_key = ideal_p.get("key")
+    if ideal_key and abs(per.get(ideal_key, 1)) < 1:
+        points.append(_pt(
+            f"You named {scores[ideal_key]['name']} as the partner you want — and you already score there.",
+            f"The gap on this one is {per[ideal_key]}, which reads like a contradiction and isn't. The archetype "
+            "you named is simply the highest score in that lens; the gap measures the distance between the two "
+            "lenses. Both can be true at once, and together they say something specific: you are describing "
+            "someone who carries about as much of this as you do. Not a complement — a match on the quality you "
+            "lead with. That may mean recognition, and it may mean you both bring the same blind spot."))
     return points
 
 
@@ -118,7 +128,7 @@ def _closeness(r):
                 "Worth checking whether you're choosing for compatibility or for room."))
         elif avo <= 3:
             points.append(_pt(
-                "Closeness comes easily, so you commit early.",
+                "Closeness comes easily, so the deciding tends to happen early.",
                 f"Distance reads low ({avo} of 7; ease {ease}). You let people in quickly, which means your choosing "
                 "happens early — often before there's much evidence in. The information usually arrives later than "
                 "your decision does."))
@@ -149,7 +159,8 @@ def _personality(r):
             f"{f['name']} does a lot of your selecting.",
             f"At {f['sten']} of 10 you sit clearly toward {f['pole_high'].lower()}. Traits this far from the middle "
             "don't sit quietly — they set what you notice first in someone and what you'll read as a dealbreaker. "
-            f"Expect to over-weight evidence of {f['pole_high'].lower()}, and to feel the absence of it quickly."))
+            f"This may show up as over-weighting evidence of {f['pole_high'].lower()}, and as feeling the absence "
+            "of it quickly."))
     for f in low:
         points.append(_pt(
             f"{f['name']} is where you'll shop for a partner to compensate.",
@@ -221,6 +232,19 @@ def build_choosing(result: dict) -> dict | None:
     return {
         "instrument": instrument,
         "lead": CHOOSING_LEAD[instrument],
-        "points": points[:5],
+        "points": _dedupe(points)[:5],
         "closing": CLOSING,
     }
+
+
+def _dedupe(points: list) -> list:
+    """No canned string renders twice in one document (PRD §8.1). Boilerplate that repeats
+    verbatim reveals itself as boilerplate, so the second occurrence is dropped."""
+    seen, out = set(), []
+    for p in points:
+        body = p.get("body", "").strip()
+        if body and body in seen:
+            continue
+        seen.add(body)
+        out.append(p)
+    return out

@@ -17,6 +17,10 @@ from auth import get_current_user, assert_session_owner
 from report_pdf import build_report_pdf, build_combined_pdf
 from choosing import build_choosing
 from composites import build_composites
+from services.mrd import build_mrd, MODE as MRD_MODE, config as mrd_config
+from services.display import (
+    DISPLAY_VERSION, NotNormReferenced, commonness, commonness_sentence,
+)
 from crosscheck import build_convergences, build_tensions, build_synthesis
 from situation_notes import situation_note
 
@@ -409,8 +413,35 @@ def _score_eq(responses: dict) -> dict:
     }
 
 
+def _commonness(result: dict) -> dict | None:
+    """Population statements for the one instrument that has a norm table (PRD §7.2).
+    Derived at read time from the stored sten, and versioned so correcting the mapping
+    cannot silently change an already-delivered report."""
+    factors = result.get("factor_scores") or {}
+    if not factors:
+        return None
+    out = {}
+    for key, f in factors.items():
+        sten = f.get("sten")
+        if sten is None:
+            continue
+        try:
+            out[key] = {
+                **commonness(sten),
+                "sentence": commonness_sentence(sten, f.get("pole_high", "this end"),
+                                                f.get("pole_low", "the other end")),
+            }
+        except NotNormReferenced:
+            continue
+    if not out:
+        return None
+    return {"display_version": DISPLAY_VERSION, "factors": out,
+            "excluded": "Global dimensions carry no population statement: they are clamped composites."}
+
+
 def _with_choosing(result: dict) -> dict:
-    """Attach read-time interpretation (choosing, composite provenance). Snapshot untouched."""
+    """Attach read-time interpretation (choosing, composite provenance, MRD, commonness).
+    Snapshot untouched."""
     extra = {}
     choosing = build_choosing(result)
     if choosing:
@@ -419,6 +450,13 @@ def _with_choosing(result: dict) -> dict:
         composites = build_composites(result)
         if composites:
             extra["composites"] = composites
+        common = _commonness(result)
+        if common:
+            extra["commonness"] = common
+    if "mrd" not in result:
+        gates = build_mrd(result)
+        if gates:
+            extra["mrd"] = gates
     return {**result, **extra} if extra else result
 
 
@@ -445,6 +483,11 @@ async def complete_assessment(session_id: str, user: dict = Depends(get_current_
     result["session_id"] = session_id
     result["algo_version"] = ALGO_VERSION
     result["completed_at"] = datetime.now(timezone.utc).isoformat()
+    # MRD gate evaluation is persisted, not just acted on (TRD T2.1): it is the audit trail
+    # for why a report said less than it could have, and it drives the guarantee rate.
+    gates = build_mrd(result)
+    if gates:
+        result["mrd"] = gates
     await db.mirror_v2_sessions.update_one(
         {"id": session_id},
         {"$set": {"status": "complete", "completed_at": result["completed_at"], "result": result}},
@@ -818,4 +861,53 @@ async def mirrors_findings(data: SummaryRequest, user: dict = Depends(get_curren
         "findings": tensions,
         "agreements": agreements,
         "synthesis": build_synthesis(by_instrument, tensions, agreements),
+    }
+
+
+# ==================== MRD SHADOW-MODE DIAGNOSTICS ====================
+# The gates run in shadow: they record what they would have withheld, and withhold nothing.
+# This endpoint is the point of that. PRD §9 refunds half a Full Reading when fewer than three
+# Reads fire, so the suppression rate has to be measured on real completed results before the
+# guarantee becomes a promise in copy. Counts only — no answers, no identities.
+
+@router.get("/diagnostics/mrd")
+async def mrd_diagnostics(user: dict = Depends(get_current_user)):
+    profile = mrd_config()
+    totals = {"results_examined": 0, "results_with_gates": 0, "results_with_any_suppression": 0}
+    by_gate: dict = {}
+    by_scale_set: dict = {}
+
+    cursor = db.results.find({}, {"_id": 0, "instrument": 1, "result": 1})
+    async for row in cursor:
+        result = row.get("result") or {}
+        totals["results_examined"] += 1
+        gates = result.get("mrd") or build_mrd(result)
+        if not gates:
+            continue
+        totals["results_with_gates"] += 1
+        suppressions = gates.get("suppressions") or []
+        if suppressions:
+            totals["results_with_any_suppression"] += 1
+        for s in suppressions:
+            by_gate[s["gate"]] = by_gate.get(s["gate"], 0) + 1
+        for s in gates.get("scale_sets") or []:
+            bucket = by_scale_set.setdefault(s["scale_set"], {"evaluated": 0, "flat": 0, "mrd": s["mrd"]})
+            bucket["evaluated"] += 1
+            if s["flat_profile"]:
+                bucket["flat"] += 1
+
+    examined = totals["results_with_gates"] or 1
+    return {
+        "mode": MRD_MODE,
+        "profile": profile["profile_version"],
+        "placeholder_alpha": bool(profile.get("placeholder")),
+        "totals": totals,
+        "suppression_rate": round(totals["results_with_any_suppression"] / examined, 3),
+        "by_gate": by_gate,
+        "by_scale_set": by_scale_set,
+        "note": (
+            "Shadow mode: nothing was withheld from any reader. suppression_rate is the share of "
+            "gate-eligible results where at least one gate would have fired. Set RK_MRD_MODE=enforce "
+            "only once this rate is understood, because it drives the guarantee in PRD §9."
+        ),
     }

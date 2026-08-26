@@ -1,0 +1,47 @@
+{
+  "summary": "Iteration 8 — verified the 1.1.0-a change set: MRD shadow-mode engine, commonness read-time block, clamp recording, Closeness inversion fix, Essential shadow/zero-gap edits, copy lint, and rewritten Landing. Backend pytest: 140 pass / 1 pre-existing fail (test_iteration6.py:213 substring match of 'predict' inside the legitimate word 'unpredictable' — not one of the eight banned phrases in the review request). All other iteration_8 verifications green.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "tests/test_iteration6.py::test_bug1_choosing_block_present_all_four_result_endpoint", "issue": "Overly-strict substring check: _forbidden_terms() at line 187-193 includes bare 'predict' which matches the legitimate word 'unpredictable' in Essential choosing copy ('unpredictable partners who destabilize your need for security'). Change to whole-word regex (r'\\bpredict\\b') or drop 'predict' since the review's own banned list is verb-phrase specific and does not include it. Not blocking product."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "verifications": {
+    "scoring_frozen": "Personality factor stens {A7,C6,E6,F6,G7,H6,I6,L7,M6,N6,O7,Q1:7,Q2:6,Q3:6,Q4:6}, EQ strengths/growth_areas populated, Closeness dims 3.9/4.2, Essential delta.overall 8.2 — all unchanged from iteration_7 baseline.",
+    "mrd_shadow_no_withhold": "Personality result still contains strengths+blind_spots keys (empty because all stens are 4-7 for this seed — genuine flat profile, not withheld; suppression 'would_suppress' names them but shadow mode records only). EQ still has strengths(3) + growth_areas(3).",
+    "mrd_persisted_in_snapshot": "GET /api/v2/assessments/{sid}/result returns mrd with keys [profile, mode='shadow', placeholder_alpha=true, note, scale_sets, suppressions(2)]. `choosing` present at read-time only, confirmed persisted state via mongo not re-checked here (unchanged path, iteration_6/7 already covered).",
+    "diagnostics_endpoint": "GET /api/v2/diagnostics/mrd — anon=401, auth=200 with keys [mode,profile,placeholder_alpha,totals,suppression_rate,by_gate,by_scale_set,note]. mode='shadow', totals.results_examined=1373, results_with_gates=1000, results_with_any_suppression=1000, suppression_rate=1.0 (EXPECTED per interpretive note).",
+    "commonness_block": "display_version=disp-1.0.0, 15 primary factors in commonness.factors, `excluded` says 'Global dimensions carry no population statement: they are clamped composites.' Sample: A sten=7 above → share_pct=23 fraction='1 in 4' — matches corrected STEN_PCT (23 at sten4/77 at sten7). No global dimension keys in factors.",
+    "clamp_recording": "composites.clamp_events=[]; each global carries raw_precise/clamped/clamp_note fields (None on this profile since none breach 1-10). Mechanism verified present in payload shape.",
+    "closeness_pdf_inversion": "Second dim labelled 'Distance from closeness · how far away closeness itself sits — low means it comes easily'. Explanatory line: 'Read the second bar as distance, not ease. Yours reads 4.2 of 7 … a short bar is closeness arriving quickly.' Directional agreement with 'How you choose' prose ('Closeness is neither the pull nor the brake').",
+    "essential_pdf_dedupe": "'shadow pull' token appears exactly 1x in the whole doc; no verbatim duplicate paragraphs across the PDF.",
+    "essential_pdf_zero_gap_note": "'A zero gap is a finding too, and not a contradiction: where the archetype you named as the partner you want shows no gap…' present. Confirmed on ui.demo (Empath/Empath scenario).",
+    "combined_pdf": "GET /api/v2/reports/combined.pdf → 200, 24851 bytes, no banned phrases.",
+    "copy_lint_pdfs": "Scanned closeness/essential/personality/eq/combined PDFs for the eight banned phrases (you will, you always, you'll always, you'll consistently, you consistently, expect to, you commit, leading to) — 0 occurrences in all five PDFs.",
+    "landing_page_mobile_390": "Hero H1 renders, hero-report-image loads (naturalWidth=1241), no per-instrument 'Begin' buttons on landing (0 found), pricing shows Free/$14/$29 with 'NOT YET PURCHASABLE' labels, section order correct (hero→what-you-get→delta→refusals→pricing→flag-check→safety by scrollY).",
+    "landing_desktop_nav": "nav-the-instruments='The instruments'→/methodology, nav-archetypes='Archetypes'→/archetypes, nav-promise→/promise, nav-learn→/learn, nav-safety→/safety, nav-login='Log in'→/login, nav-start='Start free'→/register. hero-start→/register?next=%2Ftake%2Fessential, samples-link→/samples, methodology-link→/methodology, start-flag-check→/flag-check, safety-link→/safety.",
+    "auth_regression": "anon POST /api/v2/assessments → 401. Cross-user GET result → 403, GET report.pdf → 403. Login for ui.demo and test.user both 200."
+  },
+  "test_report_links": [
+    "/app/test_reports/pytest/iteration8.xml"
+  ],
+  "action_items": [
+    "Minor: relax the 'predict' substring rule in /app/backend/tests/test_iteration6.py::_forbidden_terms() so it does not flag the legitimate word 'unpredictable'. Use r'\\bpredict\\b' or drop the bare term (the reviewed banned list is verb-phrase specific)."
+  ],
+  "critical_code_review_comments": [
+    "services/mrd.py + routes/mirror_v2.py — MRD block correctly persisted at complete_assessment() and only mode/profile/scale_sets/suppressions surface at read; `choosing` remains read-time only. Diagnostics rollup query is authenticated and returns totals/by_gate/by_scale_set — good shape.",
+    "services/display.py — STEN_PCT corrected (sten 4=23, sten 7=77) confirmed on the wire; commonness cleanly excludes globals with an explicit `excluded` reason string. NotNormReferenced never surfaced because primaries never trigger it — correct.",
+    "composites.py — raw_precise/clamped/clamp_note fields are present on every global with default None; clamp_events collected. Since ui.demo's raw values sit in 5.95-6.95, no live clamp fired — mechanism proven by field presence but a synthetic-primary integration test would strengthen coverage.",
+    "report_pdf.py — Closeness relabelling and direction sentence are unambiguous; Essential shadow warning is emitted once (single 'shadow pull' occurrence in the whole doc); zero-gap general note present.",
+    "Landing.js — data-testid coverage is thorough on both mobile (hero + sections) and desktop (nav). Pricing tiers explicitly labelled 'NOT YET PURCHASABLE' so honesty guardrail holds. Hero image is static PNG (naturalWidth 1241) — matches the 'real report-page image' requirement.",
+    "Test hygiene: /app/backend/tests/test_iteration6.py uses substring `predict` which now collides with product copy 'unpredictable'. The reviewed banned-phrase list is verb-phrase specific; the test should be updated to reflect that."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "99.3% (140/141; 1 pre-existing over-strict substring test)", "frontend": "100%"},
+  "test_credentials": "ui.demo@ratherknow.com / knowmore123 (all 4 instruments completed); test.user@ratherknow.com / knowmore123 (cross-user 403 checks).",
+  "seed_data_creation": "None. Read-only against existing ui.demo sessions.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "MRD shadow diagnostic totals shift as new results land — do not treat a rising suppression_rate as a regression; it is expected until enforcement mode ships. If test_iteration6's 'predict' substring assertion is loosened (recommended), the whole backend+tests suite goes green on a single run (141/141). Landing testids inventory verified — reuse the list from this iteration for any Landing regression."
+}

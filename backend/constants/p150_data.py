@@ -122,6 +122,20 @@ def score_global_factor(factor_scores: dict, factors_map: dict, gain: float = 1.
     return max(1.0, min(10.0, 5.5 + gain * weighted))
 
 
+def global_factor_raw(factor_scores: dict, factors_map: dict, gain: float = 1.0) -> float:
+    """The weighted sum BEFORE the 1-10 clamp. Read-only: nothing here feeds a score.
+
+    `score_global_factor` clips its return to 1-10, which makes the clip invisible — on an
+    extreme profile Independence computes to 11.2 and is published as 10. A clamped value is
+    disqualified from any population statement (PRD §7.3), so the display layer has to be able
+    to see that it happened.
+    """
+    if not factors_map:
+        return 5.5
+    weighted = sum(w * (factor_scores[f_key]["sten"] - 5.5) for f_key, w in factors_map.items())
+    return 5.5 + gain * weighted
+
+
 def compute_global_scores(factor_scores: dict) -> dict:
     """Build the full `global_scores` dict from the 15 primary factor Stens.
     Each entry carries `score` (rounded Sten, for display/back-compat) and

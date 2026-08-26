@@ -218,14 +218,20 @@ snapshots stay immutable and old reports do not change:
 
 | Sten | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Approx. percentile | 2 | 5 | 12 | 27 | 40 | 60 | 73 | 88 | 95 | 98 |
+| Percentile at band midpoint | 1 | 4 | 11 | 23 | 40 | 60 | 77 | 89 | 96 | 99 |
 | % of people in band | 2.3 | 4.4 | 9.2 | 15.0 | 19.1 | 19.1 | 15.0 | 9.2 | 4.4 | 2.3 |
+
+> **Corrected June 2026.** The first issue of this document printed 27 at sten 4 and 73 at sten 7.
+> Both were wrong. The row above is `100 × Φ((sten − 5.5) / 2)`, and `tests/test_display.py` now
+> asserts the shipped table against the normal curve so it cannot drift again. Because these
+> statements are derived at read time, the table is versioned (`disp-1.0.0`) and pinned per report:
+> correcting it does not alter a report already delivered.
 
 Three cautions worth deciding on deliberately:
 
-1. **Precision inflation.** A sten band is wide; "73rd percentile" sounds like a measurement to one
-   person. "Higher than about 7 in 10 people" carries the same information without the false
-   precision. Recommend banded/approximate language, never a decimal.
+1. **Precision inflation.** A sten band is wide; "77th percentile" sounds like a measurement to one
+   person. "About 1 in 4 people sit further this way than you" carries the same information without
+   the false precision. Recommend rounded fractions, never a decimal.
 2. **Bidirectional factors.** Half these factors are not "more is better" (Vigilance, Privateness,
    Apprehension). A percentile invites a league-table reading of a trait that has costs at both
    poles. Any percentile presentation needs the two pole labels kept visibly attached.

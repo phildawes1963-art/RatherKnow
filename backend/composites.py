@@ -7,7 +7,7 @@ equation: which primaries feed each dimension, in which direction, and with what
 
 Read-time only. Nothing here changes a score (hard rule 1: scoring is frozen).
 """
-from constants.p150_data import P150_GLOBAL_FACTORS, GLOBAL_CALIBRATION
+from constants.p150_data import P150_GLOBAL_FACTORS, GLOBAL_CALIBRATION, global_factor_raw
 
 FACTOR_NAMES = {
     "A": "Warmth", "C": "Emotional Stability", "E": "Dominance", "F": "Liveliness",
@@ -60,15 +60,42 @@ def global_provenance(factor_scores: dict) -> dict:
                 "contribution": None if sten is None else round(weight * (sten - 5.5), 2),
             })
         contributions.sort(key=lambda c: -abs(c["contribution"] or 0))
-        out[key] = {
+        gain = GLOBAL_CALIBRATION.get(key, 1.0)
+        entry = {
             "name": meta["name"],
             "equation": "5.5 + Σ(weight × (sten − 5.5))",
-            "gain": GLOBAL_CALIBRATION.get(key, 1.0),
+            "gain": gain,
             "contributions": contributions,
             "polarity_note": POLARITY_NOTES.get(key),
             "known_residual": key in RESIDUAL_KEYS,
         }
+        if all(c["sten"] is not None for c in contributions):
+            raw = round(global_factor_raw(factor_scores, meta["factors"], gain), 2)
+            entry["raw_precise"] = raw
+            if raw > 10.0 or raw < 1.0:
+                entry["clamped"] = True
+                entry["clamp_note"] = (
+                    f"The equation returns {raw} for you, outside the 1–10 scale, so it is published as "
+                    f"{10 if raw > 10 else 1}. The direction is unambiguous; the exact distance is not, and "
+                    "no population comparison is shown for a clamped value."
+                )
+        out[key] = entry
     return out
+
+
+def clamp_events(factor_scores: dict) -> list:
+    """Which globals hit the 1-10 clamp, and what the equation actually returned (TRD T3.3)."""
+    events = []
+    for key, meta in P150_GLOBAL_FACTORS.items():
+        if not all(fk in factor_scores and factor_scores[fk].get("sten") is not None
+                   for fk in meta["factors"]):
+            continue
+        raw = round(global_factor_raw(factor_scores, meta["factors"],
+                                      GLOBAL_CALIBRATION.get(key, 1.0)), 2)
+        if raw > 10.0 or raw < 1.0:
+            events.append({"dimension": key, "name": meta["name"], "raw": raw,
+                           "published": 10 if raw > 10 else 1})
+    return events
 
 
 def build_composites(result: dict) -> dict | None:
@@ -81,4 +108,5 @@ def build_composites(result: dict) -> dict | None:
         "residual_note": RESIDUAL_NOTE,
         "residual_dimensions": [P150_GLOBAL_FACTORS[k]["name"] for k in RESIDUAL_KEYS],
         "globals": global_provenance(factor_scores),
+        "clamp_events": clamp_events(factor_scores),
     }

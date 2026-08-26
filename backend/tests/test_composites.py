@@ -91,10 +91,45 @@ def test_provenance_exposes_every_contribution():
     assert prov["globals"]["receptivity"]["polarity_note"]
 
 
+def test_clamping_is_recorded_not_silent():
+    """On the reference profile the Independence equation returns 11.2 and is published as 10.
+
+    A clamped value is disqualified from any population statement (PRD §7.3), so the clip has
+    to be visible to the display layer rather than swallowed by score_global_factor.
+    """
+    from constants.p150_data import global_factor_raw
+    from composites import clamp_events
+
+    factors = _factor_scores(REFERENCE_PRIMARIES)
+    raw = global_factor_raw(factors, P150_GLOBAL_FACTORS["independence"]["factors"], 1.0)
+    assert round(raw, 2) == 11.2
+    assert compute_global_scores(factors)["independence"]["score"] == 10
+
+    events = {e["dimension"]: e for e in clamp_events(factors)}
+    assert "independence" in events
+    assert events["independence"]["raw"] == 11.2
+    assert events["independence"]["published"] == 10
+
+    prov = build_composites({"instrument": "personality", "factor_scores": factors})
+    assert prov["globals"]["independence"]["clamped"] is True
+    assert prov["globals"]["independence"]["raw_precise"] == 11.2
+    assert prov["clamp_events"]
+
+
+def test_unclamped_globals_carry_no_clamp_flag():
+    average = _factor_scores({k: 6 for k in REFERENCE_PRIMARIES})
+    prov = build_composites({"instrument": "personality", "factor_scores": average})
+    assert not prov["clamp_events"]
+    for block in prov["globals"].values():
+        assert "clamped" not in block
+
+
 if __name__ == "__main__":
     test_equations_unchanged()
     test_gains_remain_uncalibrated()
     test_reference_profile_reproduces()
     test_self_control_is_low_for_reference_profile()
     test_provenance_exposes_every_contribution()
+    test_clamping_is_recorded_not_silent()
+    test_unclamped_globals_carry_no_clamp_flag()
     print("COMPOSITE EQUATIONS OK")
