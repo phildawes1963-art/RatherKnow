@@ -119,7 +119,8 @@ export default function Runner() {
     const onKey = (e) => {
       if (phase !== 'run' || !payload) return;
       const n = parseInt(e.key, 10);
-      if (n >= 1 && n <= payload.scale.length) select(n);
+      const max = payload.scale ? payload.scale.length : 2;
+      if (n >= 1 && n <= max) select(n);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -207,7 +208,9 @@ export default function Runner() {
       <Shell title={meta.name} minimal>
         <div className="min-h-screen flex items-center justify-center px-5">
           <div className="max-w-xl mi2-fade">
-            <p className="text-xs uppercase tracking-[0.18em] text-[#6E6E66]">Lens two of two</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-[#6E6E66]">
+              {payload.instrument === 'everyday' ? 'Part two of two' : 'Lens two of two'}
+            </p>
             <h2 className="mi2-serif mt-4 text-3xl text-[#1C1C18]">{payload.interstitial.title}</h2>
             <p className="mt-5 text-base text-[#3B3B34] leading-relaxed">{payload.interstitial.text}</p>
             <button
@@ -294,6 +297,31 @@ export default function Runner() {
             <p className="mi2-fade text-2xl sm:text-3xl leading-relaxed text-[#1C1C18]" data-testid="runner-item-statement">
               {item.text}
             </p>
+            {item.kind === 'choice' ? (
+              <div className="mi2-fade mt-10 grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Choose one">
+                {item.options.map((label, i) => {
+                  const value = i + 1;
+                  const isSel = selected === value;
+                  return (
+                    <button
+                      key={value}
+                      role="radio"
+                      aria-checked={isSel}
+                      aria-label={label}
+                      onClick={() => select(value)}
+                      data-testid={`choice-option-${value}`}
+                      className={`border px-5 py-6 text-left text-base leading-relaxed min-h-[7rem] flex items-center transition-colors ${
+                        isSel
+                          ? 'bg-[#1C1C18] text-[#F6F6F2] border-[#1C1C18]'
+                          : 'bg-white text-[#3B3B34] border-[#E4E4DE] hover:border-[#1C1C18] hover:bg-[#FBFBF9]'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
             <div className="mi2-fade mt-10 grid gap-2" role="radiogroup" aria-label="Response scale">
               {payload.scale.map((label, i) => {
                 const value = i + 1;
@@ -320,6 +348,12 @@ export default function Runner() {
                 );
               })}
             </div>
+            )}
+            {item.kind === 'choice' && (
+              <p className="mi2-fade mt-5 text-xs text-[#6E6E66]">
+                Neither answer is better, and there’s no way to keep both — pick the one you’d actually choose.
+              </p>
+            )}
           </div>
         </div>
         <div className="max-w-2xl w-full mx-auto pb-10 flex items-center justify-between text-sm">

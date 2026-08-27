@@ -9,5 +9,6 @@ export const PROMISES = LOCKED.promises;
 export const REFUSALS = LOCKED.refusals;
 export const SAFETY = LOCKED.safety;
 export const FLAG = LOCKED.flag_check;
+export const COMMONNESS = LOCKED.commonness;
 export const ATTRIBUTION = LOCKED.attribution;
 export const DISCLAIMER = LOCKED.disclaimer;

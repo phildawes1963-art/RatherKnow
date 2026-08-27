@@ -17,6 +17,7 @@ EXPECTED = {
     "personality":{"total_items": 130, "evidence_tier": "Established",   "scale": 5},
     "eq":         {"total_items": 140, "evidence_tier": "Established",   "scale": 5},
     "closeness":  {"total_items": 37,  "evidence_tier": "Developmental", "scale": 7},
+    "everyday":   {"total_items": 49,  "evidence_tier": "Developmental", "scale": 2},
 }
 
 
@@ -211,3 +212,53 @@ def test_findings_empty_below_two(s):
     r = s.post(f"{API}/mirrors/findings", json={"session_ids": [sid]}, timeout=30)
     assert r.status_code == 200
     assert r.json()["findings"] == []
+
+
+def test_everyday_lifecycle(s):
+    """The forced-choice instrument end to end: 49 two-option items, position + priority out."""
+    sid, res = _run(s, "everyday")
+    assert res["instrument"] == "MI-EV-49"
+    assert len(res["positions"]) == 7
+    assert len(res["priority"]) == 7
+    assert sum(p["wins"] for p in res["priority"]) == 21
+    assert res["evidence_tier"] == "developmental"
+    assert res["pretest_status"] == "not_run"
+    assert "not a compatibility score" in res["claim_limit"]
+    # No norms, bands or percentiles may ever appear in this instrument's output.
+    blob = repr({k: v for k, v in res.items() if k != "claim_limit"}).lower()
+    for banned in ("percentile", "compatibility"):
+        assert banned not in blob, banned
+
+
+def test_everyday_items_are_forced_choice_pairs(s):
+    r = s.post(f"{API}/assessments", json={"instrument": "everyday"}, timeout=30)
+    assert r.status_code == 200, r.text
+    sess = r.json()
+    assert sess["scale"] is None, "forced choice has no shared response scale"
+    assert len(sess["items"]) == 49
+    for it in sess["items"]:
+        assert it["kind"] == "choice", it
+        assert len(it["options"]) == 2
+        assert it["options"][0] != it["options"][1]
+    # Block B arrives after the 28 position items, behind an interstitial.
+    assert sess["interstitial"]["after_index"] == 27
+    assert sum(1 for it in sess["items"] if it["id"].startswith("B:")) == 21
+    # A third option must be rejected.
+    bad = s.put(f"{API}/assessments/{sess['session_id']}/responses",
+                json={"responses": [{"item_id": sess["items"][0]["id"], "value": 3}]}, timeout=30)
+    assert bad.status_code == 400
+
+
+def test_everyday_side_map_is_stored_and_randomised(s):
+    """Side randomisation is required for the side-bias index to mean anything, so it has to be
+    per session and it has to be persisted."""
+    maps = []
+    for _ in range(2):
+        r = s.post(f"{API}/assessments", json={"instrument": "everyday"}, timeout=30)
+        sess = r.json()
+        got = s.get(f"{API}/assessments/{sess['session_id']}", timeout=30).json()
+        maps.append([it["options"][0] for it in got["items"]])
+        # The order is fixed for everyone; only the sides move.
+        assert [it["id"] for it in got["items"]] == [it["id"] for it in sess["items"]]
+        assert maps[-1] == [it["options"][0] for it in sess["items"]], "sides must be stable on resume"
+    assert maps[0] != maps[1], "two sessions should not share the same side assignment"

@@ -11,9 +11,11 @@ import ClosenessResult from './results/ClosenessResult';
 import EssentialResult from './results/EssentialResult';
 import PersonalityResult from './results/PersonalityResult';
 import EqResult from './results/EqResult';
+import EverydayResult from './results/EverydayResult';
 
 const VIEWS = {
   'MI-AS-36': ClosenessResult,
+  'MI-EV-49': EverydayResult,
   essential: EssentialResult,
   personality: PersonalityResult,
   eq: EqResult,
@@ -21,6 +23,7 @@ const VIEWS = {
 
 const TITLES = {
   'MI-AS-36': 'Closeness Mirror — your result',
+  'MI-EV-49': 'Everyday Mirror — your result',
   essential: 'Essential Mirror — your result',
   personality: 'Personality Mirror — your result',
   eq: 'EI Mirror — your result',
@@ -63,7 +66,8 @@ export default function Results() {
   }
 
   const View = VIEWS[result.instrument];
-  const currentKey = result.instrument === 'MI-AS-36' ? 'closeness' : result.instrument;
+  const INSTRUMENT_KEYS = { 'MI-AS-36': 'closeness', 'MI-EV-49': 'everyday' };
+  const currentKey = INSTRUMENT_KEYS[result.instrument] || result.instrument;
   return (
     <Shell title={TITLES[result.instrument] || 'Your result'}>
       <div className="max-w-3xl mx-auto px-5 sm:px-8 py-14 sm:py-20" data-testid="results-page">

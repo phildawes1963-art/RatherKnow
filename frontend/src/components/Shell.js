@@ -125,6 +125,7 @@ export default function Shell({ title, description, children, minimal = false, j
                 <li><Link className="text-[#3B3B34] hover:text-[#1C1C18]" to="/take/closeness">Closeness Mirror</Link></li>
                 <li><Link className="text-[#3B3B34] hover:text-[#1C1C18]" to="/take/personality">Personality Mirror</Link></li>
                 <li><Link className="text-[#3B3B34] hover:text-[#1C1C18]" to="/take/eq">EI Mirror</Link></li>
+                <li><Link className="text-[#3B3B34] hover:text-[#1C1C18]" to="/take/everyday">Everyday Mirror</Link></li>
                 <li><Link className="text-[#3B3B34] hover:text-[#1C1C18]" to="/flag-check">Flag Check — {REGISTER.flag_check.descriptor}</Link></li>
                 <li><Link className="text-[#3B3B34] hover:text-[#1C1C18]" to="/archetypes">The six archetypes</Link></li>
                 <li><Link className="text-[#3B3B34] hover:text-[#1C1C18]" to="/samples" data-testid="footer-samples">Sample results</Link></li>
@@ -145,6 +146,12 @@ export default function Shell({ title, description, children, minimal = false, j
               <Link to="/safety" data-testid="footer-safety" className="mt-3 inline-block text-sm underline underline-offset-4 text-[#3B3B34] hover:text-[#1C1C18]">
                 {SAFETY.exit_link}
               </Link>
+              <p className="mt-5 text-sm text-[#6E6E66] leading-relaxed">
+                For coaches, therapists and practitioners →{' '}
+                <Link to="/partners" data-testid="footer-partners" className="underline underline-offset-4 text-[#3B3B34] hover:text-[#1C1C18]">
+                  Partner with us
+                </Link>
+              </p>
             </div>
           </div>
         </footer>

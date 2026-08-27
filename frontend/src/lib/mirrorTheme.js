@@ -63,6 +63,18 @@ export const INSTRUMENTS = [
     tier: TIER_CHIPS.eq,
     accent: C.slate,
   },
+  {
+    key: 'everyday',
+    name: 'Everyday Mirror',
+    tagline: "Where you sit, and what you'd protect",
+    blurb:
+      "Forty-nine either/or choices about ordinary life — pace, people, order, novelty, money, recovery, time together. It asks where you sit, then which of it you'd actually need to agree on. The only instrument here that asks you to choose rather than describe yourself, which makes it the only one that can contradict you.",
+    items: '49 either/or choices',
+    minutes: 'About 7 minutes',
+    tier: TIER_CHIPS.everyday,
+    accent: C.sage,
+    isNew: true,
+  },
 ];
 
 export const instrumentByKey = Object.fromEntries(INSTRUMENTS.map((i) => [i.key, i]));

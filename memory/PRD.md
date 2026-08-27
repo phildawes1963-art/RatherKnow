@@ -181,6 +181,53 @@ Search-led discovery, essay-led trust.
   Verified: 141 backend tests green on three consecutive runs; testing agent iteration 8 reported zero
   critical and zero frontend issues.
 
+- **rk-1.1.0 second batch (2026-06)** — user selected four items and supplied
+  `rk-everyday-mirror-instrument-draft.md`. All four shipped; 177 backend tests green; testing
+  agent iteration 9 reported zero issues in every category.
+
+  *Commonness display, stens removed.* The user chose to **drop the sten entirely** from the
+  reader-facing view rather than keep it as a secondary figure. The fifteen primary factors now read
+  "About 1 in 4 people sit further toward warm than you", with both poles attached and the position
+  marker retained. The five globals show a position word and their equation only — never a number
+  and never a population statement, because they are clamped composites. Same treatment in the PDF
+  ("How common" column, no sten column) so web and print cannot diverge. `services/display.py`
+  computes it at read time, stamped `disp-1.0.0`.
+
+  *Report snapshotting (TRD T1.1, T8.2, T10.2).* `services/narrative.py`. On first render the
+  resolved narrative is persisted write-once; on first PDF build the bytes are stored in Mongo
+  (`narratives`, `rendered_pdfs`) and served thereafter. A `display_version` bump only affects
+  reports rendered after it. **Important design point discovered in testing:** snapshotting first
+  broke the situation switch, because it froze interpretation the reader deliberately controls. The
+  snapshot key therefore includes `situation` — freezing exists to stop *us* rewriting a delivered
+  document, not to stop the reader asking for a different lens. Switching produces a new snapshot;
+  switching back returns the original bytes unchanged. The combined roll-up is invalidated when a
+  new instrument finishes; individual reports never are.
+
+  *The Everyday Mirror — sixth instrument, built.* `constants/everyday_bank_1_0_0.json` +
+  `services/everyday_scoring.py`. 28 Block A position items (four per domain, 0–4 toward the named
+  first pole, a 2–2 split reported as **undifferentiated** rather than a midpoint) and 21 Block B
+  round-robin priority comparisons (wins 0–6). Three behavioural validity checks — circular triads
+  (`ζ = 1 − 24d/336`), side bias, time floor — which are the only non-self-report evidence in the
+  product. Position × priority produces the four map cells. Full runner support for forced choice,
+  a result page, a `choosing` builder and a PDF body. **Known, published gap: the 20–30 rater
+  desirability pre-test has NOT been run.** `pretest_status: "not_run"` is returned in the payload
+  and stated in the tier statement and the PDF; until it runs the instrument contributes to a
+  reading and never anchors one. Refusals enforced by test: no compatibility score, no norms, no
+  bands, no percentiles.
+
+  *Bug found and fixed during the build:* Block A item ids originally contained dots (`A1.1`), and
+  Mongo reads `responses.A1.1` as a nested path — so no Block A answer was ever stored and every
+  domain returned "not enough answers to place you". Ids are now `A1_1`, `PUT /responses` rejects
+  dotted ids with a 400, and a test asserts no item id in any bank contains a dot.
+
+  *Partner page* at `/partners` from the copy deck, all eight sections, reachable from the footer on
+  every page. `routes/partners.py` stores applications (`partner_applications`) with a 3-per-24h
+  rate limit; open endpoint, since a practitioner should not need an account to apply. Two
+  user-directed decisions recorded deliberately: the page **publishes the dashboard promise as
+  written** even though no attribution, dashboard or payout plumbing exists (accepted because the
+  first ten partnerships are founder-led and reporting is manual), and it keeps "if you'd like to
+  see the scoring specification, ask" rather than linking the public PDF.
+
 ## Backlog
 **P0 (Phase 4 — cutover, needs infrastructure access)**
 - Deploy `docs/edge/worker.js` on mymirrorreport.com, set `RATHERKNOW_CUTOVER=on`, point
@@ -198,15 +245,29 @@ Search-led discovery, essay-led trust.
 - Learn essays for the remaining archetype clusters.
 - Object storage for illustration/diploma/OG assets and the audio demo.
 
+**P0 (partner programme — now owed)**
+- The partner page promises a link and a dashboard. Nothing behind it exists. Before the first
+  approved partner, either build attribution (`partner_ref` on the user, passed as Stripe metadata)
+  or report manually and tell them that is what is happening.
+- Applications land in `partner_applications` with no notification. Somebody has to read that
+  collection, or wire a Resend alert.
+
+**P0 (Everyday Mirror — before it may anchor a reading)**
+- **Desirability pre-test, 20–30 raters**, "which would you rather others thought about you". Any
+  pair splitting worse than 65/35 gets rewritten. This is a human research step; the instrument
+  publishes that it is outstanding until it is done.
+- Pilot n ≥ 200 for Block A internal agreement and Block B triad distribution. Four items per
+  domain is thin — expect undifferentiated domains, and go to six per domain if unstable.
+- Read 5 (Negotiability) and the priors-register rows from the draft §8 are not built.
+
 **P0 (rk-1.1.0 Phase b — now unblocked by dropping D2)**
 - **D1 remains: measure α for every scale.** Every MRD threshold is a literature placeholder. Nothing
   enforces and no guarantee copy ships until these are measured. `RK_ALLOW_PLACEHOLDER_ALPHA=1` is the
   deliberate acknowledgement that they are provisional.
-- Decide the display change on the evidence now in hand: commonness fractions are computed and
-  returned by the API (`result.commonness`, `disp-1.0.0`) but are **not yet shown in the UI**. Turning
-  them on is a copy-register change, and globals must stay excluded.
-- Snapshot the resolved narrative and rendered PDF on first render (TRD T1.1) before `display_version`
-  is ever bumped, so corrections cannot alter a delivered report.
+- ~~Commonness display~~ and ~~narrative snapshotting~~ shipped 2026-06.
+- `rendered_pdfs` grows unbounded in Mongo (one document per session per situation per display
+  version, 7–200KB each). Fine at current volume; needs a retention policy or object storage before
+  any real traffic.
 
 **P2**
 - Paid tier boundaries + the published price ceiling on the Promise page; one inert unlock boundary

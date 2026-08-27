@@ -13,6 +13,7 @@ CHOOSING_LEAD = {
     "MI-AS-36": "How these two settings behave when you're deciding whether to stay interested.",
     "personality": "Which of your own traits does the selecting — and what it selects for.",
     "eq": "What you notice, and what you miss, while you're choosing.",
+    "MI-EV-49": "Where your daily friction is likely to sit — and which of it you'd actually defend.",
 }
 
 CLOSING = (
@@ -215,7 +216,79 @@ def _eq(r):
     return points
 
 
-BUILDERS = {"essential": _essential, "MI-AS-36": _closeness, "personality": _personality, "eq": _eq}
+def _everyday(r):
+    """Position x priority. The valuable half is priority: what you'd actually defend."""
+    positions = r["positions"]
+    priority = r["priority"]
+    cells: dict = {}
+    for c in r["map"]:
+        cells.setdefault(c["cell"], []).append(c)
+    points = []
+
+    for c in cells.get("non_negotiable", [])[:1]:
+        points.append(_pt(
+            f"{c['name']} is a genuine line, not a preference.",
+            f"You sit {c['label']} on it, and you ranked it {_ordinal(c['priority_rank'])} of seven for what you'd "
+            "need to agree on. Strong feeling plus high priority is the combination that produces a real "
+            "non-negotiable — worth naming out loud early, because it won't negotiate itself later."))
+
+    for c in cells.get("strong_but_tradeable", [])[:1]:
+        points.append(_pt(
+            f"{c['name']} is a strong preference you'd trade.",
+            f"You sit {c['label']} here — as far from the middle as the instrument goes — and yet you ranked it "
+            f"{_ordinal(c['priority_rank'])} of seven for needing agreement. That combination usually surprises "
+            "people. It's the difference between what you feel strongly and what you'd defend, and it's the most "
+            "useful thing on this page."))
+
+    for c in cells.get("needs_settling", [])[:1]:
+        points.append(_pt(
+            f"On {c['name'].lower()} you're not fussy where it lands — only that it lands.",
+            f"Your position is {c['label']}, but it ranks {_ordinal(c['priority_rank'])} of seven for needing "
+            "agreement. That reads as: decide it, and I'll live with the answer. Left undecided, this is the kind "
+            "of thing that gets re-litigated every few weeks."))
+
+    top = priority[0] if priority else None
+    bottom = priority[-1] if priority else None
+    if top and bottom and not top["tied"]:
+        points.append(_pt(
+            "What you'd protect, and what you'd let go.",
+            f"Across twenty-one either/ors, {top['descriptor']} won most often and {bottom['descriptor']} won "
+            f"least. Neither is a virtue. It's a ranking of your own choices against each other — the order you'd "
+            "spend agreement on if you couldn't have all of it, which is the actual situation."))
+    elif top:
+        tied_names = ", ".join(p["name"] for p in priority if p["wins"] == top["wins"])
+        points.append(_pt(
+            "Nothing came out clearly on top.",
+            f"{tied_names} finished level across the twenty-one comparisons, which means no single thing is the one "
+            "you'd defend first. That is a real answer rather than a missing one: your priorities are spread, so "
+            "friction is more likely to arrive from whatever is loudest that week than from one standing line. "
+            "The positions in the first half still hold."))
+
+    undiff = r["validity"].get("undifferentiated_domains") or []
+    if undiff:
+        names = ", ".join(positions[d]["name"] for d in undiff)
+        points.append(_pt(
+            f"No position recorded on {names}.",
+            "Your four answers split evenly, so there's nothing to report — and that is not the same as sitting in "
+            "the middle. One says the questions didn't separate you; the other would claim a measurement we don't "
+            "have. Reported as undifferentiated rather than invented."))
+
+    zeta = r["validity"].get("zeta")
+    if zeta is not None and zeta < 0.70:
+        points.append(_pt(
+            "Read the ranking as provisional.",
+            f"Your comparisons contain enough loops — preferring A to B, B to C, and C back to A — that the "
+            f"consistency index came out at {zeta}. That happens when the trade-offs are genuinely close, and it "
+            "means the order above is softer than it looks. The positions in the first half are unaffected."))
+    return points
+
+
+def _ordinal(n):
+    return {1: "first", 2: "second", 3: "third", 4: "fourth", 5: "fifth", 6: "sixth", 7: "seventh"}.get(n, str(n))
+
+
+BUILDERS = {"essential": _essential, "MI-AS-36": _closeness, "personality": _personality,
+            "eq": _eq, "MI-EV-49": _everyday}
 
 
 def build_choosing(result: dict) -> dict | None:

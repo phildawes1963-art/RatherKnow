@@ -1,6 +1,10 @@
 {
   "account_claim": "6489436f95d59d222724a52ec364fa9db84ef5cddfdb0d1bf2976fc8ab4a16c3",
   "attribution": "7812e30047e036e9161a08089e919f6a4a3cc96738ff41be107b45e1010f2c1b",
+  "commonness.explainer": "6d8d758c9ecdfa07f0804a51b6eee3ebcd23df3d8dae4a95d7b97eb66a26fd51",
+  "commonness.globals_explainer": "3abe5707bfb8323827a658f143568259810721e565d470f865ee251f2085c3f3",
+  "commonness.heading": "6a73b1bc964ceebd693ef90492172c4c39ed6fecc1d650d74e4479603268d1e3",
+  "commonness.no_grade": "fd41e1868799eaa1f95ca1365048ad6dee32026e0a27194ac982db5ebee47fc7",
   "data_claim": "cbc92c1ff05d2ec0713cecf6f50d5391f3f670f6649772a49e6dbb91b8ff28c5",
   "disclaimer": "f59134adce5616007d47f9d7a2cd09b97bc038e7346c154106add9b663d6bdd8",
   "flag_check.cta_body": "9b9c067cba671be7b7c159de4753ab177a0ff7c3e29415a74d97afa0c0ca7337",
@@ -100,9 +104,11 @@
   "tier_chips.closeness": "59a256aa067fbea69289b35fb14e1e5431eb84545ecc2c0c267fda3aeec8dcd8",
   "tier_chips.eq": "4932324d5942c0bb64fbbe0c45283eb493c1cc27b1e65d4595d6da5f2c16e234",
   "tier_chips.essential": "59a256aa067fbea69289b35fb14e1e5431eb84545ecc2c0c267fda3aeec8dcd8",
+  "tier_chips.everyday": "59a256aa067fbea69289b35fb14e1e5431eb84545ecc2c0c267fda3aeec8dcd8",
   "tier_chips.personality": "4932324d5942c0bb64fbbe0c45283eb493c1cc27b1e65d4595d6da5f2c16e234",
   "tier_statements.closeness": "4610d3d207193eb3c2796759837d28c707e8edf0abc012d58bca9980581273d1",
   "tier_statements.eq": "3e1100ebb2590fb4a6fed666a41753dd53ecee04a2b8c3a0e00b476cb130f448",
   "tier_statements.essential": "3b98da51527e6729a7828f5ef6e68bb30776bc35cfa4e11b1bfa7de31176ea19",
+  "tier_statements.everyday": "ac138554f5d5b7ecb4d09e706930a69ce0a9ef01da5a19bb816bc210e54cb7ab",
   "tier_statements.personality": "a790299dd6d5fca8dedb1c956d953bb1dc9badfb1a3ccbb936e5db71139dee62"
 }

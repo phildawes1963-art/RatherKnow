@@ -6,6 +6,7 @@ account (name, email, situation) so results are retrievable by logging in; the
 Flag Check reflection stays open to everyone. Collection: mirror_v2_sessions.
 """
 import uuid
+import random
 import logging
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Depends
@@ -35,6 +36,10 @@ from constants.eimirror_data import (
     EIMIRROR_QUESTIONS, EIMIRROR_DOMAINS, EIMIRROR_REVERSE_ITEMS, EIMIRROR_SCALE,
 )
 from services.closeness_scoring import load_bank, score_closeness
+from services.everyday_scoring import load_bank as load_everyday_bank, score_everyday
+from services.narrative import (
+    resolved_narrative, snapshot_pdf, invalidate_combined, CONTENT_VERSION,
+)
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v2", tags=["Mirror v2"])
@@ -81,6 +86,15 @@ INSTRUMENTS = {
         "scale": None,  # from bank
         "allow_skip": True,
     },
+    "everyday": {
+        "name": "Everyday Mirror",
+        "tagline": "Where you sit, and what you'd protect",
+        "total_items": 49,
+        "minutes": "About 7 minutes",
+        "evidence_tier": "Developmental",
+        "scale": None,  # forced choice: two options per item, rendered per session
+        "allow_skip": True,
+    },
 }
 
 
@@ -105,7 +119,65 @@ def _spread(groups: list) -> list:
     return out
 
 
-def _build_items(instrument: str):
+def _everyday_side_map() -> dict:
+    """Randomise which pole is rendered on the left, per item, per session.
+
+    Required by the instrument, not cosmetic: the side-bias validity index counts how often the
+    reader picked the left-hand option, which only means anything if the side is random. Stored
+    on the session so scoring can map the answer back to a pole.
+    """
+    bank = load_everyday_bank()
+    ids = [i["id"] for i in bank["block_a"]] + [i["id"] for i in bank["block_b"]]
+    return {iid: random.choice(("AB", "BA")) for iid in ids}
+
+
+def _build_items(instrument: str, session: dict | None = None):
+    if instrument == "everyday":
+        bank = load_everyday_bank()
+        side_map = (session or {}).get("presentation", {}).get("side_map", {})
+        domains = bank["domains"]
+
+        def sides(item_id, a, b):
+            return [b, a] if side_map.get(item_id) == "BA" else [a, b]
+
+        by_domain: dict = {}
+        for item in bank["block_a"]:
+            by_domain.setdefault(item["domain"], []).append(item)
+        items = []
+        for item in _spread(list(by_domain.values())):
+            items.append({
+                "id": item["id"], "kind": "choice",
+                "text": "Which would you actually choose?",
+                "options": sides(item["id"], item["option_a"], item["option_b"]),
+            })
+        block_a_count = len(items)
+        for item in bank["block_b"]:
+            left, right = domains[item["left"]]["descriptor"], domains[item["right"]]["descriptor"]
+            a, b = sides(item["id"], left, right)
+            items.append({
+                "id": item["id"], "kind": "choice",
+                "text": f"Which would matter more to agree on — {a}, or {b}?",
+                "options": [a, b],
+            })
+        interstitial = {
+            "after_index": block_a_count - 1,
+            "title": "Now the harder half.",
+            "text": ("You've said where you sit. This part asks what you'd protect — because you won't "
+                     "agree on everything, and the things you feel most strongly about aren't always the "
+                     "ones you'd defend. Twenty-one either/ors, and there's no way to keep both."),
+        }
+        instructions = {
+            "title": "Where you sit, and what you'd protect",
+            "paragraphs": [
+                "Forty-nine either/or choices about ordinary life. Neither answer is ever better, and you "
+                "can't like both — that's the format doing its job.",
+                "The first twenty-eight ask where you actually sit on the things couples divide over. The "
+                "last twenty-one ask which of those you'd need to agree on, and which you could live with.",
+                "This is the only instrument here that asks about choices rather than self-description, "
+                "which makes it the only one that can disagree with how you describe yourself.",
+            ],
+        }
+        return items, None, instructions, interstitial
     if instrument == "closeness":
         bank = load_bank()
         by_id = {it["id"]: it for it in bank["items"]}
@@ -189,7 +261,7 @@ def _build_items(instrument: str):
 
 
 def _session_payload(session: dict) -> dict:
-    items, scale, instructions, interstitial = _build_items(session["instrument"])
+    items, scale, instructions, interstitial = _build_items(session["instrument"], session)
     meta = INSTRUMENTS[session["instrument"]]
     return {
         "session_id": session["id"],
@@ -253,6 +325,9 @@ async def start_assessment(data: StartRequest, user: dict = Depends(get_current_
     }
     if data.instrument == "closeness":
         session["bank_version"] = load_bank()["bank_version"]
+    if data.instrument == "everyday":
+        session["bank_version"] = load_everyday_bank()["bank_version"]
+        session["presentation"] = {"side_map": _everyday_side_map()}
     await db.mirror_v2_sessions.insert_one(dict(session))
     return _session_payload(session)
 
@@ -277,11 +352,20 @@ async def put_responses(session_id: str, data: ResponsesPut, user: dict = Depend
     if session["status"] == "complete":
         raise HTTPException(status_code=409, detail="Session already complete")
     meta = INSTRUMENTS[session["instrument"]]
-    n_points = 7 if session["instrument"] == "closeness" else len(meta["scale"])
+    if session["instrument"] == "everyday":
+        n_points = 2
+    elif session["instrument"] == "closeness":
+        n_points = 7
+    else:
+        n_points = len(meta["scale"])
     updates = {}
     for r in data.responses:
         if not (1 <= r.value <= n_points):
             raise HTTPException(status_code=400, detail=f"Value out of range for {r.item_id}")
+        # A dot in an item id would be read by Mongo as a nested path, silently discarding
+        # the answer. Item banks must not use dotted ids.
+        if "." in r.item_id or r.item_id.startswith("$"):
+            raise HTTPException(status_code=400, detail=f"Invalid item id: {r.item_id}")
         updates[f"responses.{r.item_id}"] = {"v": r.value, "ms": r.ms, "rev": r.rev or 0}
     if updates:
         await db.mirror_v2_sessions.update_one({"id": session_id}, {"$set": updates})
@@ -467,11 +551,14 @@ async def complete_assessment(session_id: str, user: dict = Depends(get_current_
         raise HTTPException(status_code=404, detail="Session not found")
     await assert_session_owner(session, user)
     if session["status"] == "complete" and session.get("result"):
-        return _with_choosing(session["result"])
+        return await resolved_narrative(session_id, lambda: _with_choosing(session["result"]),
+                                        str(user["_id"]), user.get("situation"))
     responses = session.get("responses", {})
     instrument = session["instrument"]
     if instrument == "closeness":
         result = score_closeness(responses)
+    elif instrument == "everyday":
+        result = score_everyday(responses, (session.get("presentation") or {}).get("side_map"))
     elif instrument == "essential":
         result = _score_essential(responses)
     elif instrument == "personality":
@@ -500,7 +587,10 @@ async def complete_assessment(session_id: str, user: dict = Depends(get_current_
                           "user_id": session.get("user_id")}},
         upsert=True,
     )
-    return _with_choosing(result)
+    # Finishing an instrument legitimately changes the roll-up, so drop only the combined copy.
+    await invalidate_combined(str(user["_id"]))
+    return await resolved_narrative(session_id, lambda: _with_choosing(result), str(user["_id"]),
+                                    user.get("situation"))
 
 
 @router.get("/assessments/{session_id}/result")
@@ -513,7 +603,9 @@ async def get_result(session_id: str, user: dict = Depends(get_current_user)):
     await assert_session_owner(session, user)
     if session["status"] != "complete" or not session.get("result"):
         raise HTTPException(status_code=409, detail="Session not complete")
-    return _with_choosing(session["result"])
+    # Snapshotted on first render: a display_version bump must never rewrite a delivered report.
+    return await resolved_narrative(session_id, lambda: _with_choosing(session["result"]),
+                                    str(user["_id"]), user.get("situation"))
 
 
 @router.get("/reports/combined.pdf")
@@ -545,13 +637,17 @@ async def get_combined_pdf(user: dict = Depends(get_current_user)):
         r["instrument"]: situation_note(user.get("situation"), r["instrument"])
         for r in results
     }
-    pdf = build_combined_pdf(
-        results=results,
-        user={"name": user["name"], "email": user["email"]},
-        findings=findings,
-        agreements=agreements,
-        synthesis=synthesis,
-        situation_notes={k: v for k, v in notes.items() if v},
+    pdf = await snapshot_pdf(
+        str(user["_id"]), "combined",
+        lambda: build_combined_pdf(
+            results=results,
+            user={"name": user["name"], "email": user["email"]},
+            findings=findings,
+            agreements=agreements,
+            synthesis=synthesis,
+            situation_notes={k: v for k, v in notes.items() if v},
+        ),
+        str(user["_id"]), user.get("situation"),
     )
     return Response(
         content=pdf,
@@ -573,10 +669,14 @@ async def get_report_pdf(session_id: str, user: dict = Depends(get_current_user)
         raise HTTPException(status_code=409, detail="Session not complete")
 
     result = session["result"]
-    pdf = build_report_pdf(
-        result=result,
-        user={"name": user["name"], "email": user["email"]},
-        situation_note=situation_note(user.get("situation"), result["instrument"]),
+    pdf = await snapshot_pdf(
+        session_id, "report",
+        lambda: build_report_pdf(
+            result=result,
+            user={"name": user["name"], "email": user["email"]},
+            situation_note=situation_note(user.get("situation"), result["instrument"]),
+        ),
+        str(user["_id"]), user.get("situation"),
     )
     slug = INSTRUMENTS[session["instrument"]]["name"].lower().replace(" ", "-")
     filename = f"ratherknow-{slug}-{session_id[:8]}.pdf"

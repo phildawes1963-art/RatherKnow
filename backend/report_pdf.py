@@ -38,6 +38,7 @@ INSTRUMENT_META = {
     "personality": ("Personality Mirror", "A validated five-factor profile", "personality"),
     "eq": ("EI Mirror", "How you handle what you feel", "eq"),
     "MI-AS-36": ("Closeness Mirror", "How you are when you’re close to someone", "closeness"),
+    "MI-EV-49": ("Everyday Mirror", "Where you sit, and what you’d protect", "everyday"),
 }
 
 S = {
@@ -150,11 +151,23 @@ def _essential(result, flow):
 
 
 def _personality(result, flow):
-    flow += [Paragraph("Five global dimensions", S["h2"])]
+    flow += [
+        Paragraph("Five global dimensions", S["h2"]),
+        Paragraph(
+            "These five are derived, not measured — each is a weighted sum of the primary factors below, "
+            "clipped to the 1–10 scale. That is why they show a position and their equation rather than a "
+            "population comparison: a clipped composite cannot carry one honestly.", S["small"]),
+    ]
     flow += [_bar_table([(g["name"], g["score"], g["label"]) for g in result["global_scores"].values()], maximum=10.0)]
     from composites import build_composites
     prov = build_composites(result)
     if prov:
+        clamped = [e for e in (prov.get("clamp_events") or [])]
+        if clamped:
+            flow += [Paragraph(
+                "Clipped: " + "; ".join(
+                    f"{e['name']} computes to {e['raw']} and is published as {e['published']}" for e in clamped)
+                + ". The direction is unambiguous; the exact distance is not.", S["small"])]
         flow += [
             Paragraph("How each global dimension is built", S["h3"]),
             Paragraph(prov["note"], S["body"]),
@@ -177,16 +190,22 @@ def _personality(result, flow):
         flow += [tbl, Paragraph(prov["residual_note"], S["small"])]
     flow += [
         Paragraph("Fifteen primary factors", S["h2"]),
-        Paragraph("Scored 1–10 (sten) against calibrated norm bands. Five is the middle of the population.", S["small"]),
+        Paragraph(
+            "Each factor is a position between two poles, and neither pole is better — both carry costs and both "
+            "carry information. Rather than a score out of ten, each row says how common your position is: how "
+            "many people sit further toward that pole than you do.", S["small"]),
     ]
+    from services.display import commonness_sentence, NotNormReferenced
     rows = [[Paragraph("<b>Factor</b>", S["cellb"]), Paragraph("<b>Low pole</b>", S["cellb"]),
-             Paragraph("<b>High pole</b>", S["cellb"]), Paragraph("<b>Sten</b>", S["cellb"]),
-             Paragraph("<b>Read</b>", S["cellb"])]]
+             Paragraph("<b>High pole</b>", S["cellb"]), Paragraph("<b>How common</b>", S["cellb"])]]
     for f in result["factor_scores"].values():
+        try:
+            common = commonness_sentence(f["sten"], f["pole_high"], f["pole_low"])
+        except (NotNormReferenced, KeyError):
+            common = f.get("label", "")
         rows.append([Paragraph(f["name"], S["cell"]), Paragraph(f["pole_low"], S["cell"]),
-                     Paragraph(f["pole_high"], S["cell"]), Paragraph(str(f["sten"]), S["cell"]),
-                     Paragraph(f["label"], S["cell"])])
-    tbl = Table(rows, colWidths=[42 * mm, 34 * mm, 34 * mm, 14 * mm, 36 * mm], repeatRows=1)
+                     Paragraph(f["pole_high"], S["cell"]), Paragraph(common, S["cell"])])
+    tbl = Table(rows, colWidths=[38 * mm, 28 * mm, 28 * mm, 66 * mm], repeatRows=1)
     tbl.setStyle(TableStyle([
         ("LINEBELOW", (0, 0), (-1, 0), 0.7, INK),
         ("LINEBELOW", (0, 1), (-1, -2), 0.35, LINE),
@@ -260,7 +279,88 @@ def _closeness(result, flow):
     ]
 
 
-BODIES = {"essential": _essential, "personality": _personality, "eq": _eq, "MI-AS-36": _closeness}
+def _everyday(result, flow):
+    CELLS = {
+        "non_negotiable": "a genuine line",
+        "strong_but_tradeable": "strong, but tradeable",
+        "needs_settling": "not fussy — just needs settling",
+        "low_friction": "unlikely to be where the friction is",
+    }
+    flow += [
+        Paragraph("Where you sit", S["h2"]),
+        Paragraph(
+            "Four either/or choices per domain, so each position runs from 0 to 4 between two named poles. "
+            "No band, no percentile, no norm — five possible positions, shown as position only. An even split "
+            "is reported as undifferentiated rather than as a middle, because those are different claims.",
+            S["small"]),
+    ]
+    rows = [[Paragraph("<b>Domain</b>", S["cellb"]), Paragraph("<b>Position</b>", S["cellb"]),
+             Paragraph("<b>Between</b>", S["cellb"])]]
+    for pos in result["positions"].values():
+        if pos.get("position") is None:
+            read = "not enough answers to place you"
+            between = ""
+        else:
+            read = pos["label"]
+            between = f"{pos['pole_b']} ← → {pos['pole_a']}"
+        rows.append([Paragraph(pos["name"], S["cell"]), Paragraph(read, S["cell"]),
+                     Paragraph(between, S["cell"])])
+    tbl = Table(rows, colWidths=[36 * mm, 58 * mm, 66 * mm], repeatRows=1)
+    tbl.setStyle(TableStyle([
+        ("LINEBELOW", (0, 0), (-1, 0), 0.7, INK),
+        ("LINEBELOW", (0, 1), (-1, -2), 0.35, LINE),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("LEFTPADDING", (0, 0), (0, -1), 0),
+    ]))
+    flow += [tbl]
+
+    flow += [
+        Paragraph("What you'd protect", S["h2"]),
+        Paragraph(
+            "Twenty-one comparisons, every domain against every other once. Wins are your own choices ranked "
+            "against each other — not against anyone else's.", S["small"]),
+        _bar_table([(p["name"], p["wins"], p["descriptor"] + (" · tied" if p["tied"] else ""))
+                    for p in result["priority"]], maximum=6.0, suffix=" of 6"),
+    ]
+
+    if result.get("map"):
+        flow += [Paragraph("Position against priority", S["h2"]),
+                 Paragraph("The corners are the interesting part.", S["small"])]
+        rows = [[Paragraph("<b>Domain</b>", S["cellb"]), Paragraph("<b>Reads as</b>", S["cellb"])]]
+        for c in sorted(result["map"], key=lambda x: x["priority_rank"]):
+            rows.append([Paragraph(c["name"], S["cell"]),
+                         Paragraph(f"{c['label']}, ranked {c['priority_rank']} of 7 — {CELLS[c['cell']]}", S["cell"])])
+        tbl = Table(rows, colWidths=[36 * mm, 124 * mm], repeatRows=1)
+        tbl.setStyle(TableStyle([
+            ("LINEBELOW", (0, 0), (-1, 0), 0.7, INK),
+            ("LINEBELOW", (0, 1), (-1, -2), 0.35, LINE),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ("LEFTPADDING", (0, 0), (0, -1), 0),
+        ]))
+        flow += [tbl]
+
+    v = result.get("validity") or {}
+    flow += [
+        Paragraph("Confidence in this reading", S["h2"]),
+        Paragraph(
+            f"<b>{(result.get('confidence') or 'not established').title()}</b>. Three behavioural checks ran on the "
+            f"choices themselves rather than on anything you told us: loops in your comparisons (consistency index "
+            f"{v.get('zeta', '—')}), how often you picked the left-hand option when the sides were randomised "
+            f"({v.get('side_bias_left_pct', '—')}%), and a time floor (mean {v.get('mean_ms', '—')} ms per item).",
+            S["body"]),
+        Paragraph(result.get("claim_limit", ""), S["body"]),
+        Paragraph(
+            "One outstanding caveat, published rather than buried: the option pairs have not yet been "
+            "desirability pre-tested, so some may not be perfectly matched for how flattering they sound. Until "
+            "that testing is done this instrument contributes to a reading and never anchors one alone.", S["small"]),
+        Paragraph(f"Item bank {result.get('bank_version', '—')} · scoring {result.get('scoring_version', '—')}", S["small"]),
+    ]
+
+
+BODIES = {"essential": _essential, "personality": _personality, "eq": _eq, "MI-AS-36": _closeness,
+          "MI-EV-49": _everyday}
 
 
 def _choosing_block(result):

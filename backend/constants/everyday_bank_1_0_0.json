@@ -1,0 +1,80 @@
+{
+  "_note": "The Everyday Mirror (rk-everyday-mirror-instrument-draft.md, Draft 0.1). Forced-choice lifestyle instrument: 28 Block A position items + 21 Block B priority comparisons. DEVELOPMENTAL and NOT YET DESIRABILITY PRE-TESTED — see `pretest` below. `option_a` is always the item's named FIRST pole; that mapping is for scoring only and must never be shown. Presentation side is randomised per session and stored in the session's presentation.side_map.",
+  "bank_version": "1.0.0",
+  "instrument": "MI-EV-49",
+  "pretest": {
+    "status": "not_run",
+    "requirement": "20-30 raters per option on 'which would you rather others thought about you'. Any pair splitting worse than 65/35 must be rewritten before this instrument may anchor a reading.",
+    "consequence": "Until this runs, unmatched pairs may behave as a Likert scale with extra steps. The instrument contributes to reads; it never anchors one alone."
+  },
+  "domains": {
+    "pace": {"name": "Pace", "pole_a": "Unplanned", "pole_b": "Planned", "descriptor": "how much of the week is planned"},
+    "sociability": {"name": "Sociability", "pole_a": "People around", "pole_b": "Quiet", "descriptor": "how many people are around"},
+    "order": {"name": "Order", "pole_a": "Loose", "pole_b": "Ordered", "descriptor": "how tidy and organised things are"},
+    "novelty": {"name": "Novelty", "pole_a": "New", "pole_b": "Familiar", "descriptor": "how often things change"},
+    "money": {"name": "Money", "pole_a": "Spend now", "pole_b": "Hold back", "descriptor": "how money gets spent"},
+    "recovery": {"name": "Recovery", "pole_a": "With people, active", "pole_b": "Alone, still", "descriptor": "how you each recover when you're tired"},
+    "togetherness": {"name": "Togetherness", "pole_a": "Shared", "pole_b": "Separate", "descriptor": "how much time is spent together"}
+  },
+  "block_a": [
+    {"id": "A1_1", "domain": "pace", "option_a": "A weekend with nothing in the diary", "option_b": "A weekend where you know what's happening"},
+    {"id": "A1_2", "domain": "pace", "option_a": "Deciding where to eat when you're already hungry", "option_b": "Having booked it on Tuesday"},
+    {"id": "A1_3", "domain": "pace", "option_a": "A holiday you work out as you go", "option_b": "A holiday you've read about beforehand"},
+    {"id": "A1_4", "domain": "pace", "option_a": "Finding out on the day", "option_b": "Knowing three weeks out"},
+
+    {"id": "A2_1", "domain": "sociability", "option_a": "A house where people turn up", "option_b": "A house where visits are arranged"},
+    {"id": "A2_2", "domain": "sociability", "option_a": "Friday in a room full of people you half know", "option_b": "Friday with two people you know well"},
+    {"id": "A2_3", "domain": "sociability", "option_a": "Hearing the news from someone who came round", "option_b": "Hearing it in a message and answering later"},
+    {"id": "A2_4", "domain": "sociability", "option_a": "A birthday with thirty people", "option_b": "A birthday with three"},
+
+    {"id": "A3_1", "domain": "order", "option_a": "Sitting down first and doing the kitchen later", "option_b": "The kitchen done before you sit down"},
+    {"id": "A3_2", "domain": "order", "option_a": "A kitchen where you find things", "option_b": "A kitchen where things live somewhere"},
+    {"id": "A3_3", "domain": "order", "option_a": "A calendar you keep in your head", "option_b": "A calendar that's filled in"},
+    {"id": "A3_4", "domain": "order", "option_a": "Doing it now and adjusting", "option_b": "Doing it properly and slowly"},
+
+    {"id": "A4_1", "domain": "novelty", "option_a": "The restaurant you've never tried", "option_b": "The one where they know your order"},
+    {"id": "A4_2", "domain": "novelty", "option_a": "A new place every holiday", "option_b": "The same place, known well"},
+    {"id": "A4_3", "domain": "novelty", "option_a": "Moving the furniture round", "option_b": "Leaving it as it works"},
+    {"id": "A4_4", "domain": "novelty", "option_a": "A film nobody's seen", "option_b": "A film you've seen four times"},
+
+    {"id": "A5_1", "domain": "money", "option_a": "Money spent on something you'll remember", "option_b": "Money set aside so nothing can go wrong"},
+    {"id": "A5_2", "domain": "money", "option_a": "Upgrading the thing you use every day", "option_b": "Keeping the one that still works"},
+    {"id": "A5_3", "domain": "money", "option_a": "A better holiday this year", "option_b": "A smaller one and less to think about"},
+    {"id": "A5_4", "domain": "money", "option_a": "Paying for the convenience", "option_b": "Doing it yourself and keeping the difference"},
+
+    {"id": "A6_1", "domain": "recovery", "option_a": "After a hard week, going out", "option_b": "After a hard week, staying in"},
+    {"id": "A6_2", "domain": "recovery", "option_a": "After a difficult conversation, talking more", "option_b": "After a difficult conversation, an hour first"},
+    {"id": "A6_3", "domain": "recovery", "option_a": "When you're flat, doing something", "option_b": "When you're flat, doing nothing"},
+    {"id": "A6_4", "domain": "recovery", "option_a": "Tired at the end of the day, company", "option_b": "Tired at the end of the day, the room to yourself"},
+
+    {"id": "A7_1", "domain": "togetherness", "option_a": "Most evenings in the same room", "option_b": "Most evenings doing your own thing"},
+    {"id": "A7_2", "domain": "togetherness", "option_a": "Holidays always taken together", "option_b": "Sometimes going separately"},
+    {"id": "A7_3", "domain": "togetherness", "option_a": "Friends who are ours", "option_b": "Friends who are mine and friends who are yours"},
+    {"id": "A7_4", "domain": "togetherness", "option_a": "Small decisions made together", "option_b": "Small decisions made by whoever's nearest"}
+  ],
+  "block_b": [
+    {"id": "B:pace|sociability", "left": "pace", "right": "sociability"},
+    {"id": "B:pace|order", "left": "pace", "right": "order"},
+    {"id": "B:pace|novelty", "left": "pace", "right": "novelty"},
+    {"id": "B:pace|money", "left": "pace", "right": "money"},
+    {"id": "B:pace|recovery", "left": "pace", "right": "recovery"},
+    {"id": "B:pace|togetherness", "left": "pace", "right": "togetherness"},
+    {"id": "B:sociability|order", "left": "sociability", "right": "order"},
+    {"id": "B:sociability|novelty", "left": "sociability", "right": "novelty"},
+    {"id": "B:sociability|money", "left": "sociability", "right": "money"},
+    {"id": "B:sociability|recovery", "left": "sociability", "right": "recovery"},
+    {"id": "B:sociability|togetherness", "left": "sociability", "right": "togetherness"},
+    {"id": "B:order|novelty", "left": "order", "right": "novelty"},
+    {"id": "B:order|money", "left": "order", "right": "money"},
+    {"id": "B:order|recovery", "left": "order", "right": "recovery"},
+    {"id": "B:order|togetherness", "left": "order", "right": "togetherness"},
+    {"id": "B:novelty|money", "left": "novelty", "right": "money"},
+    {"id": "B:novelty|recovery", "left": "novelty", "right": "recovery"},
+    {"id": "B:novelty|togetherness", "left": "novelty", "right": "togetherness"},
+    {"id": "B:money|recovery", "left": "money", "right": "recovery"},
+    {"id": "B:money|togetherness", "left": "money", "right": "togetherness"},
+    {"id": "B:recovery|togetherness", "left": "recovery", "right": "togetherness"}
+  ],
+  "block_a_instruction": "Neither answer is better. Pick the one you'd actually choose.",
+  "block_b_instruction": "You won't agree on everything. Which of these two would matter more to agree on?"
+}

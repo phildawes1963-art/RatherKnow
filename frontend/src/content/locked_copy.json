@@ -5,13 +5,21 @@
     "essential": "Built on attachment theory, a validated five-factor measure and Goleman's EQ framework. The archetype instrument itself is developmental: the questions are ours, and their properties are still being established.",
     "closeness": "The two dimensions come from a large and well-replicated research tradition. The questions are ours, written for this instrument, and their properties are still being established.",
     "personality": "A validated five-factor profile.",
-    "eq": "A Goleman four-domain emotional intelligence read."
+    "eq": "A Goleman four-domain emotional intelligence read.",
+    "everyday": "Forced-choice pairs about ordinary life, so self-description can't do the answering. Ours, and the newest thing here: the option pairs have not yet been tested for whether one sounds more flattering than the other, so this instrument contributes to a reading and never anchors one alone."
   },
   "tier_chips": {
     "essential": "Developmental",
     "closeness": "Developmental",
     "personality": "Established",
-    "eq": "Established"
+    "eq": "Established",
+    "everyday": "Developmental"
+  },
+  "commonness": {
+    "heading": "How common your position is",
+    "explainer": "Each factor is a position between two poles, and neither pole is better — both carry costs and both carry information. So instead of a score out of ten, each row says how many people sit further toward that pole than you do.",
+    "globals_explainer": "These five are derived, not measured: each is a weighted sum of the primary factors, clipped to fit a 1–10 scale. That's why they show a position and their equation instead of a population comparison — a clipped composite can't carry one honestly.",
+    "no_grade": "There is no good end and no bad end. A rare position is not a better one."
   },
   "promise_opening": "We cannot find you love. Nobody can. Every promise we make is about you, because that’s the only person we can honestly make one about.",
   "promises": [
