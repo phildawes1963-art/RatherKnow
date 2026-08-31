@@ -28,6 +28,15 @@ export default function Archetypes() {
               The Essential Mirror doesn’t hand you one archetype and call it a personality. It maps all six — what each
               offers a partner, where each tends to break, who each is quietly drawn to, and who is quietly drawn to you.
             </p>
+            <a
+              href="/docs/ratherknow-archetypes.pdf"
+              target="_blank"
+              rel="noopener"
+              data-testid="archetypes-guide-pdf"
+              className="mt-6 inline-block text-sm underline underline-offset-4 text-[#1C1C18] hover:opacity-70"
+            >
+              Read the full guide to all six (PDF) →
+            </a>
           </div>
           <figure className="justify-self-center max-w-sm">
             <img

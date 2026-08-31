@@ -228,6 +228,39 @@ Search-led discovery, essay-led trust.
   first ten partnerships are founder-led and reporting is manual), and it keeps "if you'd like to
   see the scoring specification, ask" rather than linking the public PDF.
 
+- **Archetype documentation (2026-06)** — user asked for a document describing the six archetypes
+  and chose **both** a publishable guide and an internal specification, with the item-overlap
+  findings kept **internal only** pending a decision, and **no code changes**.
+
+  - `docs/ARCHETYPES_GUIDE.md` → `frontend/public/docs/ratherknow-archetypes.pdf` (5 pages),
+    linked from the Archetypes page. Reader-facing: what an archetype is and isn't, the two lenses
+    and the Delta, the shadow map, then each of the six — how it chooses, what it looks like day to
+    day, what to look for, **what it costs**, and its shadow pull.
+  - `docs/ARCHETYPES_SPEC.md` → `docs/ratherknow-archetypes-spec-INTERNAL.pdf`. **Not published**;
+    a test walks `frontend/public/` to keep it that way.
+  - `scripts/build_archetype_docs.py` builds both. `tests/test_archetype_docs.py` (8 tests) checks
+    the guide's shadow map and counter-types against the shipped `ARCHETYPES` data, asserts the
+    internal findings have not leaked into the guide, and recomputes the overlap so the spec's
+    figures cannot go stale.
+
+  **Three defects found while writing the spec. None fixed — all would change scores.**
+
+  1. **Item overlap.** Six archetypes × 10 items = 60 scoring slots from a 50-item lens, so 13
+     items are double-counted and the archetype scores are not independent. Worst case: the
+     **Torchbearer shares 8 of its 10 items** (5 with the Challenger, 3 with the Voyager), so it is
+     largely a linear combination of two others — "primary Torchbearer, secondary Challenger" is
+     near-mechanical rather than a finding. The Diplomat shares 4 of 10 across three archetypes.
+  2. **Items 7, 34 and 36 feed no archetype**, so six of a reader's hundred answers do nothing
+     toward the archetype scores. May be dimension-only; undetermined.
+  3. **`diplomat.reverse = [24]` is inert** — item 24 is not in the Diplomat's item list. Item 24 is
+     a Challenger item with no reversal, so the shipped Challenger score is probably missing an
+     intended reverse.
+
+  Also raised, not changed: the Essential result carries a field named **`compatibility`** (and a
+  `_COMPATIBILITY` table). It holds a top-two blend narrative within one lens — no number, no second
+  person — so it does not breach the refusal, but it is named like the one thing permanently ruled
+  out. Rename to `blend` recommended; no instruction received.
+
 ## Backlog
 **P0 (Phase 4 — cutover, needs infrastructure access)**
 - Deploy `docs/edge/worker.js` on mymirrorreport.com, set `RATHERKNOW_CUTOVER=on`, point
@@ -244,6 +277,19 @@ Search-led discovery, essay-led trust.
   essays can't drift out of the sitemap.
 - Learn essays for the remaining archetype clusters.
 - Object storage for illustration/diploma/OG assets and the audio demo.
+
+**P1 (Essential Mirror item allocation — decide, then version)**
+- Re-allocate the 50 items so the six archetypes have independent items. This **changes scores**, so
+  it ships as a new scoring version with parity tests, and every existing report keeps its original
+  numbers. Full detail in `docs/ARCHETYPES_SPEC.md` §4.
+- Allocate items 7, 34, 36 or declare them dimension-only. (§5)
+- Resolve item 24's intended reversal. (§6)
+- Cheap and worth doing whatever is decided: assert at import that every `reverse` entry appears in
+  the same archetype's `questions`, so an inert reverse key cannot ship again.
+- Rename the `compatibility` field to `blend`, carrying the old key for existing snapshots. (§7)
+- Decide whether the shadow map is meant to be complete: `adventurer` is currently nobody's shadow. (§3)
+- If the overlap is not fixed, revisit whether the published guide should disclose it — the
+  evidence-tier disclosures set a standard this omission sits awkwardly against.
 
 **P0 (partner programme — now owed)**
 - The partner page promises a link and a dashboard. Nothing behind it exists. Before the first
