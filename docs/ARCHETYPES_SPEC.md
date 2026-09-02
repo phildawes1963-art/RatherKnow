@@ -13,7 +13,7 @@ defects found while writing it.
 
 ## 1. Structure
 
-| | |
+| Structure | Value |
 |---|---|
 | Archetypes | 6 |
 | Items per lens | 50 |

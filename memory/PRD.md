@@ -261,6 +261,50 @@ Search-led discovery, essay-led trust.
   person — so it does not breach the refusal, but it is named like the one thing permanently ruled
   out. Rename to `blend` recommended; no instruction received.
 
+- **As-built product & technical specification (2026-06)** — user asked for a full product and
+  technical spec and chose: **one combined document**, as-built **plus** a forward-looking spec for
+  the next version, **internal only**, Markdown plus PDF.
+
+  - `docs/RK_SPEC.md` → `docs/ratherknow-spec-INTERNAL.pdf` (10 pages). **Supersedes
+    `rk-1.1.0-PRD.md` and `rk-1.1.0-TRD.md`**, which describe intent rather than what exists.
+  - Part 0 summary · Part I product as built (refusals, situations, the five instruments and Flag
+    Check, the four interpretation layers, the Delta, content surface, pricing, partners) · Part II
+    technical (architecture, 10 collections, full API surface with auth levels, versioning, the
+    three-layer immutability model, MRD, display layer, auth, copy governance, PDFs, migration,
+    185-test inventory, config) · Part III the defect register · Part IV the 1.2.0 spec in five
+    gated phases.
+  - `scripts/build_rk_spec_pdf.py` builds it. **`tests/test_rk_spec.py` (9 tests) checks the
+    document against the running code** — instrument table and item total, all five MRD thresholds,
+    every version stamp, the situation enum, that every collection in §11 is actually used, that
+    the register stays ordered and keeps its four worst entries, the Flag Check counts and its
+    never-scored constraint, and that the spec is not published and claims no checkout. It caught
+    two wrong numbers in the first draft (EI-domain and Closeness MRD).
+
+  **Part III risk register, ordered by harm — R1 is the one to act on:**
+
+  | | | |
+  |---|---|---|
+  | R1 | Guarantee has no working mechanism | SEVERE |
+  | R2 | Partner link/dashboard promised, nothing behind it, no application alerts | HIGH |
+  | R3 | Essential archetypes not independent (+ 3 unallocated items, 1 inert reverse) | HIGH |
+  | R4 | Reliability unmeasured across every instrument | HIGH |
+  | R5 | Everyday desirability pre-test outstanding | MEDIUM |
+  | R6 | Production redirects unverified | MEDIUM |
+  | R7 | `compatibility` field name | MEDIUM |
+  | R8 | Outbound email receipt unverified (provider returns 202, no inbox confirmed) | MEDIUM |
+  | R9 | `rendered_pdfs` grows unbounded | LOW |
+  | R10 | No data retention, export, deletion or DSAR path — **blocking for launch** | LOW/BLOCKING |
+  | R11 | Shadow map incomplete (`adventurer` is nobody's shadow) | LOW |
+  | R12 | No production deployment, monitoring, backups or CI gate | CONTEXT |
+
+  **R1 in full:** the site promises a half refund when the report can't say enough; the MRD gates
+  would decide that, and their shadow suppression rate is 1.0 across ~1,000 results. Highest-value
+  single action in the whole backlog is Phase A7 — pull or reword that guarantee line until α is
+  measured.
+
+  Also documented: **R10 is the genuine launch blocker.** The product holds intimate relationship
+  self-report data with no retention policy, no export and no deletion path.
+
 ## Backlog
 **P0 (Phase 4 — cutover, needs infrastructure access)**
 - Deploy `docs/edge/worker.js` on mymirrorreport.com, set `RATHERKNOW_CUTOVER=on`, point
@@ -277,6 +321,13 @@ Search-led discovery, essay-led trust.
   essays can't drift out of the sitemap.
 - Learn essays for the remaining archetype clusters.
 - Object storage for illustration/diploma/OG assets and the audio demo.
+
+**P0 (honesty debt — no research needed, all in `docs/RK_SPEC.md` Part IV Phase A)**
+- **A7 · Pull or reword the half-refund guarantee** until α is measured. Highest value item here. (R1)
+- A3 Partner application alert via the existing Resend integration, which also closes R8.
+- A4 Account deletion + data export; A5 retention policy. (R10, R9)
+- A1 rename `compatibility` → `blend`; A2 import-time reverse-key assert. (R7, R3)
+- A6 CI gate running the locked-copy hash test, copy lint and the suite. (R12)
 
 **P1 (Essential Mirror item allocation — decide, then version)**
 - Re-allocate the 50 items so the six archetypes have independent items. This **changes scores**, so
