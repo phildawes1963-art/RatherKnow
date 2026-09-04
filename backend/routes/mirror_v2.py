@@ -15,10 +15,11 @@ from typing import List, Optional
 from database import db
 from fastapi.responses import Response
 from auth import get_current_user, assert_session_owner
+from services.ratelimit import limiter
 from report_pdf import build_report_pdf, build_combined_pdf
 from choosing import build_choosing
 from composites import build_composites
-from services.mrd import build_mrd, MODE as MRD_MODE, config as mrd_config
+from services.mrd import build_mrd, MODE as MRD_MODE, config as mrd_config, mrd_sd_units_for
 from services.display import (
     DISPLAY_VERSION, NotNormReferenced, commonness, commonness_sentence,
 )
@@ -28,7 +29,7 @@ from situation_notes import situation_note
 from services.essential_scoring import (
     SELF_ASSESSMENT_QUESTIONS, IDEAL_PARTNER_QUESTIONS, ARCHETYPES,
     QuizAnswer, calculate_archetype_scores, calculate_dimension_scores,
-    get_compatibility_result,
+    get_blend_result,
 )
 from constants.p150_data import P150_PERSONALITY_ITEMS, P150_VALIDITY_ITEMS
 from services.p150_lite import P150_FACTORS
@@ -238,7 +239,7 @@ def _build_items(instrument: str, session: dict | None = None):
             "title": "Your five-factor profile",
             "paragraphs": [
                 "One hundred and thirty statements about how you tend to think, feel and act. Answer as you generally are, not as you'd like to be.",
-                "This is a validated five-factor personality measure. Your result maps sixteen primary factors and five global dimensions.",
+                "This is a validated five-factor personality measure. Your result maps fifteen primary factors and five global dimensions.",
                 "There are no right answers. Go at whatever pace suits you — nothing is timed.",
             ],
         }
@@ -387,7 +388,7 @@ def _score_essential(responses: dict) -> dict:
             "archetype_scores": arch_scores,
             "primary": ordered[0][0],
             "secondary": ordered[1][0],
-            "compatibility": get_compatibility_result(arch_scores, quiz_type),
+            "blend": get_blend_result(arch_scores, quiz_type),
             "dimensions": calculate_dimension_scores(answers),
         }
     self_r, ideal_r = lens_results["self"], lens_results["ideal"]
@@ -417,14 +418,16 @@ def _score_essential(responses: dict) -> dict:
             "primary": {"key": self_r["primary"], **_arch_brief(self_r["primary"], "self_description")},
             "secondary": {"key": self_r["secondary"], **_arch_brief(self_r["secondary"], "self_description", desc=False)},
             "archetype_scores": self_r["archetype_scores"],
-            "compatibility": self_r["compatibility"],
+            "blend": self_r["blend"],
+            "compatibility": self_r["blend"],
             "dimensions": self_r["dimensions"],
         },
         "ideal": {
             "primary": {"key": ideal_r["primary"], **_arch_brief(ideal_r["primary"], "ideal_partner_description")},
             "secondary": {"key": ideal_r["secondary"], **_arch_brief(ideal_r["secondary"], "ideal_partner_description", desc=False)},
             "archetype_scores": ideal_r["archetype_scores"],
-            "compatibility": ideal_r["compatibility"],
+            "blend": ideal_r["blend"],
+            "compatibility": ideal_r["blend"],
             "dimensions": ideal_r["dimensions"],
         },
         "delta": {"per_archetype": delta, "overall": overall_delta, "biggest": biggest_key},
@@ -706,7 +709,7 @@ def _headline(session: dict) -> str:
                 f"You want: {result['ideal']['primary']['name']} · Delta {result['delta']['overall']}")
     if inst == "personality":
         s = result.get("strengths", [])
-        return f"16 factors scored · {len(s)} marked strengths" if s else "16 factors scored"
+        return f"15 factors scored · {len(s)} marked strengths" if s else "15 factors scored"
     if inst == "eq":
         return f"Overall {result['overall_score']} — {result['overall_band']}"
     return ""
@@ -775,7 +778,7 @@ def _flag_payload(doc: dict) -> dict:
 
 
 @router.post("/reflections")
-async def start_reflection():
+async def start_reflection(_rl=Depends(limiter("reflections"))):
     doc = {
         "id": str(uuid.uuid4()),
         "kind": "flag_check",
@@ -797,7 +800,8 @@ async def get_reflection(reflection_id: str):
 
 
 @router.put("/reflections/{reflection_id}/responses")
-async def put_reflection_responses(reflection_id: str, data: ResponsesPut):
+async def put_reflection_responses(reflection_id: str, data: ResponsesPut,
+                                   _rl=Depends(limiter("reflections"))):
     doc = await db.mirror_v2_reflections.find_one({"id": reflection_id}, {"_id": 0, "id": 1, "status": 1})
     if not doc:
         raise HTTPException(status_code=404, detail="Reflection not found")
@@ -818,7 +822,7 @@ async def put_reflection_responses(reflection_id: str, data: ResponsesPut):
 
 
 @router.post("/reflections/{reflection_id}/complete")
-async def complete_reflection(reflection_id: str):
+async def complete_reflection(reflection_id: str, _rl=Depends(limiter("reflections"))):
     doc = await db.mirror_v2_reflections.find_one({"id": reflection_id}, {"_id": 0})
     if not doc:
         raise HTTPException(status_code=404, detail="Reflection not found")
@@ -966,9 +970,11 @@ async def mirrors_findings(data: SummaryRequest, user: dict = Depends(get_curren
 
 # ==================== MRD SHADOW-MODE DIAGNOSTICS ====================
 # The gates run in shadow: they record what they would have withheld, and withhold nothing.
-# This endpoint is the point of that. PRD §9 refunds half a Full Reading when fewer than three
-# Reads fire, so the suppression rate has to be measured on real completed results before the
-# guarantee becomes a promise in copy. Counts only — no answers, no identities.
+# This endpoint is the point of that. Counts only — no answers, no identities.
+#
+# B2: rates are reported per scale set, not as one figure. A single rate is dominated by the
+# fifteen personality primaries competing for distinction; the four-to-six element sets behave
+# differently and one number hides that. mrd_sd_units travels alongside mrd for the same reason.
 
 @router.get("/diagnostics/mrd")
 async def mrd_diagnostics(user: dict = Depends(get_current_user)):
@@ -991,10 +997,21 @@ async def mrd_diagnostics(user: dict = Depends(get_current_user)):
         for s in suppressions:
             by_gate[s["gate"]] = by_gate.get(s["gate"], 0) + 1
         for s in gates.get("scale_sets") or []:
-            bucket = by_scale_set.setdefault(s["scale_set"], {"evaluated": 0, "flat": 0, "mrd": s["mrd"]})
+            bucket = by_scale_set.setdefault(s["scale_set"], {
+                "evaluated": 0, "flat": 0, "indistinct_named": 0, "suppressed": 0,
+                "mrd": s["mrd"],
+                "mrd_sd_units": s.get("mrd_sd_units") or mrd_sd_units_for(s["scale_set"]),
+            })
             bucket["evaluated"] += 1
             if s["flat_profile"]:
                 bucket["flat"] += 1
+            if s.get("indistinct_named_scales"):
+                bucket["indistinct_named"] += 1
+            if s["flat_profile"] or s.get("indistinct_named_scales"):
+                bucket["suppressed"] += 1
+
+    for bucket in by_scale_set.values():
+        bucket["suppression_rate"] = round(bucket["suppressed"] / (bucket["evaluated"] or 1), 3)
 
     examined = totals["results_with_gates"] or 1
     return {
@@ -1007,7 +1024,10 @@ async def mrd_diagnostics(user: dict = Depends(get_current_user)):
         "by_scale_set": by_scale_set,
         "note": (
             "Shadow mode: nothing was withheld from any reader. suppression_rate is the share of "
-            "gate-eligible results where at least one gate would have fired. Set RK_MRD_MODE=enforce "
-            "only once this rate is understood, because it drives the guarantee in PRD §9."
+            "gate-eligible results where at least one gate would have fired; read the per-scale-set "
+            "rates rather than the overall one, since the fifteen personality primaries dominate it. "
+            "mrd_sd_units is the same threshold in standard deviations of its own scale — sets "
+            "sharing an alpha share it exactly, which is why the small-unit sets are not the "
+            "healthier instruments they appear to be."
         ),
     }

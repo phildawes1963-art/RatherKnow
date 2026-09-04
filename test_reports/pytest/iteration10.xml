@@ -1,0 +1,642 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="231" time="186.840" timestamp="2026-09-04T16:11:08.650454+00:00" hostname="agent-env-3e9f5ab4-8a3a-4e7a-88d1-31c9d6f63cfa"><testcase classname="tests.test_iteration6" name="test_bug3_personality_no_adjacent_same_factor" time="0.001" /><testcase classname="tests.test_iteration6" name="test_bug3_eq_no_adjacent_same_sub" time="0.000" /><testcase classname="tests.test_iteration6" name="test_bug3_essential_no_adjacent_same_category_within_lens" time="0.001" /><testcase classname="tests.test_iteration6" name="test_bug3_closeness_preserves_spec_order" time="0.000" /><testcase classname="tests.test_iteration6" name="test_bug3_order_stable_on_resume" time="1.146" /><testcase classname="tests.test_iteration6" name="test_bug1_choosing_block_present_all_four_result_endpoint" time="2.124" /><testcase classname="tests.test_iteration6" name="test_bug1_choosing_block_present_on_complete_endpoint" time="0.862" /><testcase classname="tests.test_pdf_report" name="test_pdf_401_without_token" time="3.655" /><testcase classname="tests.test_pdf_report" name="test_pdf_403_other_user" time="0.546" /><testcase classname="tests.test_iteration6" name="test_bug1_choosing_quotes_real_numbers" time="0.290" /><testcase classname="tests.test_pdf_report" name="test_pdf_404_unknown_session" time="0.133" /><testcase classname="tests.test_pdf_report" name="test_pdf_409_incomplete" time="0.332" /><testcase classname="tests.test_iteration6" name="test_bug1_choosing_not_stored_in_snapshot" time="0.007" /><testcase classname="tests.test_iteration6" name="test_bug1_choosing_in_per_result_pdf" time="0.369" /><testcase classname="tests.test_pdf_report" name="test_pdf_happy_path[essential]" time="0.186" /><testcase classname="tests.test_iteration6" name="test_bug1_choosing_in_combined_pdf" time="0.139" /><testcase classname="tests.test_pdf_report" name="test_pdf_happy_path[personality]" time="0.162" /><testcase classname="tests.test_iteration6" name="test_bug2_findings_return_agreements_and_synthesis" time="0.064" /><testcase classname="tests.test_iteration6" name="test_bug2_agreements_only_when_close" time="0.000" /><testcase classname="tests.test_iteration6" name="test_bug2_tensions_only_when_far" time="0.000" /><testcase classname="tests.test_iteration6" name="test_bug2_convergent_and_divergent_via_api" time="1.388" /><testcase classname="tests.test_pdf_report" name="test_pdf_happy_path[eq]" time="0.391" /><testcase classname="tests.test_pdf_report" name="test_pdf_happy_path[closeness]" time="0.132" /><testcase classname="tests.test_pdf_report" name="test_pdf_content_required[essential]" time="0.151" /><testcase classname="tests.test_pdf_report" name="test_pdf_content_required[personality]" time="0.157" /><testcase classname="tests.test_pdf_report" name="test_pdf_content_required[eq]" time="0.162" /><testcase classname="tests.test_pdf_report" name="test_pdf_content_required[closeness]" time="0.151" /><testcase classname="tests.test_pdf_report" name="test_pdf_forbidden_content[essential]" time="0.165" /><testcase classname="tests.test_pdf_report" name="test_pdf_forbidden_content[personality]" time="0.130" /><testcase classname="tests.test_iteration6" name="test_bug2_no_crosscheck_with_one_instrument" time="0.750" /><testcase classname="tests.test_pdf_report" name="test_pdf_forbidden_content[eq]" time="0.312" /><testcase classname="tests.test_pdf_report" name="test_pdf_forbidden_content[closeness]" time="0.150" /><testcase classname="tests.test_pdf_report" name="test_closeness_no_band_or_percentile" time="0.138" /><testcase classname="tests.test_pdf_report" name="test_essential_numbers_match" time="0.310" /><testcase classname="tests.test_iteration6" name="test_bug2_combined_pdf_has_agreement_finding_and_synthesis" time="0.090" /><testcase classname="tests.test_iteration6" name="test_regression_item_counts" time="0.001" /><testcase classname="tests.test_pdf_report" name="test_eq_numbers_match" time="0.406" /><testcase classname="tests.test_mirror_v2" name="test_instruments_list" time="0.509" /><testcase classname="tests.test_mirror_v2" name="test_essential_lifecycle" time="0.438" /><testcase classname="tests.test_pdf_report" name="test_personality_numbers_match" time="0.291" /><testcase classname="tests.test_pdf_report" name="test_closeness_numbers_match" time="0.288" /><testcase classname="tests.test_mirror_v2" name="test_personality_lifecycle" time="0.899" /><testcase classname="tests.test_pdf_report" name="test_situation_framing_differs_numbers_same" time="63.008" /><testcase classname="tests.test_mirror_v2" name="test_eq_lifecycle" time="0.718" /><testcase classname="tests.test_mirror_v2" name="test_closeness_lifecycle_no_bands" time="0.364" /><testcase classname="tests.test_mirror_v2" name="test_immutability_and_double_complete" time="0.463" /><testcase classname="tests.test_mirror_v2" name="test_unknown_instrument_404" time="0.081" /><testcase classname="tests.test_mirror_v2" name="test_out_of_range_value_400" time="0.152" /><testcase classname="tests.test_mirror_v2" name="test_put_on_completed_409" time="0.426" /><testcase classname="tests.test_mirror_v2" name="test_flag_check_result_shape_no_score" time="0.228" /><testcase classname="tests.test_mirror_v2" name="test_flag_safety_yes" time="0.228" /><testcase classname="tests.test_mirror_v2" name="test_flag_safety_unsure" time="0.264" /><testcase classname="tests.test_mirror_v2" name="test_flag_insufficient" time="0.227" /><testcase classname="tests.test_mirror_v2" name="test_mirrors_summary_and_findings" time="0.940" /><testcase classname="tests.test_mirror_v2" name="test_findings_empty_below_two" time="0.422" /><testcase classname="tests.test_mirror_v2" name="test_everyday_lifecycle" time="0.347" /><testcase classname="tests.test_mirror_v2" name="test_everyday_items_are_forced_choice_pairs" time="0.150" /><testcase classname="tests.test_mirror_v2" name="test_everyday_side_map_is_stored_and_randomised" time="0.325" /><testcase classname="tests.test_auth" name="test_register_returns_user_and_token" time="40.036"><failure message="requests.exceptions.ConnectTimeout: HTTPSConnectionPool(host='relationship-delta.preview.emergentagent.com', port=443): Max retries exceeded with url: /api/auth/register (Caused by ConnectTimeoutError(&lt;HTTPSConnection(host='relationship-delta.preview.emergentagent.com', port=443) at 0xfe5abc275f90&gt;, 'Connection to relationship-delta.preview.emergentagent.com timed out. (connect timeout=20)'))">self = &lt;HTTPSConnection(host='relationship-delta.preview.emergentagent.com', port=443) at 0xfe5abc275f90&gt;
+
+    def _new_conn(self) -&gt; socket.socket:
+        """Establish a socket connection and set nodelay settings on it.
+    
+        :return: New socket connection.
+        """
+        try:
+&gt;           sock = connection.create_connection(
+                (self._dns_host, self.port),
+                self.timeout,
+                source_address=self.source_address,
+                socket_options=self.socket_options,
+            )
+
+/root/.venv/lib/python3.11/site-packages/urllib3/connection.py:204: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/root/.venv/lib/python3.11/site-packages/urllib3/util/connection.py:85: in create_connection
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+address = ('relationship-delta.preview.emergentagent.com', 443), timeout = 20
+source_address = None, socket_options = [(6, 1, 1)]
+
+    def create_connection(
+        address: tuple[str, int],
+        timeout: _TYPE_TIMEOUT = _DEFAULT_TIMEOUT,
+        source_address: tuple[str, int] | None = None,
+        socket_options: _TYPE_SOCKET_OPTIONS | None = None,
+    ) -&gt; socket.socket:
+        """Connect to *address* and return the socket object.
+    
+        Convenience function.  Connect to *address* (a 2-tuple ``(host,
+        port)``) and return the socket object.  Passing the optional
+        *timeout* parameter will set the timeout on the socket instance
+        before attempting to connect.  If no *timeout* is supplied, the
+        global default timeout setting returned by :func:`socket.getdefaulttimeout`
+        is used.  If *source_address* is set it must be a tuple of (host, port)
+        for the socket to bind as a source address before making the connection.
+        An host of '' or port 0 tells the OS to use the default.
+        """
+    
+        host, port = address
+        if host.startswith("["):
+            host = host.strip("[]")
+        err = None
+    
+        # Using the value from allowed_gai_family() in the context of getaddrinfo lets
+        # us select whether to work with IPv4 DNS records, IPv6 records, or both.
+        # The original create_connection function always returns all records.
+        family = allowed_gai_family()
+    
+        try:
+            host.encode("idna")
+        except UnicodeError:
+            raise LocationParseError(f"'{host}', label empty or too long") from None
+    
+        for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
+            af, socktype, proto, canonname, sa = res
+            sock = None
+            try:
+                sock = socket.socket(af, socktype, proto)
+    
+                # If provided, set socket level options before connecting.
+                _set_socket_options(sock, socket_options)
+    
+                if timeout is not _DEFAULT_TIMEOUT:
+                    sock.settimeout(timeout)
+                if source_address:
+                    sock.bind(source_address)
+&gt;               sock.connect(sa)
+E               TimeoutError: timed out
+
+/root/.venv/lib/python3.11/site-packages/urllib3/util/connection.py:73: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = &lt;urllib3.connectionpool.HTTPSConnectionPool object at 0xfe5abc275210&gt;
+method = 'POST', url = '/api/auth/register'
+body = b'{"name": "Registered User", "email": "TEST_reg+95b35db345@ratherknow.com", "password": "knowmore123", "situation": "in_relationship"}'
+headers = {'User-Agent': 'python-requests/2.34.2', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'X-Forwarded-For': '198.18.39.39', 'Content-Length': '133', 'Content-Type': 'application/json'}
+retries = Retry(total=0, connect=None, read=False, redirect=None, status=None)
+redirect = False, assert_same_host = False
+timeout = Timeout(connect=20, read=20, total=None), pool_timeout = None
+release_conn = False, chunked = False, body_pos = None, preload_content = False
+decode_content = False, response_kw = {}
+
+    def urlopen(  # type: ignore[override]
+        self,
+        method: str,
+        url: str,
+        body: _TYPE_BODY | None = None,
+        headers: typing.Mapping[str, str] | None = None,
+        retries: Retry | bool | int | None = None,
+        redirect: bool = True,
+        assert_same_host: bool = True,
+        timeout: _TYPE_TIMEOUT = _DEFAULT_TIMEOUT,
+        pool_timeout: int | None = None,
+        release_conn: bool | None = None,
+        chunked: bool = False,
+        body_pos: _TYPE_BODY_POSITION | None = None,
+        preload_content: bool = True,
+        decode_content: bool = True,
+        **response_kw: typing.Any,
+    ) -&gt; BaseHTTPResponse:
+        """
+        Get a connection from the pool and perform an HTTP request. This is the
+        lowest level call for making a request, so you'll need to specify all
+        the raw details.
+    
+        .. note::
+    
+           More commonly, it's appropriate to use a convenience method
+           such as :meth:`request`.
+    
+        .. note::
+    
+           `release_conn` will only behave as expected if
+           `preload_content=False` because we want to make
+           `preload_content=False` the default behaviour someday soon without
+           breaking backwards compatibility.
+    
+        :param method:
+            HTTP request method (such as GET, POST, PUT, etc.)
+    
+        :param url:
+            The URL to perform the request on.
+    
+        :param body:
+            Data to send in the request body, either :class:`str`, :class:`bytes`,
+            an iterable of :class:`str`/:class:`bytes`, or a file-like object.
+    
+        :param headers:
+            Dictionary of custom headers to send, such as User-Agent,
+            If-None-Match, etc. If None, pool headers are used. If provided,
+            these headers completely replace any pool-specific headers.
+    
+        :param retries:
+            Configure the number of retries to allow before raising a
+            :class:`~urllib3.exceptions.MaxRetryError` exception.
+    
+            If ``None`` (default) will retry 3 times, see ``Retry.DEFAULT``. Pass a
+            :class:`~urllib3.util.retry.Retry` object for fine-grained control
+            over different types of retries.
+            Pass an integer number to retry connection errors that many times,
+            but no other types of errors. Pass zero to never retry.
+    
+            If ``False``, then retries are disabled and any exception is raised
+            immediately. Also, instead of raising a MaxRetryError on redirects,
+            the redirect response will be returned.
+    
+        :type retries: :class:`~urllib3.util.retry.Retry`, False, or an int.
+    
+        :param redirect:
+            If True, automatically handle redirects (status codes 301, 302,
+            303, 307, 308). Each redirect counts as a retry. Disabling retries
+            will disable redirect, too.
+    
+        :param assert_same_host:
+            If ``True``, will make sure that the host of the pool requests is
+            consistent else will raise HostChangedError. When ``False``, you can
+            use the pool on an HTTP proxy and request foreign hosts.
+    
+        :param timeout:
+            If specified, overrides the default timeout for this one
+            request. It may be a float (in seconds) or an instance of
+            :class:`urllib3.util.Timeout`.
+    
+        :param pool_timeout:
+            If set and the pool is set to block=True, then this method will
+            block for ``pool_timeout`` seconds and raise EmptyPoolError if no
+            connection is available within the time period.
+    
+        :param bool preload_content:
+            If True, the response's body will be preloaded into memory.
+    
+        :param bool decode_content:
+            If True, will attempt to decode the body based on the
+            'content-encoding' header.
+    
+        :param release_conn:
+            If False, then the urlopen call will not release the connection
+            back into the pool once a response is received (but will release if
+            you read the entire contents of the response such as when
+            `preload_content=True`). This is useful if you're not preloading
+            the response's content immediately. You will need to call
+            ``r.release_conn()`` on the response ``r`` to return the connection
+            back into the pool. If None, it takes the value of ``preload_content``
+            which defaults to ``True``.
+    
+        :param bool chunked:
+            If True, urllib3 will send the body using chunked transfer
+            encoding. Otherwise, urllib3 will send the body using the standard
+            content-length form. Defaults to False.
+    
+        :param int body_pos:
+            Position to seek to in file-like body in the event of a retry or
+            redirect. Typically this won't need to be set because urllib3 will
+            auto-populate the value when needed.
+        """
+        # Ensure that the URL we're connecting to is properly encoded
+        if url.startswith("/"):
+            # URLs starting with / are inherently schemeless.
+            url = to_str(_encode_target(url))
+            destination_scheme = None
+        else:
+            parsed_url = parse_url(url)
+            destination_scheme = parsed_url.scheme
+            url = to_str(parsed_url.url)
+    
+        if headers is None:
+            headers = self.headers
+    
+        if not isinstance(retries, Retry):
+            retries = Retry.from_int(retries, redirect=redirect, default=self.retries)
+    
+        if release_conn is None:
+            release_conn = preload_content
+    
+        # Check host
+        if assert_same_host and not self.is_same_host(url):
+            raise HostChangedError(self, url, retries)
+    
+        conn = None
+    
+        # Track whether `conn` needs to be released before
+        # returning/raising/recursing. Update this variable if necessary, and
+        # leave `release_conn` constant throughout the function. That way, if
+        # the function recurses, the original value of `release_conn` will be
+        # passed down into the recursive call, and its value will be respected.
+        #
+        # See issue #651 [1] for details.
+        #
+        # [1] &lt;https://github.com/urllib3/urllib3/issues/651&gt;
+        release_this_conn = release_conn
+    
+        http_tunnel_required = connection_requires_http_tunnel(
+            self.proxy, self.proxy_config, destination_scheme
+        )
+    
+        # Merge the proxy headers. Only done when not using HTTP CONNECT. We
+        # have to copy the headers dict so we can safely change it without those
+        # changes being reflected in anyone else's copy.
+        if not http_tunnel_required:
+            headers = headers.copy()  # type: ignore[attr-defined]
+            headers.update(self.proxy_headers)  # type: ignore[union-attr]
+    
+        # Must keep the exception bound to a separate variable or else Python 3
+        # complains about UnboundLocalError.
+        err = None
+    
+        # Keep track of whether we cleanly exited the except block. This
+        # ensures we do proper cleanup in finally.
+        clean_exit = False
+    
+        # Rewind body position, if needed. Record current position
+        # for future rewinds in the event of a redirect/retry.
+        body_pos = set_file_position(body, body_pos)
+    
+        try:
+            # Request a connection from the queue.
+            timeout_obj = self._get_timeout(timeout)
+            conn = self._get_conn(timeout=pool_timeout)
+    
+            conn.timeout = timeout_obj.connect_timeout  # type: ignore[assignment]
+    
+            # Is this a closed/new connection that requires CONNECT tunnelling?
+            if self.proxy is not None and http_tunnel_required and conn.is_closed:
+                try:
+                    self._prepare_proxy(conn)
+                except (BaseSSLError, OSError, SocketTimeout) as e:
+                    self._raise_timeout(
+                        err=e, url=self.proxy.url, timeout_value=conn.timeout
+                    )
+                    raise
+    
+            # If we're going to release the connection in ``finally:``, then
+            # the response doesn't need to know about the connection. Otherwise
+            # it will also try to release it and we'll have a double-release
+            # mess.
+            response_conn = conn if not release_conn else None
+    
+            # Make the request on the HTTPConnection object
+&gt;           response = self._make_request(
+                conn,
+                method,
+                url,
+                timeout=timeout_obj,
+                body=body,
+                headers=headers,
+                chunked=chunked,
+                retries=retries,
+                response_conn=response_conn,
+                preload_content=preload_content,
+                decode_content=decode_content,
+                **response_kw,
+            )
+
+/root/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py:788: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/root/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py:488: in _make_request
+    raise new_e
+/root/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py:464: in _make_request
+    self._validate_conn(conn)
+/root/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py:1106: in _validate_conn
+    conn.connect()
+/root/.venv/lib/python3.11/site-packages/urllib3/connection.py:759: in connect
+    self.sock = sock = self._new_conn()
+                       ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;HTTPSConnection(host='relationship-delta.preview.emergentagent.com', port=443) at 0xfe5abc275f90&gt;
+
+    def _new_conn(self) -&gt; socket.socket:
+        """Establish a socket connection and set nodelay settings on it.
+    
+        :return: New socket connection.
+        """
+        try:
+            sock = connection.create_connection(
+                (self._dns_host, self.port),
+                self.timeout,
+                source_address=self.source_address,
+                socket_options=self.socket_options,
+            )
+        except socket.gaierror as e:
+            raise NameResolutionError(self.host, self, e) from e
+        except SocketTimeout as e:
+&gt;           raise ConnectTimeoutError(
+                self,
+                f"Connection to {self.host} timed out. (connect timeout={self.timeout})",
+            ) from e
+E           urllib3.exceptions.ConnectTimeoutError: (&lt;HTTPSConnection(host='relationship-delta.preview.emergentagent.com', port=443) at 0xfe5abc275f90&gt;, 'Connection to relationship-delta.preview.emergentagent.com timed out. (connect timeout=20)')
+
+/root/.venv/lib/python3.11/site-packages/urllib3/connection.py:213: ConnectTimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = &lt;requests.adapters.HTTPAdapter object at 0xfe5abc277310&gt;
+request = &lt;PreparedRequest [POST]&gt;, stream = False, timeout = 20, verify = True
+cert = None, proxies = OrderedDict()
+
+    def send(
+        self,
+        request: PreparedRequest,
+        stream: bool = False,
+        timeout: _t.TimeoutType = None,
+        verify: _t.VerifyType = True,
+        cert: _t.CertType = None,
+        proxies: dict[str, str] | None = None,
+    ) -&gt; Response:
+        """Sends PreparedRequest object. Returns Response object.
+    
+        :param request: The :class:`PreparedRequest &lt;PreparedRequest&gt;` being sent.
+        :param stream: (optional) Whether to stream the request content.
+        :param timeout: (optional) How long to wait for the server to send
+            data before giving up, as a float, or a :ref:`(connect timeout,
+            read timeout) &lt;timeouts&gt;` tuple.
+        :type timeout: float or tuple or urllib3 Timeout object
+        :param verify: (optional) Either a boolean, in which case it controls whether
+            we verify the server's TLS certificate, or a string, in which case it
+            must be a path to a CA bundle to use
+        :param cert: (optional) Any user-provided SSL certificate to be trusted.
+        :param proxies: (optional) The proxies dictionary to apply to the request.
+        :rtype: requests.Response
+        """
+    
+        assert _is_prepared(request)
+    
+        try:
+            conn = self.get_connection_with_tls_context(
+                request, verify, proxies=proxies, cert=cert
+            )
+        except LocationValueError as e:
+            raise InvalidURL(e, request=request)
+    
+        self.cert_verify(conn, request.url, verify, cert)
+        url = self.request_url(request, proxies)
+        self.add_headers(
+            request,
+            stream=stream,
+            timeout=timeout,
+            verify=verify,
+            cert=cert,
+            proxies=proxies,
+        )
+    
+        chunked = not (request.body is None or "Content-Length" in request.headers)
+    
+        if isinstance(timeout, tuple):
+            try:
+                connect, read = timeout
+                resolved_timeout = TimeoutSauce(connect=connect, read=read)
+            except ValueError:
+                raise ValueError(
+                    f"Invalid timeout {timeout}. Pass a (connect, read) timeout tuple, "
+                    f"or a single float to set both timeouts to the same value."
+                )
+        elif isinstance(timeout, TimeoutSauce):
+            resolved_timeout = timeout
+        else:
+            resolved_timeout = TimeoutSauce(connect=timeout, read=timeout)
+    
+        try:
+&gt;           resp = conn.urlopen(
+                method=request.method,
+                url=url,
+                body=request.body,  # type: ignore[arg-type]  # urllib3 stubs don't accept Iterable[bytes | str]
+                headers=request.headers,  # type: ignore[arg-type]  # urllib3#3072
+                redirect=False,
+                assert_same_host=False,
+                preload_content=False,
+                decode_content=False,
+                retries=self.max_retries,
+                timeout=resolved_timeout,
+                chunked=chunked,
+            )
+
+/root/.venv/lib/python3.11/site-packages/requests/adapters.py:696: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/root/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py:842: in urlopen
+    retries = retries.increment(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Retry(total=0, connect=None, read=False, redirect=None, status=None)
+method = 'POST', url = '/api/auth/register', response = None
+error = ConnectTimeoutError(&lt;HTTPSConnection(host='relationship-delta.preview.emergentagent.com', port=443) at 0xfe5abc275f90&gt;, 'Connection to relationship-delta.preview.emergentagent.com timed out. (connect timeout=20)')
+_pool = &lt;urllib3.connectionpool.HTTPSConnectionPool object at 0xfe5abc275210&gt;
+_stacktrace = &lt;traceback object at 0xfe5abc2754c0&gt;
+
+    def increment(
+        self,
+        method: str | None = None,
+        url: str | None = None,
+        response: BaseHTTPResponse | None = None,
+        error: Exception | None = None,
+        _pool: ConnectionPool | None = None,
+        _stacktrace: TracebackType | None = None,
+    ) -&gt; Self:
+        """Return a new Retry object with incremented retry counters.
+    
+        :param response: A response object, or None, if the server did not
+            return a response.
+        :type response: :class:`~urllib3.response.BaseHTTPResponse`
+        :param Exception error: An error encountered during the request, or
+            None if the response was received successfully.
+    
+        :return: A new ``Retry`` object.
+        """
+        if self.total is False and error:
+            # Disabled, indicate to re-raise the error.
+            raise reraise(type(error), error, _stacktrace)
+    
+        total = self.total
+        if total is not None:
+            total -= 1
+    
+        connect = self.connect
+        read = self.read
+        redirect = self.redirect
+        status_count = self.status
+        other = self.other
+        cause = "unknown"
+        status = None
+        redirect_location = None
+    
+        if error and self._is_connection_error(error):
+            # Connect retry?
+            if connect is False:
+                raise reraise(type(error), error, _stacktrace)
+            elif connect is not None:
+                connect -= 1
+    
+        elif error and self._is_read_error(error):
+            # Read retry?
+            if read is False or method is None or not self._is_method_retryable(method):
+                raise reraise(type(error), error, _stacktrace)
+            elif read is not None:
+                read -= 1
+    
+        elif error:
+            # Other retry?
+            if other is not None:
+                other -= 1
+    
+        elif response and response.get_redirect_location():
+            # Redirect retry?
+            if redirect is not None:
+                redirect -= 1
+            cause = "too many redirects"
+            response_redirect_location = response.get_redirect_location()
+            if response_redirect_location:
+                redirect_location = response_redirect_location
+            status = response.status
+    
+        else:
+            # Incrementing because of a server error like a 500 in
+            # status_forcelist and the given method is in the allowed_methods
+            cause = ResponseError.GENERIC_ERROR
+            if response and response.status:
+                if status_count is not None:
+                    status_count -= 1
+                cause = ResponseError.SPECIFIC_ERROR.format(status_code=response.status)
+                status = response.status
+    
+        history = self.history + (
+            RequestHistory(method, url, error, status, redirect_location),
+        )
+    
+        new_retry = self.new(
+            total=total,
+            connect=connect,
+            read=read,
+            redirect=redirect,
+            status=status_count,
+            other=other,
+            history=history,
+        )
+    
+        if new_retry.is_exhausted():
+            reason = error or ResponseError(cause)
+&gt;           raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='relationship-delta.preview.emergentagent.com', port=443): Max retries exceeded with url: /api/auth/register (Caused by ConnectTimeoutError(&lt;HTTPSConnection(host='relationship-delta.preview.emergentagent.com', port=443) at 0xfe5abc275f90&gt;, 'Connection to relationship-delta.preview.emergentagent.com timed out. (connect timeout=20)'))
+
+/root/.venv/lib/python3.11/site-packages/urllib3/util/retry.py:543: MaxRetryError
+
+During handling of the above exception, another exception occurred:
+
+http = &lt;requests.sessions.Session object at 0xfe5ac89b1a10&gt;
+
+    def test_register_returns_user_and_token(http):
+        email = _uniq_email("reg")
+&gt;       r = http.post(f"{API}/auth/register", json={
+            "name": "Registered User", "email": email, "password": "knowmore123",
+            "situation": "in_relationship",
+        }, timeout=20)
+
+backend/tests/test_auth.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:712: in post
+    return self.request("POST", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:651: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:784: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;requests.adapters.HTTPAdapter object at 0xfe5abc277310&gt;
+request = &lt;PreparedRequest [POST]&gt;, stream = False, timeout = 20, verify = True
+cert = None, proxies = OrderedDict()
+
+    def send(
+        self,
+        request: PreparedRequest,
+        stream: bool = False,
+        timeout: _t.TimeoutType = None,
+        verify: _t.VerifyType = True,
+        cert: _t.CertType = None,
+        proxies: dict[str, str] | None = None,
+    ) -&gt; Response:
+        """Sends PreparedRequest object. Returns Response object.
+    
+        :param request: The :class:`PreparedRequest &lt;PreparedRequest&gt;` being sent.
+        :param stream: (optional) Whether to stream the request content.
+        :param timeout: (optional) How long to wait for the server to send
+            data before giving up, as a float, or a :ref:`(connect timeout,
+            read timeout) &lt;timeouts&gt;` tuple.
+        :type timeout: float or tuple or urllib3 Timeout object
+        :param verify: (optional) Either a boolean, in which case it controls whether
+            we verify the server's TLS certificate, or a string, in which case it
+            must be a path to a CA bundle to use
+        :param cert: (optional) Any user-provided SSL certificate to be trusted.
+        :param proxies: (optional) The proxies dictionary to apply to the request.
+        :rtype: requests.Response
+        """
+    
+        assert _is_prepared(request)
+    
+        try:
+            conn = self.get_connection_with_tls_context(
+                request, verify, proxies=proxies, cert=cert
+            )
+        except LocationValueError as e:
+            raise InvalidURL(e, request=request)
+    
+        self.cert_verify(conn, request.url, verify, cert)
+        url = self.request_url(request, proxies)
+        self.add_headers(
+            request,
+            stream=stream,
+            timeout=timeout,
+            verify=verify,
+            cert=cert,
+            proxies=proxies,
+        )
+    
+        chunked = not (request.body is None or "Content-Length" in request.headers)
+    
+        if isinstance(timeout, tuple):
+            try:
+                connect, read = timeout
+                resolved_timeout = TimeoutSauce(connect=connect, read=read)
+            except ValueError:
+                raise ValueError(
+                    f"Invalid timeout {timeout}. Pass a (connect, read) timeout tuple, "
+                    f"or a single float to set both timeouts to the same value."
+                )
+        elif isinstance(timeout, TimeoutSauce):
+            resolved_timeout = timeout
+        else:
+            resolved_timeout = TimeoutSauce(connect=timeout, read=timeout)
+    
+        try:
+            resp = conn.urlopen(
+                method=request.method,
+                url=url,
+                body=request.body,  # type: ignore[arg-type]  # urllib3 stubs don't accept Iterable[bytes | str]
+                headers=request.headers,  # type: ignore[arg-type]  # urllib3#3072
+                redirect=False,
+                assert_same_host=False,
+                preload_content=False,
+                decode_content=False,
+                retries=self.max_retries,
+                timeout=resolved_timeout,
+                chunked=chunked,
+            )
+    
+        except (ProtocolError, OSError) as err:
+            raise ConnectionError(err, request=request)
+    
+        except MaxRetryError as e:
+            if isinstance(e.reason, ConnectTimeoutError):
+                # TODO: Remove this in 3.0.0: see #2811
+                if not isinstance(e.reason, NewConnectionError):
+&gt;                   raise ConnectTimeout(e, request=request)
+E                   requests.exceptions.ConnectTimeout: HTTPSConnectionPool(host='relationship-delta.preview.emergentagent.com', port=443): Max retries exceeded with url: /api/auth/register (Caused by ConnectTimeoutError(&lt;HTTPSConnection(host='relationship-delta.preview.emergentagent.com', port=443) at 0xfe5abc275f90&gt;, 'Connection to relationship-delta.preview.emergentagent.com timed out. (connect timeout=20)'))
+
+/root/.venv/lib/python3.11/site-packages/requests/adapters.py:717: ConnectTimeout</failure></testcase><testcase classname="tests.test_auth" name="test_register_normalises_email_lowercase" time="19.745" /><testcase classname="tests.test_pdf_report" name="test_essential_delta_wording_direction" time="8.481" /><testcase classname="tests.test_auth" name="test_register_duplicate_email_409" time="0.364" /><testcase classname="tests.test_auth" name="test_register_short_password_422" time="0.070" /><testcase classname="tests.test_auth" name="test_register_invalid_situation_422" time="0.066" /><testcase classname="tests.test_auth" name="test_login_success_shared_user" time="0.299" /><testcase classname="tests.test_auth" name="test_login_wrong_password_401" time="0.294" /><testcase classname="tests.test_auth" name="test_me_returns_situation_label" time="0.368" /><testcase classname="tests.test_auth" name="test_me_no_token_401" time="0.071" /><testcase classname="tests.test_auth" name="test_me_garbage_token_401" time="0.069" /><testcase classname="tests.test_auth" name="test_brute_force_lockout" time="1.873" /><testcase classname="tests.test_auth" name="test_assessment_start_requires_auth" time="0.070" /><testcase classname="tests.test_auth" name="test_assessment_start_ok_with_bearer_and_stamps_user" time="0.434" /><testcase classname="tests.test_auth" name="test_flag_check_open_no_auth" time="0.220" /><testcase classname="tests.test_auth" name="test_me_sessions_lists_completed_only_for_owner" time="0.980" /><testcase classname="tests.test_auth" name="test_claim_only_attaches_unowned_and_not_stolen" time="1.156" /><testcase classname="tests.test_pdf_report" name="test_essential_flat_all_ones" time="1.047" /><testcase classname="tests.test_iteration5" name="test_combined_pdf_401_no_token" time="0.155" /><testcase classname="tests.test_iteration5" name="test_combined_pdf_409_when_no_completions" time="0.501" /><testcase classname="tests.test_pdf_report" name="test_essential_flat_all_fives" time="1.178" /><testcase classname="tests.test_iteration5" name="test_combined_pdf_one_instrument_shape" time="0.783" /><testcase classname="tests.test_pdf_report" name="test_personality_flagged_validity" time="1.112" /><testcase classname="test_everyday" name="test_bank_shape" time="0.000" /><testcase classname="test_everyday" name="test_pretest_is_declared_outstanding" time="0.000" /><testcase classname="test_everyday" name="test_block_a_positions_run_0_to_4" time="0.000" /><testcase classname="test_everyday" name="test_side_map_maps_choices_back_to_poles" time="0.000" /><testcase classname="test_everyday" name="test_two_two_split_is_undifferentiated_not_a_midpoint" time="0.000" /><testcase classname="test_everyday" name="test_block_b_wins_sum_to_21" time="0.000" /><testcase classname="test_everyday" name="test_a_transitive_ordering_has_no_circular_triads" time="0.000" /><testcase classname="test_everyday" name="test_circular_triads_are_detected_and_flagged" time="0.000" /><testcase classname="test_everyday" name="test_zeta_arithmetic" time="0.000" /><testcase classname="test_everyday" name="test_side_bias_flag" time="0.000" /><testcase classname="test_everyday" name="test_time_floor_flag" time="0.000" /><testcase classname="test_everyday" name="test_thin_domain_is_not_scored" time="0.000" /><testcase classname="test_everyday" name="test_the_map_names_the_four_corners" time="0.000" /><testcase classname="test_everyday" name="test_no_compatibility_score_or_norms_anywhere" time="0.000" /><testcase classname="test_everyday" name="test_no_item_id_contains_a_dot" time="0.000" /><testcase classname="tests.test_iteration3" name="test_forgot_password_returns_sent_true_for_existing_user" time="0.638" /><testcase classname="tests.test_iteration3" name="test_forgot_password_no_enumeration" time="0.110" /><testcase classname="tests.test_iteration3" name="test_reset_password_garbage_token_400" time="0.067" /><testcase classname="tests.test_iteration3" name="test_reset_password_expired_token_400" time="0.415" /><testcase classname="tests.test_iteration3" name="test_reset_password_happy_path_and_single_use" time="1.427" /><testcase classname="tests.test_iteration5" name="test_combined_pdf_four_instruments" time="2.684" /><testcase classname="tests.test_iteration5" name="test_combined_pdf_crosscheck_matches_findings_endpoint" time="0.590" /><testcase classname="tests.test_iteration5" name="test_combined_pdf_numbers_match_result" time="0.455" /><testcase classname="tests.test_iteration5" name="test_combined_pdf_dedupes_to_most_recent" time="2.499" /><testcase classname="tests.test_iteration3" name="test_reset_clears_lockout" time="2.774" /><testcase classname="tests.test_iteration5" name="test_combined_pdf_no_cross_user_leak" time="2.873" /><testcase classname="tests.test_iteration3" name="test_ownership_403_on_responses" time="1.134" /><testcase classname="tests.test_iteration3" name="test_ownership_403_on_complete" time="0.790" /><testcase classname="tests.test_iteration3" name="test_ownership_403_on_result_fetch" time="0.938" /><testcase classname="tests.test_iteration5" name="test_situation_patch_401_no_token" time="0.160" /><testcase classname="tests.test_iteration5" name="test_situation_patch_400_invalid_value" time="0.616" /><testcase classname="tests.test_iteration3" name="test_scoring_independent_of_situation[essential]" time="2.605" /><testcase classname="tests.test_iteration5" name="test_situation_patch_valid_values[single_dating-Single &amp; dating]" time="1.295" /><testcase classname="tests.test_iteration5" name="test_situation_patch_valid_values[in_relationship-In a relationship]" time="1.041" /><testcase classname="tests.test_iteration3" name="test_scoring_independent_of_situation[personality]" time="2.848" /><testcase classname="tests.test_iteration5" name="test_situation_patch_valid_values[post_breakup-Post-breakup]" time="1.429" /><testcase classname="tests.test_iteration5" name="test_situation_switch_does_not_rescore" time="1.092" /><testcase classname="tests.test_iteration5" name="test_situation_switch_reframes_per_result_pdf" time="1.631" /><testcase classname="tests.test_iteration3" name="test_scoring_independent_of_situation[eq]" time="2.224" /><testcase classname="tests.test_iteration5" name="test_situation_switch_reframes_combined_pdf" time="2.117" /><testcase classname="tests.test_iteration3" name="test_scoring_independent_of_situation[closeness]" time="1.905" /><testcase classname="test_mrd" name="test_sem_and_mrd_arithmetic" time="0.000" /><testcase classname="test_mrd" name="test_thresholds_match_the_published_profile" time="0.000" /><testcase classname="test_mrd" name="test_placeholder_alpha_is_declared" time="0.000" /><testcase classname="test_mrd" name="test_pairwise_gate" time="0.000" /><testcase classname="test_mrd" name="test_flat_profile_gate" time="0.000" /><testcase classname="test_mrd" name="test_distinctiveness_gate" time="0.000" /><testcase classname="test_mrd" name="test_the_whole_reference_profile_collapses_into_one_cluster" time="0.000" /><testcase classname="test_mrd" name="test_clusters_split_when_a_gap_clears_the_threshold" time="0.000" /><testcase classname="test_mrd" name="test_build_mrd_runs_in_shadow_mode_and_suppresses_nothing" time="0.000" /><testcase classname="test_mrd" name="test_build_mrd_returns_none_for_unrankable_instruments" time="0.000" /><testcase classname="test_archetype_docs" name="test_the_internal_spec_is_not_published" time="0.000" /><testcase classname="test_archetype_docs" name="test_the_guide_does_not_leak_the_internal_findings" time="0.000" /><testcase classname="test_archetype_docs" name="test_the_guide_names_all_six_archetypes_as_shipped" time="0.000" /><testcase classname="test_archetype_docs" name="test_the_guide_shadow_map_matches_the_code" time="0.001" /><testcase classname="test_archetype_docs" name="test_the_guide_counter_types_match_the_code" time="0.000" /><testcase classname="test_archetype_docs" name="test_the_guide_refuses_what_the_product_refuses" time="0.000" /><testcase classname="test_archetype_docs" name="test_the_spec_records_the_three_defects_and_the_naming_risk" time="0.000" /><testcase classname="test_archetype_docs" name="test_the_spec_overlap_table_matches_the_code" time="0.000" /><testcase classname="test_display" name="test_sten_pct_matches_the_normal_curve" time="0.000" /><testcase classname="test_display" name="test_the_two_corrected_cells" time="0.000" /><testcase classname="test_display" name="test_fractions_are_rounded_never_decimal" time="0.000" /><testcase classname="test_display" name="test_commonness_direction_follows_the_midpoint" time="0.000" /><testcase classname="test_display" name="test_commonness_sentence_names_the_pole_not_a_grade" time="0.000" /><testcase classname="test_display" name="test_composites_are_refused" time="0.000" /><testcase classname="test_display" name="test_clamped_values_are_refused" time="0.000" /><testcase classname="test_display" name="test_out_of_range_is_refused" time="0.000" /><testcase classname="tests.test_composites" name="test_equations_unchanged" time="0.000" /><testcase classname="tests.test_composites" name="test_gains_remain_uncalibrated" time="0.000" /><testcase classname="tests.test_composites" name="test_reference_profile_reproduces" time="0.000" /><testcase classname="tests.test_composites" name="test_self_control_is_low_for_reference_profile" time="0.000" /><testcase classname="tests.test_composites" name="test_provenance_exposes_every_contribution" time="0.000" /><testcase classname="tests.test_composites" name="test_clamping_is_recorded_not_silent" time="0.000" /><testcase classname="tests.test_composites" name="test_unclamped_globals_carry_no_clamp_flag" time="0.000" /><testcase classname="test_rk_spec" name="test_the_spec_is_not_published" time="0.000" /><testcase classname="test_rk_spec" name="test_instrument_table_matches_the_code" time="0.001" /><testcase classname="test_rk_spec" name="test_mrd_thresholds_match_the_engine" time="0.000" /><testcase classname="test_rk_spec" name="test_version_stamps_match_the_code" time="0.000" /><testcase classname="test_rk_spec" name="test_situations_match_the_code" time="0.000" /><testcase classname="test_rk_spec" name="test_collections_named_in_the_spec_are_the_ones_in_use" time="0.001" /><testcase classname="test_rk_spec" name="test_the_defect_register_is_present_and_ordered" time="0.001" /><testcase classname="test_rk_spec" name="test_flag_check_counts_and_constraint" time="0.000" /><testcase classname="test_rk_spec" name="test_no_payment_integration_is_claimed" time="0.001" /><testcase classname="test_copy_lint" name="test_lint_scope_is_not_empty" time="0.000" /><testcase classname="test_copy_lint" name="test_lint_scope_covers_every_backend_module" time="0.000" /><testcase classname="test_copy_lint" name="test_required_modules_still_resolve" time="0.000" /><testcase classname="test_copy_lint" name="test_no_prediction_verbs_in_narrative" time="0.085" /><testcase classname="test_copy_lint" name="test_no_claims_about_a_third_party" time="0.047" /><testcase classname="tests.test_iteration7_composites_api" name="test_personality_result_has_composites" time="0.733" /><testcase classname="test_copy_lint" name="test_no_guarantee_language_while_alpha_is_placeholder" time="0.006" /><testcase classname="test_copy_lint" name="test_no_canned_string_renders_twice" time="0.028" /><testcase classname="test_workorder_a" name="test_oversized_unauthenticated_body_is_refused" time="0.000" /><testcase classname="test_workorder_a" name="test_unauthenticated_writes_all_carry_a_limiter" time="0.000" /><testcase classname="test_workorder_a" name="test_blend_matrix_is_the_only_name_in_the_data" time="0.000" /><testcase classname="test_workorder_a" name="test_blend_read_still_produces_the_same_pair_output" time="0.000" /><testcase classname="test_workorder_a" name="test_reverse_key_guard_rejects_a_new_orphan" time="0.001" /><testcase classname="test_workorder_a" name="test_reverse_key_guard_passes_on_shipped_data" time="0.000" /><testcase classname="test_workorder_a" name="test_the_only_acknowledged_orphan_is_diplomat_24" time="0.000" /><testcase classname="test_workorder_b" name="test_personality_instructions_name_the_factors_that_are_scored" time="0.000" /><testcase classname="test_workorder_b" name="test_personality_scope_copy_matches_the_locked_register" time="0.000" /><testcase classname="test_workorder_b" name="test_mrd_in_sd_units_is_equal_for_scale_sets_sharing_an_alpha" time="0.000" /><testcase classname="test_workorder_b" name="test_every_evaluated_scale_set_reports_both_units" time="0.000" /><testcase classname="test_workorder_b" name="test_diagnostics_report_a_rate_per_scale_set" time="0.000" /><testcase classname="test_workorder_b" name="test_the_norms_provenance_finding_is_on_the_record" time="0.000" /><testcase classname="test_workorder_b" name="test_the_snapshot_still_carries_no_population_metadata" time="0.000" /><testcase classname="tests.test_iteration10.TestA2RateLimit" name="test_anon_flag_check_full_flow_not_throttled" time="0.478" /><testcase classname="tests.test_iteration7_composites_api" name="test_every_contribution_has_required_fields" time="0.157" /><testcase classname="tests.test_iteration7_composites_api" name="test_contributions_sum_matches_score_precise" time="0.125" /><testcase classname="tests.test_iteration7_composites_api" name="test_residual_flags_and_polarity" time="0.123" /><testcase classname="tests.test_iteration10.TestA2RateLimit" name="test_reflections_bucket_429_after_30_and_isolated_by_xff" time="4.994" /><testcase classname="tests.test_iteration7_composites_api" name="test_composites_not_persisted_in_mongo" time="0.004" /><testcase classname="tests.test_iteration7_composites_api" name="test_no_composites_on_other_instruments" time="0.390" /><testcase classname="tests.test_iteration7_composites_api" name="test_arithmetic_reproduces_user_reference" time="0.000" /><testcase classname="tests.test_iteration10.TestRegressionDemoUser" name="test_login_and_me" time="0.540" /><testcase classname="tests.test_iteration10.TestRegressionDemoUser" name="test_all_instrument_results_render" time="1.902" /><testcase classname="tests.test_iteration10.TestRegressionDemoUser" name="test_individual_pdf_byte_identical" time="0.306" /><testcase classname="tests.test_iteration10.TestRegressionDemoUser" name="test_combined_pdf_byte_identical" time="0.237" /><testcase classname="tests.test_iteration10.TestRegressionDemoUser" name="test_situation_switch_and_restore" time="0.665" /><testcase classname="tests.test_iteration9.TestEverydayMirror" name="test_start_returns_49_forced_choice_items" time="0.567" /><testcase classname="tests.test_iteration9.TestEverydayMirror" name="test_reject_dotted_item_id" time="0.259" /><testcase classname="tests.test_iteration9.TestEverydayMirror" name="test_side_map_stable_within_session_random_across" time="0.569" /><testcase classname="tests.test_iteration10.TestA2RateLimit" name="test_auth_limiter_normal_use_ok" time="1.077" /><testcase classname="tests.test_iteration9.TestEverydayMirror" name="test_complete_coherent_produces_scored_positions" time="1.376" /><testcase classname="tests.test_iteration10.TestA2RateLimit" name="test_auth_failed_login_lockout_still_returns_429" time="2.420" /><testcase classname="tests.test_ratelimit" name="test_a_single_flag_check_is_unaffected" time="0.338" /><testcase classname="tests.test_ratelimit" name="test_the_window_closes_after_the_threshold" time="3.067" /><testcase classname="tests.test_iteration10.TestA2RateLimit" name="test_partner_apply_oversized_body_rejected" time="0.293" /><testcase classname="tests.test_iteration10.TestA2RateLimit" name="test_partner_apply_normal_body_succeeds" time="0.211" /><testcase classname="test_immutability" name="test_first_render_is_snapshotted_and_later_reads_serve_it" time="0.009" /><testcase classname="test_immutability" name="test_display_version_bump_leaves_the_existing_snapshot_untouched" time="0.010" /><testcase classname="test_immutability" name="test_pdf_bytes_are_stored_on_first_build_and_served_after" time="0.007" /><testcase classname="test_immutability" name="test_combined_pdf_is_invalidated_but_single_reports_are_not" time="0.012" /><testcase classname="tests.test_iteration9.TestSnapshotImmutability" name="test_pdf_bytes_identical_on_two_fetches" time="0.682" /><testcase classname="tests.test_iteration9.TestSnapshotImmutability" name="test_result_json_identical_on_two_fetches" time="0.293" /><testcase classname="tests.test_iteration9.TestSnapshotImmutability" name="test_situation_switch_changes_pdf_then_restores" time="0.789" /><testcase classname="tests.test_ratelimit" name="test_a_different_origin_is_not_punished_for_it" time="2.577" /><testcase classname="tests.test_iteration9.TestAuthOwnership" name="test_anon_start_401" time="0.114" /><testcase classname="tests.test_iteration9.TestAuthOwnership" name="test_cross_user_403_result" time="0.503" /><testcase classname="tests.test_iteration9.TestAuthOwnership" name="test_cross_user_403_pdf" time="0.135" /><testcase classname="tests.test_iteration9.TestCommonness" name="test_personality_result_has_commonness_no_sten_in_factors" time="0.131" /><testcase classname="tests.test_iteration9.TestCommonness" name="test_globals_have_no_commonness_but_position_label" time="0.158" /><testcase classname="tests.test_iteration9.TestPartners" name="test_audience_options" time="0.136" /><testcase classname="tests.test_iteration9.TestPartners" name="test_apply_success_and_rate_limit_and_invalid_audience" time="0.814" /><testcase classname="test_locked_copy" name="test_locked_copy_hashes_unchanged" time="0.001" /><testcase classname="test_locked_copy" name="test_validated_only_for_established_instruments" time="0.000" /><testcase classname="tests.test_iteration10.TestA4EssentialBlend" name="test_fresh_essential_completion_carries_both_blend_and_compatibility" time="1.050" /><testcase classname="tests.test_ratelimit" name="test_an_oversized_body_is_refused" time="0.094" /><testcase classname="tests.test_iteration10.TestB2MRDDiagnostics" name="test_mrd_endpoint_returns_sd_units_and_per_set_rates" time="0.791" /><testcase classname="tests.test_iteration10.TestB2MRDDiagnostics" name="test_mrd_requires_auth" time="68.306" /><testcase classname="tests.test_iteration10.TestB1FifteenFactors" name="test_personality_instructions_say_fifteen" time="68.653" /></testsuite></testsuites>

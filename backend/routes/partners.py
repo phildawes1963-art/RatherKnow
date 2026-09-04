@@ -11,10 +11,11 @@ import re
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr, Field
 
 from database import db
+from services.ratelimit import limiter
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/partners", tags=["Partners"])
@@ -54,7 +55,8 @@ async def audience_options():
 
 
 @router.post("/apply")
-async def apply(data: PartnerApplication, request: Request):
+async def apply(data: PartnerApplication, request: Request,
+                _rl=Depends(limiter("partners"))):
     if data.audience_where not in AUDIENCE_PLACES:
         raise HTTPException(status_code=400, detail="Unknown audience type")
     if not re.search(r"[a-zA-Z]", data.why_it_fits):

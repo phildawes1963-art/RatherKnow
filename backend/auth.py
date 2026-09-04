@@ -14,6 +14,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 from database import db
 from email_service import send_email, password_reset_html
+from services.ratelimit import limiter
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
@@ -171,7 +172,7 @@ async def _claim(user_id: str, session_ids: List[str]) -> int:
 
 
 @router.post("/register")
-async def register(data: RegisterRequest):
+async def register(data: RegisterRequest, _rl=Depends(limiter("auth"))):
     email = data.email.lower().strip()
     if await db.users.find_one({"email": email}):
         raise HTTPException(status_code=409, detail="An account already exists for that email — log in instead.")
@@ -188,7 +189,7 @@ async def register(data: RegisterRequest):
 
 
 @router.post("/login")
-async def login(data: LoginRequest, request: Request):
+async def login(data: LoginRequest, request: Request, _rl=Depends(limiter("auth"))):
     email = data.email.lower().strip()
     identifier = email
     await _lockout_guard(identifier)
@@ -206,7 +207,7 @@ async def me(user: dict = Depends(get_current_user)):
 
 
 @router.post("/forgot-password")
-async def forgot_password(data: ForgotRequest):
+async def forgot_password(data: ForgotRequest, _rl=Depends(limiter("auth"))):
     """Always answers the same way — an attacker learns nothing about who has an account."""
     email = data.email.lower().strip()
     user = await db.users.find_one({"email": email})
@@ -230,7 +231,7 @@ async def forgot_password(data: ForgotRequest):
 
 
 @router.post("/reset-password")
-async def reset_password(data: ResetRequest):
+async def reset_password(data: ResetRequest, _rl=Depends(limiter("auth"))):
     record = await db.password_resets.find_one({"token_hash": _hash_token(data.token), "used": False})
     if not record or datetime.fromisoformat(record["expires_at"]) < datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="That reset link has expired or already been used.")

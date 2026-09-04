@@ -292,7 +292,7 @@ SCORE_BANDS = {
     (2.0, 3.0): {"label": "Emerging", "description": "You show some awareness here but there is room for meaningful development."},
     (3.0, 3.5): {"label": "Competent", "description": "You demonstrate a solid foundation in this area."},
     (3.5, 4.0): {"label": "Proficient", "description": "You perform well in this area and it is becoming a strength."},
-    (4.0, 5.01): {"label": "Exemplary", "description": "This is a clear strength \u2014 you consistently excel here."},
+    (4.0, 5.01): {"label": "Exemplary", "description": "This is a clear strength \u2014 your answers sit at the top of this scale."},
 }
 
 def get_score_band(score):

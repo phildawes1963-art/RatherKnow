@@ -3,7 +3,13 @@
 Extracted from mymirrorreport routes/dating_wellness.py (data frozen in
 constants/essential_data.json via _export_data.py). Logic is a verbatim port:
 6 archetypes scored over 50 items per lens, 5 display dimensions, and the
-compatibility read keyed on the primary+secondary pair.
+blend read keyed on the primary+secondary pair.
+
+Naming (work order A4): the pair read is a *blend* of two archetypes within one person. It was
+called "compatibility" in the ported code, which in a single-player instrument names something
+that does not exist here and never will. The data key, the function and the API field are all
+"blend" now; the API keeps emitting "compatibility" alongside it so nothing already delivered or
+already reading a result changes.
 """
 import json
 import os
@@ -18,7 +24,7 @@ with open(_DATA_PATH, encoding="utf-8") as _fh:
 SELF_ASSESSMENT_QUESTIONS = _D["self_assessment_questions"]
 IDEAL_PARTNER_QUESTIONS = _D["ideal_partner_questions"]
 ARCHETYPES = _D["archetypes"]
-_COMPATIBILITY = _D["compatibility_matrix"]  # keyed "keyA|keyB" (sorted)
+_BLEND = _D["blend_matrix"]  # keyed "keyA|keyB" (sorted)
 
 
 class QuizAnswer(BaseModel):
@@ -71,14 +77,14 @@ def calculate_dimension_scores(answers: List[QuizAnswer]) -> Dict[str, int]:
     return results
 
 
-def get_compatibility_result(archetype_scores: Dict[str, dict], quiz_type: str) -> dict:
+def get_blend_result(archetype_scores: Dict[str, dict], quiz_type: str) -> dict:
     sorted_archetypes = sorted(archetype_scores.items(), key=lambda x: x[1]["score"], reverse=True)
     primary = sorted_archetypes[0][0]
     secondary = sorted_archetypes[1][0]
 
     key = "|".join(sorted([primary, secondary]))
-    if key in _COMPATIBILITY:
-        compat = _COMPATIBILITY[key]
+    if key in _BLEND:
+        compat = _BLEND[key]
         narrative_key = "self_narrative" if quiz_type == "self_assessment" else "ideal_partner_narrative"
         return {
             "type_name": compat["type_name"],
@@ -93,3 +99,30 @@ def get_compatibility_result(archetype_scores: Dict[str, dict], quiz_type: str) 
         "description": primary_arch[desc_key],
         "narrative": primary_arch[desc_key],
     }
+
+
+def assert_reverse_keys_within_questions(archetypes: dict = ARCHETYPES) -> None:
+    """Import-time guard (work order A4): a reverse key outside its own item set is inert.
+
+    `calculate_archetype_scores` only ever consults `reverse` for ids it is already iterating
+    from `questions`, so an id listed in one and absent from the other reverses nothing and
+    nothing reports it.
+
+    KNOWN_ORPHANS is an acknowledgement, not a licence. Diplomat carries reverse=[24] while 24
+    sits in Challenger's item set; resolving it either way is a scoring decision, so it is
+    recorded here rather than silently deleted. Any *new* orphan fails at load.
+    """
+    KNOWN_ORPHANS = {("diplomat", 24)}
+    orphans = {(key, qid)
+               for key, arch in archetypes.items()
+               for qid in arch.get("reverse", [])
+               if qid not in arch["questions"]}
+    unexpected = orphans - KNOWN_ORPHANS
+    if unexpected:
+        raise AssertionError(
+            "Archetype reverse keys outside their own item set — the reversal is inert: "
+            f"{sorted(unexpected)}"
+        )
+
+
+assert_reverse_keys_within_questions()

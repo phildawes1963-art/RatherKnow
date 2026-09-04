@@ -1,0 +1,77 @@
+# RatherKnow test gate (work order A0).
+#
+# Nothing ran these seventeen test files on a change before this workflow existed.
+#
+# RK_ALLOW_PLACEHOLDER_ALPHA=1 is set deliberately: backend/services/mrd.py refuses to load
+# while constants/reliability_1_0_0.json carries placeholder=true, which it does until internal
+# consistency is measured per scale on our own sample (work order D1). The day placeholder
+# becomes false, delete this variable from both jobs below — that is the signal.
+name: RK tests
+
+on:
+  push:
+    branches: [RK]
+  pull_request:
+    branches: [RK]
+
+jobs:
+  offline:
+    # Static guards: copy lint, locked-copy hashes, scoring/display/doc tests. No server needed.
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7
+        ports: ["27017:27017"]
+    env:
+      RK_ALLOW_PLACEHOLDER_ALPHA: "1"
+      MONGO_URL: mongodb://localhost:27017
+      DB_NAME: rk_ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r backend/requirements.txt
+      - name: Copy lint
+        run: python tests/test_copy_lint.py
+      - name: Locked-copy hashes
+        run: python tests/test_locked_copy.py
+      - name: Offline suite
+        run: python -m pytest tests -p no:cacheprovider -n 0
+
+  e2e:
+    # The backend suite talks HTTP to a live app, so CI has to stand one up.
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7
+        ports: ["27017:27017"]
+    env:
+      RK_ALLOW_PLACEHOLDER_ALPHA: "1"
+      RK_MRD_MODE: shadow
+      MONGO_URL: mongodb://localhost:27017
+      DB_NAME: rk_ci
+      JWT_SECRET: ci-only-not-a-real-secret
+      CORS_ORIGINS: "*"
+      APP_BASE_URL: http://localhost:8001
+      REACT_APP_BACKEND_URL: http://localhost:8001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r backend/requirements.txt
+      - name: Start backend
+        working-directory: backend
+        run: |
+          uvicorn server:app --host 0.0.0.0 --port 8001 &
+          for i in $(seq 1 40); do
+            curl -sf http://localhost:8001/api/ >/dev/null && exit 0
+            sleep 2
+          done
+          echo "backend did not come up" && exit 1
+      - name: Backend suite
+        working-directory: backend
+        run: python -m pytest tests -p no:cacheprovider

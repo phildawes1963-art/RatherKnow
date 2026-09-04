@@ -382,3 +382,103 @@ Search-led discovery, essay-led trust.
   the sample readings are public.
 - Do free-tier boundaries differ per instrument, or is everything free until paid tiers exist?
 - Parent attribution is currently visible in the footer — keep or clean split?
+
+---
+
+# Work order Batch A/B — shipped 2026-06 (branch RK)
+
+Governing document: `rk-work-order-batch-A-C.md` (user-supplied). Standing rules honoured: no
+scoring change, no `algo_version`/`bank_version` bump, no delivered result change, every item
+carries a test, no live collection renamed.
+
+## A0 · CI gate
+`.github/workflows/rk-tests.yml`. Two jobs on push/PR to `RK`: `offline` (copy lint, locked-copy
+hashes, `tests/`) and `e2e` (mongo service + uvicorn + `backend/tests/`).
+`RK_ALLOW_PLACEHOLDER_ALPHA=1` is set explicitly in both with a comment saying to delete it the
+day `reliability_1_0_0.json` sets `placeholder: false`.
+**Unverified until pushed** — GitHub Actions cannot be triggered from the preview pod. A red run
+was demonstrated locally instead (deliberate break → `1 failed`, then reverted).
+
+## A1 · Copy lint coverage (landed before A4, as instructed)
+`tests/test_copy_lint.py` rewritten: scope is now **derived** from `backend/`,
+`backend/services/`, `backend/routes/`, `backend/constants/` with a two-entry non-narrative
+allow-list (`server.py`, `database.py`). Tests assert the scope is non-empty, that every
+discovered module has a lint decision, and that the named modules still resolve (hard failure,
+not `continue`).
+Found on first run: `constants/eimirror_data.py:295` had shipped "you consistently excel here"
+in the EI Exemplary band — a banned prediction verb that had never been linted. Reworded to
+"your answers sit at the top of this scale".
+
+## A2 · Rate limiting on unauthenticated writes
+`backend/services/ratelimit.py` — Mongo-backed fixed window, atomic `$inc`, per-origin key from
+the X-Forwarded-For chain, plus a 16 KiB body cap. Buckets: reflections 30/10min,
+partners 10/10min, auth 60/10min (all env-overridable). Wired to `POST /reflections`,
+`PUT/POST /reflections/{id}/*`, `POST /partners/apply`, and register/login/forgot/reset.
+`backend/tests/conftest.py` gives every `requests.Session` its own forwarded address so the suite
+cannot exhaust a window — product limits were not raised to fit the tests.
+**Known limitation, documented in the module:** the header is client-supplied, so this bounds
+loops and casual abuse but is not a defence against a determined attacker. Edge-level limiting is
+still needed before anything is promoted publicly.
+
+## A3 · Guarantee line removed
+`frontend/src/pages/Landing.js` — the half-refund sentence is gone, not softened. Replaced by
+`locked_copy.json → pricing.reportable_limits` (hash-locked). Hashes rotated.
+New lint test fails on any refund/guarantee/money-back wording anywhere in `frontend/src` while
+`reliability_1_0_0.json` has `placeholder: true`. Verified by reinstating the line (lint red) and
+removing it again (green).
+
+## A4 · `compatibility` → `blend`, and the orphaned reverse key
+`essential_data.json` key, `services/essential_scoring.py` (`_BLEND`, `get_blend_result`) and the
+API all renamed. New results emit `blend` **and** `compatibility` pointing at the same object;
+stored documents untouched. Nothing in the frontend or PDFs ever consumed the field.
+Guard `assert_reverse_keys_within_questions()` runs at import and fails on any orphan.
+**Open decision — Diplomat `reverse: [24]`.** Not deleted. It is carried as the single entry in
+`KNOWN_ORPHANS`, and `tests/test_workorder_a.py` asserts that set never grows. Evidence on what
+it was meant to do: Diplomat's items are `22,23,25,26,27,28,29,30,17,38` — a contiguous 22–30 run
+with **24 missing**, refilled with 17 (also Adventurer's) and 38. Item 24 is "I am comfortable
+with loud, passionate debates" and now sits in Challenger's set. Reverse-scored it reads as
+Diplomat-consistent. So the reverse key is evidence that 24 was intended to be a reversed
+Diplomat item and was moved out of the list without the key following. Restoring it changes
+scoring; dropping the key changes nothing. Awaiting the owner's call.
+Work-order correction: the API keys are at `routes/mirror_v2.py` 391/421/429, not 240/270/277.
+
+## B1 · Factor count
+"sixteen primary factors" → "fifteen" in the personality pre-assessment instructions, added to
+`locked_copy.json → instrument_instructions.personality_scope`, with a test asserting the backend
+string matches the locked one verbatim. Code review then found the **same claim on a second
+surface** — `_headline` returned "16 factors scored" from `POST /api/v2/mirrors/summary`. Also
+changed to 15 and covered by the same test.
+
+## B2 · MRD diagnostics in comparable units
+`mrd_sd_units_for()` computes `z·√(2(1−α))` from the formula (not from the rounded threshold, so
+sets sharing an α report identical ratios). `mrd_sd_units` travels with `mrd` in every evaluated
+scale set, and `/api/v2/diagnostics/mrd` now reports `suppression_rate` **per scale set** as well
+as overall. Diagnostics only — no gate behaviour changed. The refund-promise justification was
+also removed from the module docstring and the endpoint note.
+
+## B3 · Norms provenance — findings, no change
+`docs/B3_NORMS_PROVENANCE.md`. Answer is worse than the question assumed: there is no evidence of
+a respondent population at all. The snapshot's entire metadata is `exported_at` and
+`source: "mymirrorreport backend effective bands (super-admin config over defaults)"` — no n, no
+group, no norming date. All fifteen factors share identical sten 1–4 boundaries, which are exactly
+the hardcoded generic `raw_to_sten()` cut-offs, and the band widths are near-uniform across the
+raw range where a normed sten table would be narrow in the middle and wide in the tails. These
+look like equal-interval cut-offs with hand-tuning in stens 5–8, not a percentile map of a sample.
+Consequence, stated and not acted on: `display.py`'s commonness sentences and the sten ≥ 8 /
+sten ≤ 3 strengths and blind-spot selection all rest on the sten ~ N(5.5, 2) assumption that this
+table does not establish. This is upstream of measuring α. **No re-norm performed.**
+
+## Verification
+`tests/` 77 passed · `backend/tests/` 139 passed · testing agent iteration 10: **zero critical,
+zero minor, zero frontend issues**, 231 passed including its own 15 new tests. Delivered-report
+immutability specifically re-checked: individual and combined PDFs byte-identical on repeat, and a
+situation flip-and-back returns the original bytes.
+
+## Batch C — not started, awaiting the Junction Check spec
+C1 Junction Check (spec to be handed over), C2 fourth situation value + move the question out of
+registration, C3 new `informant_predictions` collection (separate lifecycle, no `kind`
+discriminator).
+
+## Still explicitly not started (owner's instruction)
+Entitlement/payments · retention/export/erasure (must cover `rendered_pdfs`) ·
+`RK_MRD_MODE=enforce` · the `services/` module split · any change to Essential item allocation.

@@ -79,11 +79,35 @@
     "outside_uk": "Outside the UK, the equivalent services in your country are the right first step — most countries run a national domestic abuse line and a crisis line. Nothing on this site is a substitute for them, and nothing you read here should ever be a reason to stay somewhere you’re afraid.",
     "exit_link": "If you’re afraid of someone, start here",
     "routes": [
-      { "name": "In immediate danger", "detail": "Call 999.", "contact": "999" },
-      { "name": "National Domestic Abuse Helpline (Refuge)", "detail": "Free, confidential, 24 hours a day. For women; they will help anyone find the right service.", "contact": "0808 2000 247", "link": "https://www.nationaldahelpline.org.uk" },
-      { "name": "Respect Men’s Advice Line", "detail": "Confidential support for men experiencing domestic abuse.", "contact": "0808 8010 327", "link": "https://mensadviceline.org.uk" },
-      { "name": "Galop", "detail": "Support for LGBT+ people experiencing abuse or violence.", "contact": "0800 999 5428", "link": "https://galop.org.uk" },
-      { "name": "Samaritans", "detail": "Whatever you’re carrying, any hour, any day.", "contact": "116 123", "link": "https://www.samaritans.org" }
+      {
+        "name": "In immediate danger",
+        "detail": "Call 999.",
+        "contact": "999"
+      },
+      {
+        "name": "National Domestic Abuse Helpline (Refuge)",
+        "detail": "Free, confidential, 24 hours a day. For women; they will help anyone find the right service.",
+        "contact": "0808 2000 247",
+        "link": "https://www.nationaldahelpline.org.uk"
+      },
+      {
+        "name": "Respect Men’s Advice Line",
+        "detail": "Confidential support for men experiencing domestic abuse.",
+        "contact": "0808 8010 327",
+        "link": "https://mensadviceline.org.uk"
+      },
+      {
+        "name": "Galop",
+        "detail": "Support for LGBT+ people experiencing abuse or violence.",
+        "contact": "0800 999 5428",
+        "link": "https://galop.org.uk"
+      },
+      {
+        "name": "Samaritans",
+        "detail": "Whatever you’re carrying, any hour, any day.",
+        "contact": "116 123",
+        "link": "https://www.samaritans.org"
+      }
     ]
   },
   "flag_check": {
@@ -107,10 +131,22 @@
     "safety_unsure_body": "You weren’t sure whether some of this is about someone you’re afraid of. That uncertainty deserves respect rather than analysis — if any part of you is checking, the checking itself is worth taking seriously. Fear of a specific person is always information.",
     "graduated_note": "One category is exempt from graduation: anything involving fear, control or coercion is not a yellow flag to explore. It has a different answer, and it’s on",
     "stages": [
-      ["Notice", "observe the behaviour, without conclusion"],
-      ["Reflect", "is this a pattern or an incident? does it recur?"],
-      ["Engage", "raise it, if it's worth raising"],
-      ["Decide", "and only then"]
+      [
+        "Notice",
+        "observe the behaviour, without conclusion"
+      ],
+      [
+        "Reflect",
+        "is this a pattern or an incident? does it recur?"
+      ],
+      [
+        "Engage",
+        "raise it, if it's worth raising"
+      ],
+      [
+        "Decide",
+        "and only then"
+      ]
     ],
     "cta_body": "The thing underneath the noticing — what you’re drawn to, what you excuse, and the gap between who you are and who you say you want — is measurable. That’s the Essential Mirror.",
     "cta_label": "Take the Essential Mirror — free",
@@ -145,5 +181,13 @@
   "data_claim": "We never ask who you’re assessing. No profile, no matching, no browsing other people, no verdict on anyone who hasn’t taken the assessment. Your answers are never sold, never shared, and never used to train any model — contractually, not aspirationally.",
   "account_claim": "Three fields — a name, an email, and where you are right now. No card, no social login, and nothing emailed at you: your results appear on screen and stay retrievable by logging back in.",
   "disclaimer": "It’s a self-reflection instrument, not a clinical tool. It informs conversations; it does not replace professionals.",
-  "honest_line": "It can’t find you anyone. Nothing can."
+  "honest_line": "It can’t find you anyone. Nothing can.",
+  "pricing": {
+    "_note": "A3: replaces the line removed from the pricing block. Locked because it is the sentence most likely to be softened back into a promise we cannot honour while reliability_1_0_0.json holds placeholder alphas.",
+    "reportable_limits": "Where the instrument cannot tell two of your scores apart, the reading says so instead of ranking them. That is the whole of what we will claim about how much a reading finds."
+  },
+  "instrument_instructions": {
+    "_note": "B1: sentences the reader is shown before answering. Locked because they state what the instrument delivers, and the previous version said sixteen primary factors while fifteen are scored — Factor B is not administered. tests/test_workorder_b.py asserts the backend string matches this one verbatim.",
+    "personality_scope": "This is a validated five-factor personality measure. Your result maps fifteen primary factors and five global dimensions."
+  }
 }

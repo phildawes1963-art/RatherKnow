@@ -5,10 +5,12 @@ them apart. This module decides what is distinguishable. It does not score and i
 write prose.
 
 MODE. Ships in **shadow** by default: every gate is evaluated and every would-be suppression
-is recorded, but nothing is withheld from the reader. That is deliberate — the guarantee in
-PRD §9 refunds half when fewer than three Reads fire, so the suppression rate has to be
-observed on real profiles before it becomes a contractual promise. Flip
-`RK_MRD_MODE=enforce` once the rate is known.
+is recorded, but nothing is withheld from the reader. That is deliberate: at the configured
+thresholds the fifteen personality primaries fall into one undifferentiated cluster, so
+enforcing would suppress ranking on essentially every reading. The half-refund promise those
+thresholds once backed has been removed from the copy (work order A3) rather than softened.
+`RK_MRD_MODE=enforce` is a reporting-design decision about what class of claim these gates
+permit, not a flag to flip once alpha is measured.
 """
 import json
 import math
@@ -45,6 +47,21 @@ def mrd_for(scale_set: str) -> float:
     cfg = config()
     s = cfg["scale_sets"][scale_set]
     return round(mrd(s["sd"], s["alpha"], s["alpha"], cfg["z"]), 3)
+
+
+def mrd_sd_units_for(scale_set: str) -> float:
+    """MRD expressed in standard deviations of its own scale (work order B2).
+
+    The five scale sets do not share a metric: a 2.326 on the sten primaries and a 0.451 on the
+    EI domains look like very different instruments and are not. MRD/SD = z*sqrt(2*(1-alpha)) is
+    identical for every set sharing an alpha, so the raw figure flatters the small-unit scales
+    for no reason other than their units. Reporting both stops that reading.
+    """
+    cfg = config()
+    s = cfg["scale_sets"][scale_set]
+    # From the formula, not from the rounded threshold: sd cancels, so rounding mrd first would
+    # make two sets with the same alpha differ in the third decimal for no reason.
+    return round(cfg["z"] * math.sqrt(2 * (1 - s["alpha"])), 3)
 
 
 # ---------------------------------------------------------------- the three gates
@@ -116,6 +133,7 @@ def _evaluate_set(scale_set: str, values: dict, named: list) -> dict:
         "scale_set": scale_set,
         "label": config()["scale_sets"][scale_set]["label"],
         "mrd": threshold,
+        "mrd_sd_units": mrd_sd_units_for(scale_set),
         "n": len(values),
         "range": spread,
         "flat_profile": is_flat,

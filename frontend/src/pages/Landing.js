@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import Shell from '../components/Shell';
 import { INSTRUMENTS } from '../lib/mirrorTheme';
 import { SITE } from '../lib/siteMeta';
-import { FLAG, SAFETY } from '../content/register';
+import { FLAG, SAFETY, REGISTER } from '../content/register';
 
 const Tier = ({ tier }) => (
   <span
@@ -285,9 +285,7 @@ export default function Landing() {
               says a maximum price will be published before anything is purchasable, and that’s it. Nothing expires and
               nothing renews.
             </p>
-            <p data-testid="guarantee-line">
-              If your results don’t produce enough for us to say something useful, we’ll tell you, and refund half.
-            </p>
+            <p data-testid="reportable-limits-line">{REGISTER.pricing.reportable_limits}</p>
             <p className="text-[#6E6E66]">
               Only the free tier is built today. The paid readings are published here so you can see what’s coming and
               what it will cost — you cannot buy them yet, and nothing on this page takes a card.
