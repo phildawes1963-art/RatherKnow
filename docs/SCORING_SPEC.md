@@ -224,6 +224,13 @@ snapshots stay immutable and old reports do not change:
 > **Corrected June 2026.** The first issue of this document printed 27 at sten 4 and 73 at sten 7.
 > Both were wrong. The row above is `100 × Φ((sten − 5.5) / 2)`, and `tests/test_display.py` now
 > asserts the shipped table against the normal curve so it cannot drift again. Because these
+> **PAUSED, June 2026.** This whole layer is refused at source: `services/display.NORM_REFERENCED`
+> is `False` because the sten bands behind it have no documented reference sample
+> (`docs/B3_NORMS_PROVENANCE.md`). Reader-facing surfaces show within-person position only
+> (`services/within_person.py`, `wp-1.0.0`). The description below is retained because the layer is
+> paused, not deleted; the day a reference sample exists with its n and composition published, one
+> switch restores it.
+>
 > statements are derived at read time, the table is versioned (`disp-1.0.0`) and pinned per report:
 > correcting it does not alter a report already delivered.
 

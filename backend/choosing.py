@@ -111,7 +111,7 @@ def _closeness(r):
             points.append(_pt(
                 "You don't need much signal to keep choosing someone.",
                 f"Reassurance sits at {anx} of 7 — you're not scanning for evidence that things are all right. That "
-                "makes you unusually easy to be with, and it also means you can stay in something under-fed for a "
+                "makes you easy to be with, and it also means you can stay in something under-fed for a "
                 "long time without registering it as a problem."))
         else:
             points.append(_pt(
@@ -178,7 +178,8 @@ def _personality(r):
     if sd.get("flag") == "HIGH":
         points.append(_pt(
             "One caveat about this reading.",
-            "The validity check noticed an unusually high level of agreement with flattering statements. That doesn't "
+            "The validity check counts how many of the ten most flattering statements you agreed with, and you agreed "
+            "with most of them. That doesn't "
             "invalidate the profile, but it does mean the version of you that answered may be the version you'd "
             "choose to be. Choosing is done by the ordinary-day version."))
     return points

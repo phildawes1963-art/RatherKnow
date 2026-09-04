@@ -13,6 +13,10 @@ BACKEND = os.path.join(ROOT, "backend")
 sys.path.insert(0, BACKEND)
 os.environ.setdefault("RK_ALLOW_PLACEHOLDER_ALPHA", "1")
 
+from dotenv import load_dotenv  # noqa: E402
+
+load_dotenv(os.path.join(BACKEND, ".env"))  # services.ratelimit imports database at module load
+
 
 # ---------------------------------------------------------------- A2 payload cap
 
@@ -80,14 +84,33 @@ def test_reverse_key_guard_passes_on_shipped_data():
     assert_reverse_keys_within_questions(ARCHETYPES)
 
 
-def test_the_only_acknowledged_orphan_is_diplomat_24():
-    """The exception list is a record of one open decision, not a place to put more.
-
-    Diplomat carries reverse=[24] and 24 is in Challenger's item set. Resolving it changes
-    scoring or changes data, so it waits on a decision — but it must not grow a neighbour.
-    """
+def test_no_orphaned_reverse_keys_remain():
+    """Decided: Diplomat's inert reverse=[24] is dropped, not restored. Permanent guard."""
     from services.essential_scoring import ARCHETYPES
 
     orphans = sorted((k, q) for k, a in ARCHETYPES.items() for q in a.get("reverse", [])
                      if q not in a["questions"])
-    assert orphans == [("diplomat", 24)], f"Orphaned reverse keys changed: {orphans}"
+    assert orphans == [], f"Orphaned reverse keys are back: {orphans}"
+
+
+def test_dropping_diplomat_24_changed_no_score():
+    """The whole justification for deleting it: it was never consulted. Proven, not asserted.
+
+    Scores the same answers against the shipped data and against a copy carrying the old
+    reverse=[24], and requires them to be identical.
+    """
+    import copy
+
+    from services.essential_scoring import (ARCHETYPES, QuizAnswer, calculate_archetype_scores,
+                                            calculate_score)
+
+    answers = [QuizAnswer(question_id=i, answer=(i % 5) + 1) for i in range(1, 51)]
+    now = calculate_archetype_scores(answers)
+
+    as_before = copy.deepcopy(ARCHETYPES)
+    as_before["diplomat"]["reverse"] = [24]
+    answer_dict = {a.question_id: a.answer for a in answers}
+    for key, arch in as_before.items():
+        total = sum(calculate_score(answer_dict[q], q in arch["reverse"])
+                    for q in arch["questions"] if q in answer_dict)
+        assert total == now[key]["score"], f"{key} changed: {now[key]['score']} vs {total}"

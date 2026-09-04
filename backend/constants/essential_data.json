@@ -585,7 +585,7 @@
     "They maintain independence—they want you, don't need you"
    ],
    "shadow": "diplomat",
-   "shadow_warning": "You may be drawn to overly agreeable partners who never challenge you, leading to intellectual boredom and eventual resentment.",
+   "shadow_warning": "You may be drawn to overly agreeable partners who never challenge you, and then to intellectual boredom and eventual resentment.",
    "love_language": "Words of Affirmation (about achievements)",
    "counter_type": {
     "name": "The Harmonizer",
@@ -679,7 +679,7 @@
     "They make you feel like anything is possible"
    ],
    "shadow": "rock",
-   "shadow_warning": "You may be drawn to overly rigid partners who represent 'stability' but actually stifle your spirit, leading to feeling trapped.",
+   "shadow_warning": "You may be drawn to overly rigid partners who represent 'stability' but actually stifle your spirit, and then to feeling trapped.",
    "love_language": "Quality Time (experiences)",
    "counter_type": {
     "name": "The Homebody",
@@ -701,9 +701,7 @@
     17,
     38
    ],
-   "reverse": [
-    24
-   ],
+   "reverse": [],
    "ideal_partner_description": "You want a peacemaker. This person excels at communication, values harmony, and has the emotional intelligence to navigate difficult conversations with grace.",
    "self_description": "You are a natural mediator who values harmony and clear communication. You have the rare ability to see multiple perspectives and help others feel heard. You show love by creating peace and facilitating understanding.",
    "full_description": "The Diplomat represents communication mastery, conflict resolution, and the pursuit of harmony. This archetype brings peace to chaos and understanding to confusion.\n\n**Core Philosophy:** Most conflicts stem from miscommunication. With patience and empathy, almost anything can be resolved.\n\n**What Drives Them:** A deep belief that harmony is achievable and that relationships thrive when both parties feel truly heard.",

@@ -311,7 +311,7 @@ def test_situation_framing_differs_numbers_same():
     signatures = {
         "single_dating": "next person still theoretical",
         "in_relationship": "nothing here is a scorecard on your partner",
-        "post_breakup": "window after an ending is short and unusually clear",
+        "post_breakup": "window after an ending is short, and clearer than it will feel in six months",
     }
     for sit, sig in signatures.items():
         assert sig in texts[sit], f"{sit} missing its situation framing"

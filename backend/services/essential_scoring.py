@@ -108,11 +108,16 @@ def assert_reverse_keys_within_questions(archetypes: dict = ARCHETYPES) -> None:
     from `questions`, so an id listed in one and absent from the other reverses nothing and
     nothing reports it.
 
-    KNOWN_ORPHANS is an acknowledgement, not a licence. Diplomat carries reverse=[24] while 24
-    sits in Challenger's item set; resolving it either way is a scoring decision, so it is
-    recorded here rather than silently deleted. Any *new* orphan fails at load.
+    Diplomat used to carry reverse=[24] while 24 sat in Challenger's item set. Decided and closed:
+    the key is dropped, not restored. Restoring 24 would have changed scoring for new readers
+    while delivered results stayed frozen — two populations under one version, worse than the
+    defect — and 24 is forward-scored in Challenger where it reads correctly, so moving it would
+    have changed two archetypes rather than one. Dropping it changes no score at all, which
+    tests/test_workorder_a.py proves. The finding is recorded in docs/ARCHETYPES_SPEC.md.
+
+    KNOWN_ORPHANS is empty and stays empty. Any orphan now fails at load.
     """
-    KNOWN_ORPHANS = {("diplomat", 24)}
+    KNOWN_ORPHANS: set = set()
     orphans = {(key, qid)
                for key, arch in archetypes.items()
                for qid in arch.get("reverse", [])

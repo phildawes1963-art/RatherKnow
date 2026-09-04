@@ -19,6 +19,7 @@ from services.ratelimit import limiter
 from report_pdf import build_report_pdf, build_combined_pdf
 from choosing import build_choosing
 from composites import build_composites
+from services.within_person import build_position
 from services.mrd import build_mrd, MODE as MRD_MODE, config as mrd_config, mrd_sd_units_for
 from services.display import (
     DISPLAY_VERSION, NotNormReferenced, commonness, commonness_sentence,
@@ -456,6 +457,10 @@ async def _score_personality(responses: dict) -> dict:
         "factor_scores": scored["factor_scores"],
         "global_scores": scored["global_scores"],
         "validity": scored["validity"],
+        "loudest": scored["loudest"],
+        "profile_mean": scored["profile_mean"],
+        "loudest_floor": scored["loudest_floor"],
+        # Old names, same objects (norms pause): nothing already reading these breaks.
         "strengths": scored["strengths"],
         "blind_spots": scored["blind_spots"],
         "evidence_tier": "established",
@@ -477,27 +482,49 @@ def _score_eq(responses: dict) -> dict:
                     raw = 6 - raw
                 sub_total += raw
             sub_avg = round(sub_total / len(sub_data["items"]), 2)
-            band = "High" if sub_avg >= 4.0 else "Moderate" if sub_avg >= 3.0 else "Developing"
-            sub_scores[sub_key] = {"name": sub_data["name"], "domain": domain_key, "score": sub_avg, "band": band}
+            # No band word: High / Moderate / Developing implies a standard, and no standard is
+            # documented for these 3.0 and 4.0 cut-offs any more than for the sten bands (B3).
+            # A mean of 4.2 on a five-point scale is a fact about the reader's answers and stays.
+            sub_scores[sub_key] = {"name": sub_data["name"], "domain": domain_key, "score": sub_avg}
             domain_total += sub_total
             domain_count += len(sub_data["items"])
         domain_avg = round(domain_total / domain_count, 2)
-        domain_band = "High" if domain_avg >= 4.0 else "Moderate" if domain_avg >= 3.0 else "Developing"
-        domain_scores[domain_key] = {"name": domain_data["name"], "score": domain_avg, "band": domain_band,
+        domain_scores[domain_key] = {"name": domain_data["name"], "score": domain_avg,
                                      "description": domain_data["description"]}
     overall = round(sum(d["score"] for d in domain_scores.values()) / len(domain_scores), 2)
-    overall_band = "High" if overall >= 4.0 else "Moderate" if overall >= 3.0 else "Developing"
     ordered = sorted(sub_scores.values(), key=lambda x: x["score"], reverse=True)
     return {
         "instrument": "eq",
         "domain_scores": domain_scores,
         "sub_scores": sub_scores,
         "overall_score": overall,
-        "overall_band": overall_band,
         "strengths": ordered[:3],
         "growth_areas": ordered[-3:][::-1],
         "evidence_tier": "established",
     }
+
+
+def _position(result: dict) -> dict | None:
+    """The within-person layer for the primary factors (norms pause, B3 decision).
+
+    Says only what needed no reference sample: which way each factor leans, how far it sits from
+    the reader's own profile mean, and which are the loudest in their own profile. Derived at
+    read time and versioned, so the mapping can be corrected without touching a delivered report.
+    """
+    factors = result.get("factor_scores") or {}
+    values = {k: f["sten"] for k, f in factors.items() if f.get("sten") is not None}
+    if not values:
+        return None
+    meta = {k: {"name": f.get("name", k), "pole_high": f.get("pole_high", "one end"),
+                "pole_low": f.get("pole_low", "the other end")} for k, f in factors.items()}
+    block = build_position(values, meta)
+    block["note"] = (
+        "Each row shows which way you lean, and marks the three that sit furthest from your own "
+        "middle. What they do not show is how you compare with anybody else: we have not yet "
+        "established the reference sample that would make a comparison honest, so we are not "
+        "making one."
+    )
+    return block
 
 
 def _commonness(result: dict) -> dict | None:
@@ -537,6 +564,11 @@ def _with_choosing(result: dict) -> dict:
         composites = build_composites(result)
         if composites:
             extra["composites"] = composites
+        position = _position(result)
+        if position:
+            extra["position"] = position
+        # Returns None while services/display.NORM_REFERENCED is False. Kept wired so the day a
+        # reference sample exists, the population layer comes back without a code change here.
         common = _commonness(result)
         if common:
             extra["commonness"] = common
@@ -711,7 +743,7 @@ def _headline(session: dict) -> str:
         s = result.get("strengths", [])
         return f"15 factors scored · {len(s)} marked strengths" if s else "15 factors scored"
     if inst == "eq":
-        return f"Overall {result['overall_score']} — {result['overall_band']}"
+        return f"Overall {result['overall_score']} of 5"
     return ""
 
 
@@ -939,7 +971,7 @@ def _build_findings(by_instrument: dict) -> list:
                 "id": "flattering-light",
                 "sources": ["EI Mirror", "Personality Mirror"],
                 "title": "A flattering light.",
-                "body": "Two self-report instruments both came back glowing — and the Personality Mirror's validity check noticed you agreed with an unusually high number of very flattering statements. Nothing wrong with a good day. Worth sitting with: would an ordinary-day retake say the same?",
+                "body": "Two self-report instruments both came back glowing — and the Personality Mirror's validity check counts how many of the ten most flattering statements you agreed with. You agreed with most of them. Nothing wrong with a good day. Worth sitting with: would an ordinary-day retake say the same?",
             })
     return findings[:4]
 

@@ -1,0 +1,8 @@
+crons:
+  - name: junction-purge
+    description: "Deletes unclaimed anonymous Junction Check answers after 90 days"
+    cron: "40 3 * * *"
+    endpoint: "{{BASE_URL}}/api/cron/junction-purge"
+    method: POST
+    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+    enabled: true

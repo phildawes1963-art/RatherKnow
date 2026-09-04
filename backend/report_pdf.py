@@ -158,7 +158,11 @@ def _personality(result, flow):
             "clipped to the 1–10 scale. That is why they show a position and their equation rather than a "
             "population comparison: a clipped composite cannot carry one honestly.", S["small"]),
     ]
-    flow += [_bar_table([(g["name"], g["score"], g["label"]) for g in result["global_scores"].values()], maximum=10.0)]
+    # The band word (Very High … Very Low) is paused with the rest of the population layer, so the
+    # third column shows where the number sits on its own scale. Older results still carry `label`
+    # and are read from their own frozen narrative snapshot, never re-rendered through here.
+    flow += [_bar_table([(g["name"], g["score"], f"{g['score']} of 10")
+                         for g in result["global_scores"].values()], maximum=10.0)]
     from composites import build_composites
     prov = build_composites(result)
     if prov:
@@ -192,19 +196,21 @@ def _personality(result, flow):
         Paragraph("Fifteen primary factors", S["h2"]),
         Paragraph(
             "Each factor is a position between two poles, and neither pole is better — both carry costs and both "
-            "carry information. Rather than a score out of ten, each row says how common your position is: how "
-            "many people sit further toward that pole than you do.", S["small"]),
+            "carry information. Each row says which way you lean and how far that sits from your own middle. "
+            "Nothing in this table compares you with other people: the bands behind these scores have no "
+            "published reference sample yet, so a comparison would be a number without a population.", S["small"]),
     ]
-    from services.display import commonness_sentence, NotNormReferenced
+    from services.within_person import build_position
+    scales = build_position(
+        {k: f["sten"] for k, f in result["factor_scores"].items() if f.get("sten") is not None},
+        {k: f for k, f in result["factor_scores"].items()},
+    ).get("scales", {})
     rows = [[Paragraph("<b>Factor</b>", S["cellb"]), Paragraph("<b>Low pole</b>", S["cellb"]),
-             Paragraph("<b>High pole</b>", S["cellb"]), Paragraph("<b>How common</b>", S["cellb"])]]
-    for f in result["factor_scores"].values():
-        try:
-            common = commonness_sentence(f["sten"], f["pole_high"], f["pole_low"])
-        except (NotNormReferenced, KeyError):
-            common = f.get("label", "")
+             Paragraph("<b>High pole</b>", S["cellb"]), Paragraph("<b>Where you sit</b>", S["cellb"])]]
+    for key, f in result["factor_scores"].items():
+        line = (scales.get(key) or {}).get("sentence", "")
         rows.append([Paragraph(f["name"], S["cell"]), Paragraph(f["pole_low"], S["cell"]),
-                     Paragraph(f["pole_high"], S["cell"]), Paragraph(common, S["cell"])])
+                     Paragraph(f["pole_high"], S["cell"]), Paragraph(line, S["cell"])])
     tbl = Table(rows, colWidths=[38 * mm, 28 * mm, 28 * mm, 66 * mm], repeatRows=1)
     tbl.setStyle(TableStyle([
         ("LINEBELOW", (0, 0), (-1, 0), 0.7, INK),
@@ -214,6 +220,18 @@ def _personality(result, flow):
         ("LEFTPADDING", (0, 0), (0, -1), 0),
     ]))
     flow.append(tbl)
+    loud = result.get("loudest") or []
+    flow += [Paragraph("The three furthest from your own middle", S["h2"])]
+    if loud:
+        flow += [Paragraph(
+            "Traits at this distance are the ones doing the selecting — what you notice first in somebody, "
+            "and what you are most likely to over-weight.", S["small"])]
+        flow += [Paragraph(f"— {e['name']}: toward the {e['pole'].lower()} end.", S["body"]) for e in loud]
+    else:
+        flow += [Paragraph(
+            "None of your factors sits far enough from your own middle to name one confidently. That is a "
+            "real result rather than a missing one.", S["body"])]
+
     v = result.get("validity") or {}
     sd, ct = v.get("social_desirability", {}), v.get("central_tendency", {})
     flow += [
@@ -230,17 +248,20 @@ def _eq(result, flow):
     flow += [
         Paragraph("Four domains", S["h2"]),
         Paragraph(
-            f"Overall: <b>{result['overall_score']}</b> on a 1–5 scale ({result['overall_band'].lower()}). "
-            "Bands are published descriptive thresholds, not population percentiles.", S["body"]),
-        _bar_table([(d["name"], d["score"], d["band"]) for d in result["domain_scores"].values()], maximum=5.0),
+            f"Overall: <b>{result['overall_score']}</b> on a 1–5 scale. Each number is the mean of your own "
+            "answers in that domain. There is no grade attached to it: a band word would imply a standard, "
+            "and no reference sample is documented for these thresholds.", S["body"]),
+        _bar_table([(d["name"], d["score"], f"{d['score']} of 5") for d in result["domain_scores"].values()],
+                   maximum=5.0),
     ]
-    for title, key in (("Where you’re strongest", "strengths"), ("Where the work is", "growth_areas")):
+    for title, key in (("Your highest of the fourteen", "strengths"), ("Your lowest of the fourteen", "growth_areas")):
         items = result.get(key) or []
         if items:
             flow += [Paragraph(title, S["h3"])]
-            flow += [Paragraph(f"— {i['name']} ({i['score']}, {i['band'].lower()})", S["body"]) for i in items]
+            flow += [Paragraph(f"— {i['name']} ({i['score']} of 5)", S["body"]) for i in items]
     flow += [Paragraph("Fourteen sub-dimensions", S["h2"])]
-    flow += [_bar_table([(s["name"], s["score"], s["band"]) for s in result["sub_scores"].values()], maximum=5.0)]
+    flow += [_bar_table([(s["name"], s["score"], f"{s['score']} of 5") for s in result["sub_scores"].values()],
+                        maximum=5.0)]
 
 
 def _closeness(result, flow):

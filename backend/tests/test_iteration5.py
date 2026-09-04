@@ -321,7 +321,7 @@ def test_situation_switch_reframes_per_result_pdf():
     t2 = _norm(_pdf_text(p2))
     # Signature phrases unique to each framing
     single_phrase = "next person still theoretical"
-    breakup_phrase = "window after an ending is short and unusually clear"
+    breakup_phrase = "window after an ending is short, and clearer than it will feel in six months"
     assert single_phrase in t1
     assert single_phrase not in t2
     assert breakup_phrase in t2

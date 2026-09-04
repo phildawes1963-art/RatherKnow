@@ -19,7 +19,7 @@ export default function EqResult({ result }) {
           How you handle what you feel.
         </h1>
         <p className="mt-4 text-sm text-[#3B3B34]" data-testid="eq-overall">
-          Overall: <strong>{result.overall_score}</strong> of 5 — {result.overall_band}
+          Overall: <strong>{result.overall_score}</strong> of 5 — the mean of your own answers, with no grade attached
         </p>
       </header>
 
@@ -28,14 +28,14 @@ export default function EqResult({ result }) {
           <div key={key} className="bg-white border border-[#E4E4DE] p-6">
             <div className="flex items-baseline justify-between gap-4">
               <h2 className="mi2-serif text-xl text-[#1C1C18]">{d.name}</h2>
-              <p className="text-sm text-[#5B7284] whitespace-nowrap">{d.score}/5 · {d.band}</p>
+              <p className="text-sm text-[#5B7284] whitespace-nowrap">{d.score} of 5</p>
             </div>
             <div className="mt-3"><Bar score={d.score} /></div>
             <p className="mt-3 text-xs text-[#6E6E66] leading-relaxed">{d.description}</p>
             <div className="mt-4 grid gap-1.5 sm:grid-cols-2">
               {Object.values(result.sub_scores).filter((sSub) => sSub.domain === key).map((sSub) => (
                 <p key={sSub.name} className="text-xs text-[#3B3B34] flex justify-between border-t border-[#E4E4DE] pt-1.5">
-                  <span>{sSub.name}</span><span className="text-[#6E6E66]">{sSub.score} · {sSub.band}</span>
+                  <span>{sSub.name}</span><span className="text-[#6E6E66]">{sSub.score} of 5</span>
                 </p>
               ))}
             </div>

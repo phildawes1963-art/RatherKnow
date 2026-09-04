@@ -295,6 +295,30 @@ export default function Landing() {
       </section>
 
       {/* The Flag Check is free, important, and a different intent. Its own door, out of the main flow. */}
+      {/* The Junction Check: free, no account, and the one object here one person sends to another. */}
+      <section className="max-w-6xl mx-auto px-5 sm:px-8 pt-14">
+        <div className="border border-[#E4E4DE] bg-white p-6 sm:p-7 grid gap-5 md:grid-cols-[1.4fr_auto] md:items-center" data-testid="junction-door">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.12em] text-[#6E6E66]">Start here, free</p>
+            <h3 className="mi2-serif mt-2 text-xl text-[#1C1C18]">
+              Six things worth saying out loud early
+            </h3>
+            <p className="mt-2 text-sm text-[#3B3B34] leading-relaxed max-w-xl">
+              The instruments measure how you travel. The Junction Check asks about the six places where
+              there is only one route — children, where the life happens, who moves, what money is for,
+              faith, and whether this is exclusive. Under ten minutes, no account, nothing scored.
+            </p>
+          </div>
+          <Link
+            to="/junction"
+            data-testid="start-junction-check"
+            className="justify-self-start md:justify-self-end text-sm underline underline-offset-4 text-[#1C1C18] hover:opacity-70"
+          >
+            Take the Junction Check →
+          </Link>
+        </div>
+      </section>
+
       <section className="max-w-6xl mx-auto px-5 sm:px-8 py-14">
         <div className="border border-[#E4E4DE] bg-white p-6 sm:p-7 grid gap-5 md:grid-cols-[1.4fr_auto] md:items-center" data-testid="flag-check-door">
           <div>

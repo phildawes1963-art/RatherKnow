@@ -1,0 +1,248 @@
+{
+  "_note": "The Junction Check (rk-C1-junction-check-build-spec.md). Six questions of plain fact about where a life is heading. NOTHING HERE IS SCORED: there is no domain, no pole mapping, no key, no band and no norm, and none may be added — the domains admit accommodation, junctions admit one route, and a count of routes is not a measure of anything. The only inference the instrument makes is counting which items the reader could not answer, and that count lives in the route. Options carrying `undecided: true` are the ones that count toward it; they are never styled or described as failures.",
+  "bank_version": "1.0.0",
+  "instrument": "RK-JC-6",
+  "first_screen": {
+    "title": "Six things worth saying out loud early",
+    "paragraphs": [
+      "Everything else here is about how you travel — pace, closeness, what you'd trade. Those differences admit accommodation, and most long relationships are substantially made of exactly those arrangements.",
+      "A junction is different in kind. You cannot half-have a child. You cannot live forty per cent in Australia. There is no arrangement available, however much goodwill is applied, because what is being decided is not how you travel but where the line goes.",
+      "Six questions, under ten minutes. No account, and nothing here is scored, banded or added up."
+    ],
+    "instruction": "Don't answer these for somebody else. Filling in what you think their answers are produces a document about your assumptions rather than about anything real.",
+    "dont_know": "Every question has an honest \"I don't know\", and it is never treated as a failure."
+  },
+  "items": [
+    {
+      "id": "j1",
+      "short_label": "children",
+      "title": "Children",
+      "question": "Do you want children?",
+      "options": [
+        {
+          "value": "yes",
+          "label": "Yes"
+        },
+        {
+          "value": "no",
+          "label": "No"
+        },
+        {
+          "value": "unsure",
+          "label": "I'm not sure",
+          "undecided": true
+        },
+        {
+          "value": "have_no_more",
+          "label": "I have children and don't want more"
+        },
+        {
+          "value": "have_maybe_more",
+          "label": "I have children and might want more"
+        }
+      ],
+      "follow_up": {
+        "id": "j1b",
+        "question": "Roughly when?",
+        "shown_when": [
+          "yes",
+          "have_maybe_more"
+        ],
+        "options": [
+          {
+            "value": "under_2",
+            "label": "Within two years"
+          },
+          {
+            "value": "2_to_5",
+            "label": "Two to five years"
+          },
+          {
+            "value": "over_5",
+            "label": "Longer than five years"
+          },
+          {
+            "value": "no_timeframe",
+            "label": "No timeframe in mind"
+          }
+        ]
+      },
+      "framing": "Not whether you'd be a good parent, and not how many. Just whether, and roughly when. It is the one item on this list where \"we'll see\" has a deadline attached that nobody set and neither of you controls."
+    },
+    {
+      "id": "j2",
+      "short_label": "where the life happens",
+      "title": "Where the life happens",
+      "question": "Are you settled where you live?",
+      "options": [
+        {
+          "value": "settled",
+          "label": "Settled here, and I'd want to stay"
+        },
+        {
+          "value": "open",
+          "label": "Open to moving, including abroad"
+        },
+        {
+          "value": "expect_move",
+          "label": "I expect to move within a few years"
+        },
+        {
+          "value": "dont_know",
+          "label": "I don't know",
+          "undecided": true
+        }
+      ],
+      "follow_up": {
+        "id": "j2b",
+        "question": "How near do you need to be to your own family?",
+        "shown_when": "always",
+        "options": [
+          {
+            "value": "same_town",
+            "label": "Same town"
+          },
+          {
+            "value": "within_hour",
+            "label": "Within an hour"
+          },
+          {
+            "value": "within_day",
+            "label": "Within a day's travel"
+          },
+          {
+            "value": "no_distance",
+            "label": "Distance doesn't matter to me"
+          }
+        ]
+      },
+      "framing": "Where a life happens is not a preference about scenery. It decides what work is available, whose parents get looked after, and which of you is a long way from everybody they grew up with."
+    },
+    {
+      "id": "j3",
+      "short_label": "who moves",
+      "title": "Who moves",
+      "question": "If the two of you needed to be in different places, who moves?",
+      "options": [
+        {
+          "value": "i_move",
+          "label": "I'd move"
+        },
+        {
+          "value": "they_move",
+          "label": "I'd expect them to move"
+        },
+        {
+          "value": "work_it_out",
+          "label": "We'd have to work it out"
+        },
+        {
+          "value": "never_thought",
+          "label": "I have honestly never thought about it",
+          "undecided": true
+        }
+      ],
+      "framing": "A different question from where you live now, and far more often the actual junction. Most people have an answer they have never said out loud, and a surprising number discover it only when the job offer arrives."
+    },
+    {
+      "id": "j4",
+      "short_label": "what money is for",
+      "title": "What money is for",
+      "question": "Which is closest to how you think about money?",
+      "options": [
+        {
+          "value": "now",
+          "label": "Money is for now — I'd rather have the life than the balance"
+        },
+        {
+          "value": "later",
+          "label": "Money is for later — security matters more than this year"
+        },
+        {
+          "value": "build",
+          "label": "I want to build something substantial"
+        },
+        {
+          "value": "rather_not",
+          "label": "I'd rather not think about it much"
+        }
+      ],
+      "framing": "Not spending habits — those are negotiable and most couples work them out. This is about what money is for, which decides whether one of you is quietly saving for a future the other one isn't planning."
+    },
+    {
+      "id": "j5",
+      "short_label": "faith",
+      "title": "Faith",
+      "question": "Does religious or spiritual practice shape your week?",
+      "options": [
+        {
+          "value": "yes_shared",
+          "label": "Yes, and I'd want a partner who shares it"
+        },
+        {
+          "value": "yes_not_shared",
+          "label": "Yes, and I don't need a partner to share it"
+        },
+        {
+          "value": "no_background",
+          "label": "No, though it's part of my background"
+        },
+        {
+          "value": "no",
+          "label": "No"
+        },
+        {
+          "value": "prefer_not",
+          "label": "Prefer not to say"
+        }
+      ],
+      "framing": "Only where it is practising rather than cultural. A shared background is a domain. A practice that shapes the week — and an expectation that a partner joins it — is a route."
+    },
+    {
+      "id": "j6",
+      "short_label": "whether this is exclusive",
+      "title": "Whether this is exclusive",
+      "question": "What are you looking for at the moment?",
+      "options": [
+        {
+          "value": "one_exclusive",
+          "label": "One person, exclusive"
+        },
+        {
+          "value": "one_not_exclusive",
+          "label": "One person, not exclusive"
+        },
+        {
+          "value": "more_than_one",
+          "label": "More than one relationship"
+        },
+        {
+          "value": "dont_know_yet",
+          "label": "I don't know yet",
+          "undecided": true
+        },
+        {
+          "value": "not_looking",
+          "label": "I'm not looking for anything right now"
+        }
+      ],
+      "framing": "The one people assume rather than establish, and it produces some of the worst discoveries there are. Two people can spend a year in the same relationship having answered this differently and never once discussed it."
+    }
+  ],
+  "result": {
+    "answers_heading": "What you said",
+    "finding_heading": "What you couldn't answer",
+    "undecided_lead": "You weren't sure on {count} of the six: {items}.",
+    "undecided_body": "That is not a failure and it is not unusual. It means these have not yet been decided by you — which means, if they are not raised, they will be decided by whoever arrives at them first.",
+    "all_answered_lead": "You had an answer for all six.",
+    "all_answered_body": "That is less common than you'd think. The useful next step is not more thinking — it is finding out whether the other person's six are the same.",
+    "discomfort_note": "Some people find this uncomfortable to complete, usually on one particular item. That is worth paying attention to rather than explaining away — and it is a good reason to have the conversation sooner rather than later.",
+    "closing_lead": "A junction passed is passed. You cannot re-route from the middle of a section.",
+    "closing_body": "None of this tells you who to be with. It is six things worth saying out loud early, when asking still costs a fortnight of mild awkwardness rather than four years."
+  },
+  "share": {
+    "button": "Send this to them and compare notes",
+    "sub": "They get their own six questions. You get nothing of theirs — this sends the questions, not your answers.",
+    "note": "The comparison happens between two people talking, which is where it belongs."
+  }
+}

@@ -168,7 +168,13 @@ async def _claim(user_id: str, session_ids: List[str]) -> int:
         {"session_id": {"$in": session_ids}, "user_id": {"$in": [None, user_id]}},
         {"$set": {"user_id": user_id}},
     )
-    return res.modified_count
+    # The Junction Check is anonymous by default and claims through the same guard: a document
+    # is claimable only while it belongs to nobody, or already to this account.
+    junction = await db.junction_answers.update_many(
+        {"id": {"$in": session_ids}, "user_id": {"$in": [None, user_id]}},
+        {"$set": {"user_id": user_id}},
+    )
+    return res.modified_count + junction.modified_count
 
 
 @router.post("/register")

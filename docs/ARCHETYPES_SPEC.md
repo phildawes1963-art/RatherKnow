@@ -135,7 +135,7 @@ clear the omission is intentional.
 
 ---
 
-## 6. DEFECT — the Diplomat's reverse key is inert
+## 6. CLOSED — the Diplomat's reverse key was inert, and has been dropped
 
 `diplomat.reverse = [24]`, but item 24 is not in `diplomat.questions`. Reverse scoring is applied
 only to items within the archetype's own list, so this entry never fires.
@@ -147,11 +147,37 @@ we do not currently know which:
   archetype; or
 - item 24 was intended to be a Diplomat item and was never added to the list.
 
-Both readings imply the shipped Challenger score is missing an intended reversal. **No fix
-applied** — it would change scores. Recorded for the same versioned decision as §4.
+### Evidence gathered before the decision
 
-A guard is cheap and worth adding regardless of the outcome: assert at import that every entry in
-`reverse` appears in the same archetype's `questions`, so this class of defect cannot ship again.
+Diplomat's items are `22, 23, 25, 26, 27, 28, 29, 30, 17, 38` — a contiguous 22–30 run with **24
+missing**, refilled with 17 (also Adventurer's) and 38. Item 24 reads *"I am comfortable with
+loud, passionate debates."* Reverse-scored, that is Diplomat-consistent. So the likelier of the
+two readings is the second: 24 was meant to be a reversed Diplomat item and was moved into the
+Challenger set without the reverse key following it.
+
+### Decision, June 2026 — dropped, not restored
+
+`diplomat.reverse` is now `[]`. Three reasons, none of them that the finding was wrong:
+
+1. **Restoring 24 would change scores for new readers while delivered results stayed frozen** —
+   two populations under one version, which is worse than the defect.
+2. **Item 24 is forward-scored in Challenger, where it reads correctly.** Moving it would have
+   changed two archetypes, not one.
+3. **§4.1 may retire this instrument entirely**, in which case a scoring migration spent here is
+   spent twice.
+
+Dropping the key changes no score at all, because it was never consulted.
+`tests/test_workorder_a.py::test_dropping_diplomat_24_changed_no_score` proves that by scoring the
+same answers against the shipped data and against a copy carrying the old key, and requiring the
+totals to be identical.
+
+The guard shipped with it: `assert_reverse_keys_within_questions()` runs at import and fails
+loudly if any entry in `reverse` is absent from the same archetype's `questions`.
+`KNOWN_ORPHANS` is empty and is asserted to stay empty, so this class of defect cannot ship
+again.
+
+**Still true and still unfixed:** the shipped Challenger score is missing whatever reversal item
+24 was intended to carry, under either reading. That is a scoring question and belongs with §4.
 
 ---
 
@@ -166,8 +192,10 @@ builder, and the lookup table is `_COMPATIBILITY`. Anyone reading the payload �
 practitioner, a journalist, a future engineer — will reasonably read that as the thing we have
 said we will never produce.
 
-Recommend renaming to `blend`, carrying the old field in parallel for existing snapshots. Raised
-with the user; no instruction received; **not changed.**
+**Renamed, June 2026 (work order A4).** The data key is `blend_matrix`, the function is
+`get_blend_result()`, the lookup is `_BLEND`, and the API emits `blend`. `compatibility` is
+carried in parallel at the same object on new writes so nothing reading either name breaks, and
+no stored document was migrated.
 
 ---
 

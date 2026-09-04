@@ -28,6 +28,8 @@ LIMITS = {
     "reflections": (int(os.environ.get("RK_RL_REFLECTIONS", "30")), 600),
     "partners": (int(os.environ.get("RK_RL_PARTNERS", "10")), 600),
     "auth": (int(os.environ.get("RK_RL_AUTH", "60")), 600),
+    # Six screens, so a completion is one start plus a handful of saves plus one complete.
+    "junction": (int(os.environ.get("RK_RL_JUNCTION", "40")), 600),
 }
 
 # A cap on unauthenticated request bodies. The largest legitimate one is a partner application

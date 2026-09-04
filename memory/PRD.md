@@ -482,3 +482,80 @@ discriminator).
 ## Still explicitly not started (owner's instruction)
 Entitlement/payments · retention/export/erasure (must cover `rendered_pdfs`) ·
 `RK_MRD_MODE=enforce` · the `services/` module split · any change to Essential item allocation.
+
+---
+
+# Norms pause, EI grade removal, Diplomat close-out, and C1 · shipped 2026-06 (branch RK)
+
+## Decision 1 · The norms pause
+Population claims are **paused, not caveated**. `services/display.NORM_REFERENCED = False` refuses
+`commonness()` at source; the machinery is intact behind the switch so one flag restores it.
+
+- Removed from reader-facing output: commonness fractions, percentile-flavoured language, and the
+  absolute band words (Very High … Very Low on Personality; High / Moderate / Developing on EI).
+- **EI keeps its numbers, loses the grade** — a mean of 4.2 on a five-point scale is a fact about
+  the reader's answers; the band word implied an undocumented standard.
+- Kept untouched: the Delta, "how you choose", composite provenance and equations, the cross-check,
+  agreements, tensions, synthesis.
+- New `services/within_person.py` (`wp-1.0.0`): **three** named factors in total, ranked on absolute
+  distance from the reader's own profile mean, floor **1.5 sten** (`FLOOR_BASIS` records that it is
+  provisional and becomes per-scale-set when D1 lands: α=.85 → 1.27, α=.75 → 1.65).
+- Approved copy is in `locked_copy.json → position` (`no_grade` renamed `no_comparison`).
+- `DISPLAY_VERSION` `disp-1.0.0` → `disp-1.1.0`; every delivered narrative and PDF keeps serving the
+  layer it was rendered with. No score, raw score or sten moved.
+- Copy lint gained a `POPULATION` ban list, enforced while `NORM_REFERENCED` is False, with
+  `services/display.py` the single documented exemption.
+- Found by the extended lint on its first run: `eimirror_data.py` shipped "you consistently excel
+  here"; `essential_data.json` shipped "leading to" twice. Both reworded.
+
+**Observed consequence, measured on 504 stored personality results:** at the 1.5 floor, 44% name
+nothing, 24% name three. At 1.0 it is 40% / 59%. The floor is the live design lever and the copy
+handles all three states (`loudest-list`, `loudest-partial`, `loudest-none`).
+
+## Decision 2 · Diplomat item 24
+Inert `reverse: [24]` dropped, not restored. `KNOWN_ORPHANS` is now empty and asserted to stay so.
+`tests/test_workorder_a.py::test_dropping_diplomat_24_changed_no_score` proves the deletion moved no
+score. Recorded in `docs/ARCHETYPES_SPEC.md` §6, now marked CLOSED.
+
+## Decision 3 · Methodology note
+`docs/METHODOLOGY_NOTE_DRAFT.md` — drafted for review, **not published**. Ships with the pause when
+approved, never instead of it.
+
+## Decision 4 · C1 · The Junction Check
+Six plain-language questions, free, no account, no scoring, no norms.
+
+- Bank `backend/constants/junction_bank_1_0_0.json` (`RK-JC-6`); no domain, no pole mapping, no key.
+- Route `backend/routes/junction.py` at `/api/v2/junction/*`; collection `junction_answers`.
+- The only inference is a count of items the reader could not answer, named in words.
+- Claiming **reuses** `POST /api/auth/claim`; `_claim()` extended to `junction_answers` under the
+  same `{$in: [None, user_id]}` guard. A second account gets `claimed: 0`.
+- Rate-limited (`junction` bucket, 40/10min) with the 16 KiB body cap.
+- Retention built with the module: `purge_unclaimed()` at 90 days, driven by
+  `.emergent/crons.yml → junction-purge` hitting `POST /api/cron/junction-purge` (bearer
+  `WEBHOOK_CRON_SECRET`, constant-time compare, backgrounded).
+- Frontend `/junction`, linked from the landing page (`junction-door`). Safeguarding copy on every
+  screen including the result, with no account.
+- Guards G1–G4 in `tests/test_junction_guards.py` (28 tests), flow in `backend/tests/test_junction.py`
+  (14 tests). G1 and G3 include proofs that the guard bites when removed.
+
+### Contradictions found in the C1 spec
+1. **§3.2's own approved copy contained "match"** — "whether the other person's six match" — which
+   §4's G4 bans outright. Reworded to "…are the same" so the guard can be strict.
+2. G4's list also bans "score", which appears in the honest refusal "nothing here is scored". The
+   lint is negation-aware: a refusal stays, a bare claim fails.
+
+## Verification
+`tests/` 129 passed · `backend/tests/` 170 passed · testing agent iteration 11: **zero critical,
+zero minor, zero frontend issues**, plus 12 of its own acceptance tests. Delivered-report
+immutability re-checked: PDFs byte-identical on repeat, situation flip-and-back returns the original.
+
+## Open after this round
+- **Methodology note approval** before it goes on `/methodology`.
+- **The 1.5 floor** is provisional; D1 (measure α per scale) is what makes it derived.
+- **A reference sample** — build one from RK respondents, or recover the MM provenance. Until then
+  no population claim returns.
+- **Aggregate publication for the Junction Check** at n ≥ 1,000, distributions only, computed
+  forward from a counter — not built.
+- Still explicitly not started: entitlement/payments, retention/export/erasure for the other
+  collections (`rendered_pdfs` above all), `RK_MRD_MODE=enforce`, the `services/` split, any change
+  to Essential item allocation.

@@ -15,12 +15,6 @@
     "eq": "Established",
     "everyday": "Developmental"
   },
-  "commonness": {
-    "heading": "How common your position is",
-    "explainer": "Each factor is a position between two poles, and neither pole is better — both carry costs and both carry information. So instead of a score out of ten, each row says how many people sit further toward that pole than you do.",
-    "globals_explainer": "These five are derived, not measured: each is a weighted sum of the primary factors, clipped to fit a 1–10 scale. That's why they show a position and their equation instead of a population comparison — a clipped composite can't carry one honestly.",
-    "no_grade": "There is no good end and no bad end. A rare position is not a better one."
-  },
   "promise_opening": "We cannot find you love. Nobody can. Every promise we make is about you, because that’s the only person we can honestly make one about.",
   "promises": [
     {
@@ -189,5 +183,22 @@
   "instrument_instructions": {
     "_note": "B1: sentences the reader is shown before answering. Locked because they state what the instrument delivers, and the previous version said sixteen primary factors while fifteen are scored — Factor B is not administered. tests/test_workorder_b.py asserts the backend string matches this one verbatim.",
     "personality_scope": "This is a validated five-factor personality measure. Your result maps fifteen primary factors and five global dimensions."
+  },
+  "position": {
+    "_note": "Approved replacement for the 'commonness' block (norms pause, B3). Every population statement is gone rather than caveated: a note saying the bands rest on nothing, printed beside a sentence comparing the reader to other people, is an admission of doing it anyway. `no_grade` was renamed `no_comparison` because it is now doing the opposite of its old job. Restore population copy only when a reference sample exists and its n and composition are published.",
+    "heading": "Where each factor sits in your own profile",
+    "caveat_heading": "What these rows do and don't say",
+    "caveat_body": "Each row shows which way you lean, and marks the three that sit furthest from your own middle. What they do not show is how you compare with anybody else. We have not yet established the reference sample that would make a comparison honest, so we are not making one. When we have, it will be published here before it appears in a reading.",
+    "no_comparison": "There is no good end and no bad end. Every line here compares you with you.",
+    "globals_explainer": "These five are derived, not measured: each is a weighted sum of the primary factors, clipped to fit a 1–10 scale. That's why they show a position and their equation rather than a number about you on its own.",
+    "loudest_heading": "The three furthest from your own middle",
+    "loudest_meaning": "Traits at this distance are the ones doing the selecting — what you notice first in somebody, and what you are most likely to over-weight.",
+    "loudest_partial": "{count} of your factors sit far enough from your own middle to name. A flatter profile means no single trait is doing most of the selecting, which is worth knowing in itself.",
+    "loudest_none": "None of your factors sits far enough from your own middle to name one confidently. That is a real result rather than a missing one."
+  },
+  "junction": {
+    "_note": "C1 · the Junction Check closing line, fixed and hash-locked. The instrument produces no score, no band and no statement about a second person; this is the sentence that says what it is for.",
+    "closing_lead": "A junction passed is passed. You cannot re-route from the middle of a section.",
+    "closing_body": "None of this tells you who to be with. It is six things worth saying out loud early, when asking still costs a fortnight of mild awkwardness rather than four years."
   }
 }

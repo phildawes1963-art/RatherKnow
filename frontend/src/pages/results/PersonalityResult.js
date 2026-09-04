@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { TIER_STATEMENTS } from '../../lib/mirrorTheme';
-import { TIER_CHIPS, COMMONNESS } from '../../content/register';
+import { TIER_CHIPS, POSITION_COPY } from '../../content/register';
 
-const FactorRow = ({ f, common }) => (
+const FactorRow = ({ f, position }) => (
   <div className="px-5 sm:px-6 py-4 border-b border-[#E4E4DE] last:border-0" data-testid={`factor-row-${f.name.toLowerCase().replace(/[^a-z]+/g, '-')}`}>
     <div className="flex items-baseline justify-between gap-4">
       <p className="text-sm text-[#1C1C18]">{f.name}</p>
@@ -14,15 +14,18 @@ const FactorRow = ({ f, common }) => (
         style={{ left: `calc(${((f.sten - 1) / 9) * 100}% - 3px)` }}
       />
     </div>
-    <p className="mt-2.5 text-sm text-[#3B3B34] leading-relaxed" data-testid="factor-commonness">
-      {common ? common.sentence : f.label}
+    <p className="mt-2.5 text-sm text-[#3B3B34] leading-relaxed" data-testid="factor-position">
+      {position?.sentence}
     </p>
   </div>
 );
 
-// Globals get a position word, never a number and never a population claim: they are clamped
-// composites, so "1 in 40 people" would be indefensible. The word is the shipped sten label.
-const POSITION = (g) => (g.label || '').toLowerCase();
+// Globals show where the number sits on its own 1-10 scale and nothing else. The band word they
+// used to carry (Very High / Average / ...) was an absolute claim on cut-offs with no reference
+// sample behind them, so it is paused with the rest of the population layer.
+const COUNT_WORD = ['none', 'One', 'Two', 'Three'];
+
+const POSITION = (g) => `${g.score ?? g.score_precise ?? ''} of 10`;
 
 export default function PersonalityResult({ result }) {
   const factorKeys = Object.keys(result.factor_scores);
@@ -30,7 +33,8 @@ export default function PersonalityResult({ result }) {
   const globals = Object.values(result.global_scores);
   const composites = result.composites;
   const provenance = composites?.globals || {};
-  const commonness = result.commonness?.factors || {};
+  const position = result.position?.scales || {};
+  const loud = result.loudest || [...(result.strengths || []), ...(result.blind_spots || [])];
   const sd = result.validity?.social_desirability?.flag;
 
   return (
@@ -44,7 +48,7 @@ export default function PersonalityResult({ result }) {
 
       {sd && sd !== 'NORMAL' && (
         <p className="border border-[#C8AE93] bg-[#C8AE93]/10 px-5 py-4 text-sm text-[#3B3B34]" data-testid="personality-validity-note">
-          You agreed with an unusually high number of very flattering statements — nothing wrong with that, but read
+          You agreed with most of the ten most flattering statements in this questionnaire — nothing wrong with that, but read
           this profile as a best-self version and take it again on an ordinary day if you want the everyday one.
         </p>
       )}
@@ -52,7 +56,7 @@ export default function PersonalityResult({ result }) {
       <section data-testid="personality-globals">
         <h2 className="mi2-serif text-2xl text-[#1C1C18]">The five global dimensions.</h2>
         <p className="mt-3 text-sm text-[#6E6E66] max-w-2xl leading-relaxed" data-testid="globals-explainer">
-          {COMMONNESS.globals_explainer} Open any dimension to see exactly which primaries build it, in which
+          {POSITION_COPY.globals_explainer} Open any dimension to see exactly which primaries build it, in which
           direction, and how much each contributed.
         </p>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -116,43 +120,56 @@ export default function PersonalityResult({ result }) {
 
       <section data-testid="personality-factors">
         <h2 className="mi2-serif text-2xl text-[#1C1C18]">The fifteen primary factors.</h2>
-        <p className="mt-3 text-sm text-[#6E6E66] max-w-2xl leading-relaxed" data-testid="commonness-explainer">
-          {COMMONNESS.explainer} {COMMONNESS.no_grade}
+        <p className="mt-3 text-sm text-[#6E6E66] max-w-2xl leading-relaxed" data-testid="position-explainer">
+          {POSITION_COPY.no_comparison}
         </p>
         <div className="mt-5 bg-white border border-[#E4E4DE]">
-          {factors.map((f, i) => <FactorRow key={f.name} f={f} common={commonness[factorKeys[i]]} />)}
+          {factors.map((f, i) => <FactorRow key={f.name} f={f} position={position[factorKeys[i]]} />)}
         </div>
-        {result.commonness && (
-          <p className="mt-3 text-xs text-[#6E6E66]" data-testid="commonness-version">
-            Population figures derived from calibrated norms at read time · {result.commonness.display_version}
+        <div className="mt-5 border border-[#E4E4DE] bg-white p-6 max-w-2xl" data-testid="why-no-comparison">
+          <p className="text-[11px] uppercase tracking-[0.12em] text-[#6E6E66]">{POSITION_COPY.caveat_heading}</p>
+          <p className="mt-2 text-sm text-[#3B3B34] leading-relaxed">{POSITION_COPY.caveat_body}</p>
+        </div>
+        {result.position && (
+          <p className="mt-2 text-xs text-[#6E6E66]" data-testid="position-version">
+            Positions derived within your own profile at read time · {result.position.version}
           </p>
         )}
       </section>
 
-      {(result.strengths?.length > 0 || result.blind_spots?.length > 0) && (
-        <section className="grid gap-5 sm:grid-cols-2" data-testid="personality-strengths">
-          <div className="bg-white border border-[#E4E4DE] p-6">
-            <p className="text-xs uppercase tracking-[0.12em] text-[#7E8E77]">Where you're least common</p>
-            <ul className="mt-3 space-y-2 text-sm text-[#3B3B34]">
-              {result.strengths.length ? result.strengths.map((st) => (
-                <li key={st.factor}>{st.name} — strongly {st.pole.toLowerCase()}</li>
-              )) : <li className="text-[#6E6E66]">Nothing unusually far out — a balanced profile.</li>}
-            </ul>
-          </div>
-          <div className="bg-white border border-[#E4E4DE] p-6">
-            <p className="text-xs uppercase tracking-[0.12em] text-[#C8AE93]">And at the other end</p>
-            <ul className="mt-3 space-y-2 text-sm text-[#3B3B34]">
-              {result.blind_spots.length ? result.blind_spots.map((b) => (
-                <li key={b.factor}>{b.name} — strongly {b.pole.toLowerCase()}</li>
-              )) : <li className="text-[#6E6E66]">Nothing unusually far out — a balanced profile.</li>}
-            </ul>
-          </div>
-        </section>
-      )}
+      <section data-testid="personality-loudest">
+        <h2 className="mi2-serif text-2xl text-[#1C1C18]">{POSITION_COPY.loudest_heading}</h2>
+        {loud.length === 3 && (
+          <p className="mt-3 text-sm text-[#6E6E66] max-w-2xl leading-relaxed" data-testid="loudest-meaning">
+            {POSITION_COPY.loudest_meaning}
+          </p>
+        )}
+        {loud.length > 0 && loud.length < 3 && (
+          <p className="mt-3 text-sm text-[#3B3B34] max-w-2xl leading-relaxed" data-testid="loudest-partial">
+            {POSITION_COPY.loudest_partial.replace('{count}', COUNT_WORD[loud.length])}
+          </p>
+        )}
+        {loud.length === 0 ? (
+          <p className="mt-3 text-sm text-[#3B3B34] max-w-2xl leading-relaxed" data-testid="loudest-none">
+            {POSITION_COPY.loudest_none}
+          </p>
+        ) : (
+          <ul className="mt-5 bg-white border border-[#E4E4DE]" data-testid="loudest-list">
+            {loud.map((f) => (
+              <li key={f.factor} className="px-5 sm:px-6 py-4 border-b border-[#E4E4DE] last:border-0">
+                <p className="text-sm text-[#1C1C18]">{f.name}</p>
+                <p className="mt-1 text-sm text-[#3B3B34]">
+                  Toward the {f.pole.toLowerCase()} end.
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <section className="border border-[#E4E4DE] bg-white p-6" data-testid="personality-evidence-tier">
         <p className="text-[11px] uppercase tracking-[0.1em] bg-[#1C1C18] text-[#F6F6F2] inline-block px-2 py-0.5">{TIER_CHIPS.personality}</p>
-        <p className="mt-3 text-sm text-[#3B3B34] leading-relaxed">{TIER_STATEMENTS.personality} Fifteen primary factors and five global dimensions, scored against calibrated norm bands.</p>      </section>
+        <p className="mt-3 text-sm text-[#3B3B34] leading-relaxed">{TIER_STATEMENTS.personality} Fifteen primary factors and five global dimensions.</p>      </section>
 
       <section className="border-t border-[#E4E4DE] pt-8 flex flex-wrap items-center gap-5">
         <Link to="/mirrors" data-testid="personality-cta-mirrors" className="bg-[#1C1C18] text-[#F6F6F2] px-6 py-3 rounded-sm text-sm hover:opacity-85">

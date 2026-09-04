@@ -3,14 +3,30 @@
 Pure functions. No database, no prose, no scoring. Input is a stored score; output is the
 things a reader-facing surface is allowed to say about it.
 
-Why commonness and not percentile: a 1-10 scale that is not a quality score gets read as
-one — "Rule-Consciousness 3" reads as three out of ten, a fail. "About 1 in 9 people sit
-further toward this end than you" carries the same information with no league-table valence,
-and works on bidirectional traits where a percentile actively misleads.
+PAUSED, NOT DELETED. NORM_REFERENCED is False. The sten bands this layer converts have no
+documented reference sample behind them (docs/B3_NORMS_PROVENANCE.md): the snapshot records no
+n and no group, all fifteen factors share the generic default lower cut-offs, and the band
+widths are near-uniform where a normed sten table is narrow in the middle and wide in the
+tails. Arithmetic on the normal curve is correct arithmetic on an assumption this table does
+not establish, so every population statement is refused at source. P4 says no band before
+norms.
+
+The machinery stays because the fix is a reference sample, not a rewrite: the day one exists,
+with its n and composition published, NORM_REFERENCED goes True and this layer returns.
+Meanwhile services/within_person.py carries the reader-facing load, saying only what needed no
+norm in the first place.
 """
 from math import erf, sqrt
 
-DISPLAY_VERSION = "disp-1.0.0"
+DISPLAY_VERSION = "disp-1.1.0"
+
+# The single switch. False until a reference sample exists and its n and composition are
+# published. Nothing else in the codebase decides whether a population claim is allowed.
+NORM_REFERENCED = False
+NORM_PAUSE_REASON = (
+    "Population comparisons are paused: the sten bands have no documented reference sample. "
+    "See docs/B3_NORMS_PROVENANCE.md."
+)
 
 # Cumulative percentile at the midpoint of each sten band: 100 * Phi((sten - 5.5) / 2).
 # Locked by test_display.py against the normal CDF so it cannot drift.
@@ -46,6 +62,8 @@ def commonness(sten: int, *, composite: bool = False, clamped: bool = False) -> 
     uncalibrated gains then clipped to 1-10, and a clipped number cannot carry a defensible
     population claim.
     """
+    if not NORM_REFERENCED:
+        raise NotNormReferenced(NORM_PAUSE_REASON)
     if composite:
         raise NotNormReferenced(
             "Global dimensions are derived composites with uncalibrated gains. They show position "

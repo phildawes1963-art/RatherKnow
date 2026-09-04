@@ -48,37 +48,46 @@ def _h(t):
 
 
 # ---------- Commonness display ----------
-class TestCommonness:
+class TestPosition:
+    """The population layer is paused (B3). What the reader gets is within-person only."""
+
     PERSONALITY_SID = "c92ddeea-b330-4ae2-9d80-121e888d7312"
 
-    def test_personality_result_has_commonness_no_sten_in_factors(self, ui_token):
+    def test_personality_result_carries_a_within_person_position_for_every_factor(self, ui_token):
         r = requests.get(f"{BASE}/api/v2/assessments/{self.PERSONALITY_SID}/result", headers=_h(ui_token), timeout=20)
         assert r.status_code == 200, r.text
         data = r.json()
-        cm = data.get("commonness") or {}
-        assert cm.get("display_version") == "disp-1.0.0"
-        factors = cm.get("factors") or {}
-        assert len(factors) == 15, f"expected 15 primary factors, got {len(factors)}"
-        for k, row in factors.items():
-            s = row.get("sentence") or ""
-            assert "About" in s and " in " in s, f"{k}: sentence looks wrong: {s!r}"
-            assert "sten" not in s.lower(), f"{k}: sentence should not mention sten: {s!r}"
-            # No x/10 style figure in the sentence
-            assert "/10" not in s, f"{k}: sentence should not contain x/10: {s!r}"
-        # Globals excluded
-        excluded = cm.get("excluded") or ""
-        assert "global" in excluded.lower(), f"excluded reason should mention globals: {excluded!r}"
+        pos = data.get("position") or {}
+        assert pos.get("version") == "wp-1.0.0", pos.get("version")
+        assert pos.get("floor") == 1.5
+        scales = pos.get("scales") or {}
+        assert len(scales) == 15, f"expected 15 primary factors, got {len(scales)}"
+        for k, row in scales.items():
+            sentence = row.get("sentence") or ""
+            assert sentence.startswith(("Toward the", "Between the")), f"{k}: {sentence!r}"
+            low = sentence.lower()
+            for banned in ("people", "population", "percentile", "unusually", "about 1 in",
+                           "sten", "/10", "very high", "very low"):
+                assert banned not in low, f"{k}: paused language survived: {sentence!r}"
 
-    def test_globals_have_no_commonness_but_position_label(self, ui_token):
+    def test_no_population_block_is_returned_while_norms_are_paused(self, ui_token):
+        r = requests.get(f"{BASE}/api/v2/assessments/{self.PERSONALITY_SID}/result", headers=_h(ui_token), timeout=20)
+        assert "commonness" not in r.json(), "the paused population layer is still being served"
+
+    def test_at_most_three_factors_are_named(self, ui_token):
         r = requests.get(f"{BASE}/api/v2/assessments/{self.PERSONALITY_SID}/result", headers=_h(ui_token), timeout=20)
         data = r.json()
-        globals_ = data.get("global_scores") or {}
-        assert globals_, "no global_scores in result"
-        for key, g in globals_.items():
-            label = (g.get("label") or g.get("band") or "").strip()
-            assert label, f"global {key} missing label/band word"
+        named = [k for k, row in (data["position"]["scales"]).items() if row["loudest"]]
+        assert len(named) <= 3, named
+
+    def test_composites_and_their_provenance_survive_the_pause(self, ui_token):
+        """Everything within-person was supposed to be untouched. This is the check."""
+        r = requests.get(f"{BASE}/api/v2/assessments/{self.PERSONALITY_SID}/result", headers=_h(ui_token), timeout=20)
+        data = r.json()
+        assert data.get("global_scores")
         comps = data.get("composites") or {}
         assert comps and "globals" in comps
+        assert data.get("choosing")
 
 
 # ---------- Snapshot immutability + situation switch ----------

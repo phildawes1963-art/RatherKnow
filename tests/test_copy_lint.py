@@ -38,6 +38,18 @@ BANNED = (
     "expect to", "you commit", "leading to",
 )
 
+# Population claims about the reader. Banned while services/display.NORM_REFERENCED is False:
+# the sten bands have no documented reference sample (docs/B3_NORMS_PROVENANCE.md), so any
+# sentence positioning the reader against other people is a number without a population.
+# Refusals are fine and are why these are phrased as assertions: "not population percentiles"
+# says we do not do it, and stays.
+POPULATION = ("unusually", "than most people", "more common than", "rarer than", "how common your",
+              "1 in ")
+
+# The one module exempt from POPULATION: it *is* the paused machinery, kept intact behind the
+# switch so restoring it is one flag rather than a rewrite.
+POPULATION_EXEMPT = ("services/display.py",)
+
 # Third-person references: no output may describe a person who did not answer (P1).
 THIRD_PARTY = ("your partner is", "they are probably", "your partner will", "he will", "she will")
 
@@ -66,9 +78,51 @@ def _string_literals(path: str):
             yield node.lineno, node.value
 
 
-def _offenders(terms):
+def item_banks() -> list:
+    """The JSON banks carry reader-facing copy too — the Junction Check's entire output is bank
+    copy (spec C1 G4), and a lint that only reads .py would never see it."""
+    d = os.path.join(BACKEND, "constants")
+    return [os.path.join(d, n) for n in sorted(os.listdir(d)) if n.endswith(".json")]
+
+
+# `label` holds an answer OPTION the reader picks about themselves ("I expect to move within a
+# few years"). The bans are on copy *we* write about the reader, so option labels are out of
+# scope — banning "expect to" in an answer the reader chooses would be banning the reader.
+_BANK_SKIP_KEYS = ("label", "option_a", "option_b")
+
+
+def _bank_strings(node):
+    if isinstance(node, dict):
+        for k, v in node.items():
+            if not k.startswith("_") and k not in _BANK_SKIP_KEYS:
+                yield from _bank_strings(v)
+    elif isinstance(node, list):
+        for v in node:
+            yield from _bank_strings(v)
+    elif isinstance(node, str):
+        yield node
+
+
+def _bank_offenders(terms):
+    import json
+
+    found = []
+    for path in item_banks():
+        with open(path, encoding="utf-8") as fh:
+            data = json.load(fh)
+        for text in _bank_strings(data):
+            low = text.lower()
+            for term in terms:
+                if term in low:
+                    found.append(f"{os.path.basename(path)} — '{term}' in: {text[:90]}")
+    return found
+
+
+def _offenders(terms, skip=()):
     found = []
     for module in narrative_modules():
+        if module in skip:
+            continue
         path = os.path.join(BACKEND, module)
         for lineno, text in _string_literals(path):
             low = text.lower()
@@ -102,12 +156,18 @@ def test_required_modules_still_resolve():
 
 
 def test_no_prediction_verbs_in_narrative():
-    offenders = _offenders(BANNED)
+    offenders = _offenders(BANNED) + _bank_offenders(BANNED)
     assert not offenders, "Banned prediction verbs in reader-facing copy:\n" + "\n".join(offenders)
 
 
+def test_the_banks_are_in_scope():
+    banks = item_banks()
+    assert len(banks) >= 4, f"only {len(banks)} banks found — has constants/ moved?"
+    assert any("junction_bank" in b for b in banks)
+
+
 def test_no_claims_about_a_third_party():
-    offenders = _offenders(THIRD_PARTY)
+    offenders = _offenders(THIRD_PARTY) + _bank_offenders(THIRD_PARTY)
     assert not offenders, "Copy describing someone who did not answer:\n" + "\n".join(offenders)
 
 
@@ -143,6 +203,29 @@ def test_no_guarantee_language_while_alpha_is_placeholder():
     )
 
 
+def test_no_population_claims_while_norms_are_paused():
+    """The norms pause (B3), enforced by static analysis rather than by remembering."""
+    import sys
+
+    sys.path.insert(0, BACKEND)
+    from services.display import NORM_REFERENCED
+
+    if NORM_REFERENCED:
+        return
+    offenders = _offenders(POPULATION, skip=POPULATION_EXEMPT)
+    assert not offenders, (
+        "Copy comparing the reader with other people while the norm bands have no documented "
+        "reference sample:\n" + "\n".join(offenders)
+    )
+
+
+def test_the_paused_population_layer_is_still_isolated():
+    """If the exempt module stops being the only place population copy lives, the pause has
+    leaked and the exemption is hiding it."""
+    assert POPULATION_EXEMPT == ("services/display.py",)
+    assert os.path.exists(os.path.join(BACKEND, "services", "display.py"))
+
+
 def test_no_canned_string_renders_twice():
     """A paragraph that repeats verbatim reveals itself as boilerplate. The shadow-pull warning
     used to render twice within two pages of one report; this stops it recurring."""
@@ -172,7 +255,10 @@ if __name__ == "__main__":
     test_lint_scope_covers_every_backend_module()
     test_required_modules_still_resolve()
     test_no_prediction_verbs_in_narrative()
+    test_the_banks_are_in_scope()
     test_no_claims_about_a_third_party()
     test_no_guarantee_language_while_alpha_is_placeholder()
+    test_no_population_claims_while_norms_are_paused()
+    test_the_paused_population_layer_is_still_isolated()
     test_no_canned_string_renders_twice()
     print("COPY LINT OK")

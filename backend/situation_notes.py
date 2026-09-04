@@ -21,7 +21,7 @@ SITUATION_PDF_NOTES = {
     },
     "post_breakup": {
         "label": "Post-breakup",
-        "essential": "The window after an ending is short and unusually clear. Read the gap below as what keeps being true across relationships, not as evidence about the one that just ended. Some endings are pattern; some are only timing, and no instrument can tell those apart for you.",
+        "essential": "The window after an ending is short, and clearer than it will feel in six months. Read the gap below as what keeps being true across relationships, not as evidence about the one that just ended. Some endings are pattern; some are only timing, and no instrument can tell those apart for you.",
         "MI-AS-36": "Right after an ending both dimensions can read more extreme than your settled position — reassurance especially. That doesn’t make it wrong; it makes it worth taking again in a few months and comparing.",
         "personality": "This is the steadiest thing here: personality moves very little with a breakup, so use it as ground rather than as explanation.",
         "eq": "Self-management usually takes the hit in the weeks after an ending. Read a low domain as a state you’re in rather than a trait you have.",

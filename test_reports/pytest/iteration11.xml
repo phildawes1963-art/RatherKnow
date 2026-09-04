@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="0" tests="12" time="2.551" timestamp="2026-09-04T17:06:08.465192+00:00" hostname="agent-env-3e9f5ab4-8a3a-4e7a-88d1-31c9d6f63cfa"><testcase classname="tests.test_iteration11" name="test_ui_demo_all_completed_results_open_without_500" time="0.695"><failure message="KeyError: 'id'">backend/tests/test_iteration11.py:59: in test_ui_demo_all_completed_results_open_without_500
+    r = requests.get(f"{API}/v2/assessments/{s['id']}/result",
+                                             ^^^^^^^
+E   KeyError: 'id'</failure></testcase><testcase classname="tests.test_iteration11" name="test_individual_and_combined_pdfs_are_byte_identical_on_repeat" time="0.000"><failure message="KeyError: 'kind'">backend/tests/test_iteration11.py:65: in test_individual_and_combined_pdfs_are_byte_identical_on_repeat
+    sid = _find(demo_sessions, "personality")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_iteration11.py:48: in _find
+    if s["kind"] == kind and s.get("status") == "complete":
+       ^^^^^^^^^
+E   KeyError: 'kind'</failure></testcase><testcase classname="tests.test_iteration11" name="test_situation_flip_then_flip_back_returns_original_pdf_bytes" time="0.000"><failure message="KeyError: 'kind'">backend/tests/test_iteration11.py:76: in test_situation_flip_then_flip_back_returns_original_pdf_bytes
+    sid = _find(demo_sessions, "personality")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_iteration11.py:48: in _find
+    if s["kind"] == kind and s.get("status") == "complete":
+       ^^^^^^^^^
+E   KeyError: 'kind'</failure></testcase><testcase classname="tests.test_iteration11" name="test_personality_result_has_position_block_and_no_commonness" time="0.000"><failure message="KeyError: 'kind'">backend/tests/test_iteration11.py:97: in test_personality_result_has_position_block_and_no_commonness
+    sid = _find(demo_sessions, "personality")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_iteration11.py:48: in _find
+    if s["kind"] == kind and s.get("status") == "complete":
+       ^^^^^^^^^
+E   KeyError: 'kind'</failure></testcase><testcase classname="tests.test_iteration11" name="test_at_most_three_factors_flagged_loudest" time="0.000"><failure message="KeyError: 'kind'">backend/tests/test_iteration11.py:128: in test_at_most_three_factors_flagged_loudest
+    sid = _find(demo_sessions, "personality")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_iteration11.py:48: in _find
+    if s["kind"] == kind and s.get("status") == "complete":
+       ^^^^^^^^^
+E   KeyError: 'kind'</failure></testcase><testcase classname="tests.test_iteration11" name="test_ei_result_has_no_band_words" time="0.000"><failure message="KeyError: 'kind'">backend/tests/test_iteration11.py:142: in test_ei_result_has_no_band_words
+    sid = _find(demo_sessions, "eq")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_iteration11.py:48: in _find
+    if s["kind"] == kind and s.get("status") == "complete":
+       ^^^^^^^^^
+E   KeyError: 'kind'</failure></testcase><testcase classname="tests.test_iteration11" name="test_ei_pdf_still_renders_without_grade_words" time="0.000"><failure message="KeyError: 'kind'">backend/tests/test_iteration11.py:156: in test_ei_pdf_still_renders_without_grade_words
+    sid = _find(demo_sessions, "eq")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_iteration11.py:48: in _find
+    if s["kind"] == kind and s.get("status") == "complete":
+       ^^^^^^^^^
+E   KeyError: 'kind'</failure></testcase><testcase classname="tests.test_iteration11" name="test_personality_pdf_has_no_population_language" time="0.000"><failure message="KeyError: 'kind'">backend/tests/test_iteration11.py:167: in test_personality_pdf_has_no_population_language
+    sid = _find(demo_sessions, "personality")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_iteration11.py:48: in _find
+    if s["kind"] == kind and s.get("status") == "complete":
+       ^^^^^^^^^
+E   KeyError: 'kind'</failure></testcase><testcase classname="tests.test_iteration11" name="test_junction_share_payload_serves_six_items" time="0.152" /><testcase classname="tests.test_iteration11" name="test_junction_result_carries_no_score_or_second_person_claim" time="0.451"><failure message="AssertionError: junction result mentions 'the other person'&#10;assert 'the other person' not in '{&quot;instrumen... belongs.&quot;}}'&#10;  &#10;  'the other person' is contained here:&#10;    {&quot;instrument&quot;: &quot;rk-jc-6&quot;, &quot;bank_version&quot;: &quot;1.0.0&quot;, &quot;answers_heading&quot;: &quot;what you said&quot;, &quot;finding_heading&quot;: &quot;what you couldn't answer&quot;, &quot;written_back&quot;: [{&quot;item_id&quot;: &quot;j1&quot;, &quot;title&quot;: &quot;children&quot;, &quot;said&quot;: &quot;yes \u2014 two to five years&quot;, &quot;framing&quot;: &quot;not whether you'd be a good parent, and not how many. just whether, and roughly when. it is the one item on this list where \&quot;we'll see\&quot; has a deadline attached that nobody set and neither of you controls.&quot;}, {&quot;item_id&quot;: &quot;j2&quot;, &quot;title&quot;: &quot;where the life happens&quot;, &quot;said&quot;: &quot;settled here, and i'd want to sta...&#10;  &#10;  ...Full output truncated (2 lines hidden), use '-vv' to show">backend/tests/test_iteration11.py:204: in test_junction_result_carries_no_score_or_second_person_claim
+    assert term not in text, f"junction result mentions {term!r}"
+E   AssertionError: junction result mentions 'the other person'
+E   assert 'the other person' not in '{"instrumen... belongs."}}'
+E     
+E     'the other person' is contained here:
+E       {"instrument": "rk-jc-6", "bank_version": "1.0.0", "answers_heading": "what you said", "finding_heading": "what you couldn't answer", "written_back": [{"item_id": "j1", "title": "children", "said": "yes \u2014 two to five years", "framing": "not whether you'd be a good parent, and not how many. just whether, and roughly when. it is the one item on this list where \"we'll see\" has a deadline attached that nobody set and neither of you controls."}, {"item_id": "j2", "title": "where the life happens", "said": "settled here, and i'd want to sta...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show</failure></testcase><testcase classname="tests.test_iteration11" name="test_junction_intro_and_safety_present_on_share_payload" time="0.240" /><testcase classname="tests.test_iteration11" name="test_cron_purge_requires_secret" time="0.420" /></testsuite></testsuites>

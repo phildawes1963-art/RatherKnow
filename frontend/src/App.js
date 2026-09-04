@@ -21,6 +21,7 @@ import Auth from '@/pages/Auth';
 import { ForgotPassword, ResetPassword } from '@/pages/PasswordReset';
 import LegacyRedirect from '@/pages/LegacyRedirect';
 import Partners from '@/pages/Partners';
+import Junction from '@/pages/Junction';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
             <Route path="/partners" element={<Partners />} />
             <Route path="/samples" element={<Samples />} />
             <Route path="/flag-check" element={<FlagCheck />} />
+            <Route path="/junction" element={<Junction />} />
             <Route path="/register" element={<Auth mode="register" />} />
             <Route path="/login" element={<Auth mode="login" />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

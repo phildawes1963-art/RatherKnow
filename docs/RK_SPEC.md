@@ -120,8 +120,10 @@ otherwise.
 Four layers, in increasing distance from the raw data:
 
 1. **Scores** — frozen, immutable, version-stamped.
-2. **Position language** — commonness fractions on normed factors; positions between named poles
-   elsewhere. No sten and no "x out of 10" reaches a reader.
+2. **Position language** — within-person only, since the norms pause (see R0). Which way a factor
+   leans, how far it sits from the reader's own profile mean, and which factors are the loudest in
+   their own profile. No commonness fraction, no percentile, no absolute band word, and no sten or
+   "x out of 10" reaches a reader.
 3. **"How you choose"** — per-instrument translation of scores into selection behaviour. The
    product's actual value proposition.
 4. **Cross-check** — where instruments agree (signal), where they disagree (a finding), and a
@@ -207,9 +209,11 @@ docs/  scripts/  tests/  memory/
 | `users` | account, bcrypt hash, situation | mutable |
 | `mirror_v2_sessions` | in-progress responses, `presentation.side_map`, completed `result` | result written once |
 | `mirror_v2_reflections` | Flag Check responses — never scored | append |
+| `junction_answers` | one Junction Check — six answers, never scored, `user_id` null until claimed | append |
 | `results` | canonical scored snapshot, `algo_version`, `user_id` | `$setOnInsert` |
 | `narratives` | resolved layer-3 narrative per (session, display_version, situation) | `$setOnInsert` |
 | `rendered_pdfs` | PDF bytes per (session, kind, display_version, situation) | write-once |
+| `rate_limits` | per-origin fixed-window counters for unauthenticated writes | expires |
 | `password_resets` | reset tokens, 60-min TTL | consumed |
 | `login_attempts` | lockout counters | rolling |
 | `partner_applications` | practitioner applications, `status: unread` | append |
@@ -252,7 +256,9 @@ versioned programme with parity coverage.
 |---|---|---|
 | `ALGO_VERSION` | `rk-1.0.0` | scoring |
 | `bank_version` | `1.0.0` | Closeness and Everyday item banks |
-| `DISPLAY_VERSION` | `disp-1.0.0` | commonness / position mapping |
+| `DISPLAY_VERSION` | `disp-1.1.0` | position mapping (`disp-1.0.0` = the population layer, paused) |
+| `within_person` | `wp-1.0.0` | within-profile position and loudest selection (floor 1.5 sten) |
+| `junction_bank` | `1.0.0` | Junction Check items (`RK-JC-6`, unscored) |
 | `CONTENT_VERSION` | `copy-1.1.0` | narrative copy |
 | MRD `profile_version` | `mrd-1.0.0` | reliability thresholds |
 
@@ -382,7 +388,27 @@ No defaults anywhere: missing config fails fast at import.
 
 Ordered by what would hurt most. **Nothing in this section is fixed.**
 
-### R1 — The guarantee has no working mechanism · SEVERE
+### R0 — The sten bands have no documented reference sample · SEVERE · population claims PAUSED
+`p150_norms_snapshot.json` records `exported_at` and one sentence — "super-admin config over
+defaults". No n, no group, no norming date. All fifteen factors share identical sten 1–4
+boundaries, which are exactly the hardcoded generic `raw_to_sten()` cut-offs, and the band widths
+are near-uniform across the raw range where a normed sten table is narrow in the middle and wide
+in the tails. These read as equal-interval cut-offs hand-tuned in stens 5–8, not a percentile map
+of an observed sample. Full working: `docs/B3_NORMS_PROVENANCE.md`.
+
+**Acted on, June 2026.** Every population statement is paused rather than caveated — a note
+saying the bands rest on nothing, printed beside a sentence comparing the reader to other people,
+is an admission of doing it anyway. `services/display.NORM_REFERENCED = False` refuses commonness
+at source; the absolute band words (Very High … Very Low) are no longer emitted; the extremes
+selection moved from `sten >= 8` / `sten <= 3` to within-profile rank in
+`services/within_person.py`. `DISPLAY_VERSION` moved to `disp-1.1.0`, so everything already
+delivered keeps serving the layer it was rendered with.
+
+**Still open:** whether a reference sample is ever built from RK respondents, or the provenance is
+recovered from the MM side. Reliability (R4) is a separate and still-outstanding question: the
+within-person distance claims need α, which is not measured either.
+
+### R1 — The guarantee has no working mechanism · SEVERE · line removed (A3)
 The site promises a half refund when the report can't say enough. The MRD gates would decide that,
 and in shadow mode their suppression rate across ~1,000 gate-eligible stored results is **1.0**.
 Personality primaries read flat in 197/213 cases; Closeness in 490/490. On the real reference
@@ -392,7 +418,14 @@ reportable.
 
 Enforcing today would empty the Personality Mirror and trigger the refund on nearly every reading.
 The thresholds are almost certainly too conservative because α is a guess, not because the profiles
-are flat. **Do not enforce, and do not promote that guarantee line, until α is measured.**
+are flat.
+
+**Acted on, June 2026 (work order A3).** The line was removed from the pricing block, not softened
+into a conditional one, and its replacement is hash-locked. A copy-lint test now fails the build on
+any refund, guarantee or money-back wording anywhere in reader-facing copy while
+`reliability_1_0_0.json` carries `placeholder: true`. The underlying α problem is unchanged and the
+gates stay in shadow — the α ceiling analysis says complete-profile ranking is not recoverable at
+any realistic reliability, so enforcing is a reporting-design decision rather than a flag to flip.
 
 ### R2 — Partner promises with nothing behind them · HIGH
 `/partners` promises a personal link and a dashboard of clicks, completions and earnings. There is
