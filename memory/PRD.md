@@ -559,3 +559,29 @@ immutability re-checked: PDFs byte-identical on repeat, situation flip-and-back 
 - Still explicitly not started: entitlement/payments, retention/export/erasure for the other
   collections (`rendered_pdfs` above all), `RK_MRD_MODE=enforce`, the `services/` split, any change
   to Essential item allocation.
+
+---
+
+# CI portability fix · 2026-06
+
+The A0 workflow would have failed on its first push, and not on a product defect. Thirteen test
+files hardcoded the pod root: four broke imports through `sys.path.insert`, four broke on a bare
+`open()`, and nine did a `load_dotenv` that is a silent no-op anywhere else. A collection error
+aborts the whole pytest run, so `tests/_e2e_test.py` alone would have failed the entire offline
+job before an assertion ran.
+
+- `tests/conftest.py` (new) and `backend/tests/conftest.py` derive ROOT and BACKEND from
+  `__file__`, insert the backend on `sys.path`, load both `.env` files and set
+  `RK_ALLOW_PLACEHOLDER_ALPHA`.
+- Every per-file hardcoded `load_dotenv(...)`, `sys.path.insert(...)` and `open(...)` is now
+  root-relative or removed.
+- `tests/test_ci_portability.py` is the guard: no test file may contain the pod-root literal,
+  both roots must keep a conftest that derives its own root, every test file must parse, and no
+  test file outside conftest may call `load_dotenv` with a literal path. The needle is assembled
+  at runtime so the guard does not trip on itself.
+- Workflow: the offline job's comment now says it needs Mongo (it does — immutability and
+  snapshot tests touch it); uvicorn is started with `nohup`/`disown`, logs to `/tmp/uvicorn.log`,
+  and the log is printed on failure so a connection-refused is diagnosable from the run.
+
+Verified by copying the tree to a different root and running there: 134 offline passed, all 182
+backend tests collected, both standalone lint scripts fine. In-pod suites still green (140 + 42).

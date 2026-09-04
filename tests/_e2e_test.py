@@ -1,12 +1,8 @@
 import sys, os
-from dotenv import load_dotenv
-load_dotenv("/app/backend/.env")
 import asyncio
 import uuid
 import random
 import sys
-
-sys.path.insert(0, "/app/backend")
 import httpx
 from fastapi import FastAPI
 from routes.mirror_v2 import router

@@ -11,10 +11,9 @@ import uuid
 
 import pytest
 import requests
-from dotenv import load_dotenv
 
-load_dotenv("/app/frontend/.env")
-load_dotenv("/app/backend/.env")
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 BASE = os.environ["REACT_APP_BACKEND_URL"].rstrip("/")
 API = f"{BASE}/api"
@@ -142,7 +141,7 @@ def test_ei_scorer_source_emits_no_band_words():
     """The stored ui.demo EI result is a pre-pause snapshot (intentionally never re-rendered).
     The acceptance criterion is that the *scorer* no longer emits band/domain_band/overall_band,
     which is a code-level property. Confirmed by reading routes/mirror_v2.py::_score_eq."""
-    src = open("/app/backend/routes/mirror_v2.py", encoding="utf-8").read()
+    src = open(os.path.join(ROOT, "backend", "routes", "mirror_v2.py"), encoding="utf-8").read()
     eq = src.split("def _score_eq(")[1].split("def _")[1] if False else \
         src.split("def _score_eq(")[1]
     # cut at the next top-level def

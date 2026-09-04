@@ -19,15 +19,15 @@ import random
 import pytest
 import pymupdf
 import requests
-from dotenv import load_dotenv
 
-load_dotenv("/app/frontend/.env")
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL").rstrip("/")
 API = f"{BASE_URL}/api/v2"
 AUTH = f"{BASE_URL}/api/auth"
 
-with open("/app/frontend/src/content/locked_copy.json", encoding="utf-8") as fh:
+with open(os.path.join(ROOT, "frontend", "src", "content", "locked_copy.json"), encoding="utf-8") as fh:
     LOCKED = json.load(fh)
 
 EXPECTED_TIER = {

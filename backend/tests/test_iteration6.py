@@ -13,11 +13,8 @@ import random
 import pytest
 import requests
 import fitz  # pymupdf
-from dotenv import load_dotenv
 
-load_dotenv("/app/frontend/.env")
-load_dotenv("/app/backend/.env")
-sys.path.insert(0, "/app/backend")
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 BASE_URL = os.environ["REACT_APP_BACKEND_URL"].rstrip("/")
 API = f"{BASE_URL}/api"
@@ -130,7 +127,7 @@ def test_bug3_eq_no_adjacent_same_sub():
 
 def test_bug3_essential_no_adjacent_same_category_within_lens():
     from routes.mirror_v2 import _build_items
-    with open("/app/backend/constants/essential_data.json") as f:
+    with open(os.path.join(ROOT, "backend", "constants", "essential_data.json")) as f:
         ess = json.load(f)
     self_cat = {q["id"]: q.get("category") or q.get("archetype")
                 for q in ess.get("self_assessment_questions", [])}

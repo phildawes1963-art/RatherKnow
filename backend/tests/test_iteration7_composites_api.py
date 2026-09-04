@@ -14,10 +14,7 @@ import time
 import uuid
 import requests
 import pytest
-from dotenv import load_dotenv
 
-load_dotenv("/app/frontend/.env")
-load_dotenv("/app/backend/.env")
 
 BASE_URL = os.environ["REACT_APP_BACKEND_URL"].rstrip("/")
 API = f"{BASE_URL}/api"
@@ -132,7 +129,6 @@ def test_no_composites_on_other_instruments(token, sessions):
 
 def test_arithmetic_reproduces_user_reference():
     """Independent check of the user's arithmetic claim."""
-    sys.path.insert(0, "/app/backend")
     from constants.p150_data import compute_global_scores
     primaries = {"A": 10, "C": 10, "E": 10, "F": 10, "G": 4, "H": 10, "I": 7,
                  "L": 7, "M": 9, "N": 6, "O": 2, "Q1": 10, "Q2": 9, "Q3": 6, "Q4": 3}

@@ -10,12 +10,9 @@ import asyncio
 import datetime as dt
 import pytest
 import requests
-from dotenv import load_dotenv
 import pymongo
 from pymongo import MongoClient
 
-load_dotenv("/app/frontend/.env")
-load_dotenv("/app/backend/.env")
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL").rstrip("/")
 API = f"{BASE_URL}/api"

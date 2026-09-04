@@ -5,13 +5,15 @@ import uuid
 import pytest
 import requests
 
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 def _base():
     v = os.environ.get("REACT_APP_BACKEND_URL")
     if v:
         return v.rstrip("/")
     try:
-        with open("/app/frontend/.env") as f:
+        with open(os.path.join(ROOT, "frontend", ".env")) as f:
             for ln in f:
                 if ln.startswith("REACT_APP_BACKEND_URL="):
                     return ln.split("=", 1)[1].strip().rstrip("/")

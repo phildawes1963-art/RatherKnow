@@ -19,9 +19,7 @@ import random
 import pytest
 import requests
 import fitz  # pymupdf
-from dotenv import load_dotenv
 
-load_dotenv("/app/frontend/.env")
 
 BASE_URL = os.environ["REACT_APP_BACKEND_URL"].rstrip("/")
 API = f"{BASE_URL}/api"
@@ -88,7 +86,6 @@ def _run(s, instrument, answers_override=None):
 def _closeness_max_anxiety_answers():
     """Force closeness anxiety and avoidance to 7.0 by matching item.key F/R polarity."""
     import sys
-    sys.path.insert(0, "/app/backend")
     from services.closeness_scoring import load_bank  # noqa: E402
     bank = load_bank()
     out = {}

@@ -12,9 +12,7 @@ import uuid
 import time
 import pytest
 import requests
-from dotenv import load_dotenv
 
-load_dotenv("/app/frontend/.env")
 BASE = os.environ.get("REACT_APP_BACKEND_URL", "").rstrip("/")
 assert BASE, "REACT_APP_BACKEND_URL missing"
 

@@ -16,7 +16,9 @@ on:
 
 jobs:
   offline:
-    # Static guards: copy lint, locked-copy hashes, scoring/display/doc tests. No server needed.
+    # Static guards: copy lint, locked-copy hashes, scoring, display and doc tests. No app server
+    # is started, but a few of these touch Mongo (immutability, snapshot keys), so the service
+    # below is required rather than incidental.
     runs-on: ubuntu-latest
     services:
       mongo:
@@ -65,13 +67,21 @@ jobs:
       - run: pip install -r backend/requirements.txt
       - name: Start backend
         working-directory: backend
+        # nohup + disown so the process survives the step's shell exiting. If this job ever fails
+        # with connection-refused rather than an assertion, look here first and check the log.
         run: |
-          uvicorn server:app --host 0.0.0.0 --port 8001 &
+          nohup uvicorn server:app --host 0.0.0.0 --port 8001 > /tmp/uvicorn.log 2>&1 &
+          disown || true
           for i in $(seq 1 40); do
-            curl -sf http://localhost:8001/api/ >/dev/null && exit 0
+            if curl -sf http://localhost:8001/api/ >/dev/null; then
+              echo "backend up after ${i} attempts" && exit 0
+            fi
             sleep 2
           done
-          echo "backend did not come up" && exit 1
+          echo "backend did not come up" && cat /tmp/uvicorn.log && exit 1
       - name: Backend suite
         working-directory: backend
         run: python -m pytest tests -p no:cacheprovider
+      - name: Backend log on failure
+        if: failure()
+        run: cat /tmp/uvicorn.log
