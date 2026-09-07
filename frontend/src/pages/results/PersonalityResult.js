@@ -20,12 +20,16 @@ const FactorRow = ({ f, position }) => (
   </div>
 );
 
-// Globals show where the number sits on its own 1-10 scale and nothing else. The band word they
-// used to carry (Very High / Average / ...) was an absolute claim on cut-offs with no reference
-// sample behind them, so it is paused with the rest of the population layer.
 const COUNT_WORD = ['none', 'One', 'Two', 'Three'];
 
-const POSITION = (g) => `${g.score ?? g.score_precise ?? ''} of 10`;
+// Globals carry no band word (paused with the population layer) and no number either: an x-of-10
+// beside a bidirectional composite reads as a mark out of ten. The bar and the published equation
+// carry the position; the label says where it sits against the reader's own five.
+const POSITION = (g, meanOfFive) => {
+  const d = (g.score ?? g.score_precise ?? 0) - meanOfFive;
+  if (Math.abs(d) < 0.5) return 'at your own middle';
+  return d > 0 ? 'above your own middle' : 'below your own middle';
+};
 
 export default function PersonalityResult({ result }) {
   const factorKeys = Object.keys(result.factor_scores);
@@ -34,6 +38,13 @@ export default function PersonalityResult({ result }) {
   const composites = result.composites;
   const provenance = composites?.globals || {};
   const position = result.position?.scales || {};
+  const globalsMean = globals.length
+    ? globals.reduce((t, g) => t + (g.score ?? 0), 0) / globals.length
+    : 0;
+  const subMean = (g) => {
+    const subs = Object.values(g.sub_clusters || {});
+    return subs.length ? subs.reduce((t, s2) => t + (s2.score ?? 0), 0) / subs.length : 0;
+  };
   const loud = result.loudest || [...(result.strengths || []), ...(result.blind_spots || [])];
   const sd = result.validity?.social_desirability?.flag;
 
@@ -66,7 +77,7 @@ export default function PersonalityResult({ result }) {
             <div key={g.name} className="bg-white border border-[#E4E4DE] p-5">
               <div className="flex items-baseline justify-between gap-3">
                 <p className="text-sm font-medium text-[#1C1C18]">{g.name}</p>
-                <p className="text-sm text-[#5B7284] text-right">{POSITION(g)}</p>
+                <p className="text-sm text-[#5B7284] text-right">{POSITION(g, globalsMean)}</p>
               </div>
               <p className="mt-2 text-xs text-[#6E6E66] leading-relaxed">{g.description}</p>
               {prov?.clamped && (
@@ -78,7 +89,7 @@ export default function PersonalityResult({ result }) {
                 <div className="mt-3 space-y-1 border-t border-[#E4E4DE] pt-3">
                   {Object.values(g.sub_clusters).map((sc) => (
                     <p key={sc.name} className="text-xs text-[#3B3B34] flex justify-between gap-3">
-                      <span>{sc.name}</span><span className="text-[#6E6E66] text-right">{POSITION(sc)}</span>
+                      <span>{sc.name}</span><span className="text-[#6E6E66] text-right">{POSITION(sc, subMean(g))}</span>
                     </p>
                   ))}
                 </div>

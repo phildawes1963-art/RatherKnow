@@ -18,7 +18,15 @@ norm in the first place.
 """
 from math import erf, sqrt
 
-DISPLAY_VERSION = "disp-1.1.0"
+DISPLAY_VERSION = "disp-1.2.1"
+# 1.0.0 the population layer · 1.1.0 the norms pause · 1.2.0 the Everyday Mirror joins the
+# combined reading · 1.2.1 the last sten leaks out of "how you choose" and the global rows.
+# Snapshots are keyed on this, so a bump means new renders differ and every document already
+# delivered keeps exactly the bytes it was sent with.
+#
+# 1.2.1 exists because 1.2.0 was bumped before choosing.py was fixed, so snapshots written in
+# between froze the pre-fix copy. Snapshots are write-once by design — the fix is a new version,
+# never an edit to a stored document.
 
 # The single switch. False until a reference sample exists and its n and composition are
 # published. Nothing else in the codebase decides whether a population claim is allowed.

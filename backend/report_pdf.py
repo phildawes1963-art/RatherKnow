@@ -150,6 +150,13 @@ def _essential(result, flow):
         ]
 
 
+def _global_position(score: float, mean_of_five: float) -> str:
+    delta = score - mean_of_five
+    if abs(delta) < 0.5:
+        return "at your own middle"
+    return "above your own middle" if delta > 0 else "below your own middle"
+
+
 def _personality(result, flow):
     flow += [
         Paragraph("Five global dimensions", S["h2"]),
@@ -158,11 +165,14 @@ def _personality(result, flow):
             "clipped to the 1–10 scale. That is why they show a position and their equation rather than a "
             "population comparison: a clipped composite cannot carry one honestly.", S["small"]),
     ]
-    # The band word (Very High … Very Low) is paused with the rest of the population layer, so the
-    # third column shows where the number sits on its own scale. Older results still carry `label`
-    # and are read from their own frozen narrative snapshot, never re-rendered through here.
-    flow += [_bar_table([(g["name"], g["score"], f"{g['score']} of 10")
-                         for g in result["global_scores"].values()], maximum=10.0)]
+    # No band word (paused with the population layer) and no number either: an x-of-10 beside a
+    # bidirectional composite reads as a mark out of ten. The bar carries the position; the third
+    # column says where it sits against the reader's own five. Older results keep their frozen
+    # snapshot and are never re-rendered through here.
+    globals_ = result["global_scores"]
+    mean_of_five = sum(g["score"] for g in globals_.values()) / max(len(globals_), 1)
+    flow += [_bar_table([(g["name"], g["score"], _global_position(g["score"], mean_of_five))
+                         for g in globals_.values()], maximum=10.0)]
     from composites import build_composites
     prov = build_composites(result)
     if prov:
@@ -237,8 +247,11 @@ def _personality(result, flow):
     flow += [
         Paragraph("Validity indices", S["h2"]),
         Paragraph(
-            f"Social desirability: {sd.get('agree_count', '—')} of {sd.get('items', '—')} "
-            f"({sd.get('flag', 'NORMAL').lower()}). Central tendency: {ct.get('flag', 'NORMAL').lower()}. "
+            # An item count, not a scale: "2 of 10" beside a name reads as a mark, so it says what
+            # was counted. The check is how many of the flattering statements were agreed with.
+            f"Social desirability: you agreed with {sd.get('agree_count', '—')} of the "
+            f"{sd.get('items', '—')} most flattering statements ({sd.get('flag', 'NORMAL').lower()}). "
+            f"Central tendency: {ct.get('flag', 'NORMAL').lower()}. "
             "These are reported rather than hidden — a flagged profile is still your profile, read with a caveat.",
             S["body"]),
     ]
@@ -461,8 +474,12 @@ def build_combined_pdf(*, results: list, user: dict, findings: list, situation_n
 
     doc.addPageTemplates([PageTemplate(id="all", frames=[frame], onPage=decorate)])
 
-    ordered = [r for key in ("essential", "MI-AS-36", "personality", "eq")
-               for r in results if r["instrument"] == key]
+    # The Everyday Mirror was missing from this list, so a reader who completed it received a
+    # combined reading that silently left it out. Order follows the sequence a reader takes them in.
+    # Delivered PDFs are untouched: rendered_pdfs is keyed on display_version, which moved to
+    # disp-1.2.0 with this change, so every document already sent keeps serving its own bytes.
+    COMBINED_ORDER = ("essential", "MI-EV-49", "MI-AS-36", "personality", "eq")
+    ordered = [r for key in COMBINED_ORDER for r in results if r["instrument"] == key]
 
     flow = [
         Paragraph(f"PREPARED FOR {user['name'].upper()} · {today}", S["kicker"]),

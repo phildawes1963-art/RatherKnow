@@ -1,0 +1,25 @@
+{
+  "summary": "Iteration 14 retest of the iteration-13 CRITICAL snapshot leak: VERIFIED FIXED on the deployed preview. DISPLAY_VERSION is now 'disp-1.2.1' with the recorded comment explaining why. All 10 iteration-13 tests now pass (were 6/9), including test_combined_no_sten_of_10, test_choosing_in_personality_result_has_no_of_10, test_personality_result_has_no_of_10. The new backend/tests/test_snapshot_hygiene.py guard passes — no narrative at the current display_version contains 'At N of 10', '(N of 10)' or 'sten N'. Wrote 11 additional acceptance tests in /app/backend/tests/test_iteration14.py — all pass. Confirmed: (1) personality choosing block has no sten-as-mark anywhere in JSON or on the rendered result page; (2) combined PDF is 200 %PDF, contains all five instruments including Everyday Mirror, byte-identical on repeat, no ' of 10' sten-as-mark; (3) new validity line reads 'you agreed with N of the 10 most flattering statements' and the old 'Social desirability: N of 10' shape is gone; (4) legitimate numeric copy preserved — Essential Delta 'distance of X points', EI 'x of 5', Closeness 'x of 7'; (5) 'How you choose' block still renders with >=1 point for every instrument (essential, personality, eq, closeness, everyday); (6) landing it-ends-mark still renders at 1920px and 390px with no horizontal overflow; /methodology loads and shows methodology-note plus methodology-everyday, and the five instrument entries are all present.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_iteration14.py",
+    "/app/backend/tests/test_iteration13.py",
+    "/app/backend/tests/test_snapshot_hygiene.py",
+    "/app/test_reports/pytest/iteration14.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "The version-bump-as-fix pattern in services/display.py is exactly right — snapshots are write-once, so a code fix requires a version bump. The inline comment on disp-1.2.1 records both facts (what the fix does and why 1.2.1 exists) so this stays audit-worthy.",
+    "test_snapshot_hygiene.py uses regexes and correctly avoids false positives on the Delta's '10.0 points', EI '4.2 of 5', and 'agreed with 2 of the 10 most flattering statements'. Good discrimination.",
+    "Minor observation only — on /methodology the sub-testids methodology-pause / -provisional / -delivered did not return as separate elements in this run (all the copy is visibly present under methodology-note). Iteration 13 verified them explicitly; if they were consolidated into methodology-note during this cycle it is a semantic change worth noting but does not affect user-visible copy. Not a bug."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration14.py"],
+  "success_rate": {"backend": "21/21 (100%) across test_iteration13.py + test_iteration14.py + test_snapshot_hygiene.py", "frontend": "100% on deployed preview — personality result, landing (desktop+mobile), methodology"},
+  "test_credentials": "ui.demo@ratherknow.com / knowmore123 (worked)",
+  "seed_data_creation": "none — used the existing ui.demo sessions only; unique X-Forwarded-For per run to avoid throttling",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "The disp-1.2.0 stale-snapshot leak from iteration 13 is closed. DISPLAY_VERSION is disp-1.2.1. The snapshot-hygiene guard (backend/tests/test_snapshot_hygiene.py) will fail future PRs that ship a copy fix without a companion version bump — keep it green. All iteration 13 + 14 tests pass on the deployed preview.",
+  "rca of the issue": "Closed. Root cause was correctly diagnosed in iteration 13 (write-once snapshot minted at disp-1.2.0 seconds before the choosing.py copy fix landed, freezing the pre-fix 'At 7 of 10 …' body). Fix applied per product rule: bump DISPLAY_VERSION → disp-1.2.1 so the next read writes a fresh snapshot, rather than mutating a stored document. New guard test now enforces this class of bug."
+}

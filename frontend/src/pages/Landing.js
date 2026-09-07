@@ -264,6 +264,25 @@ export default function Landing() {
           <h2 className="mi2-serif text-2xl md:text-3xl text-[#1C1C18]" data-testid="it-ends-h2">
             {LANDING.it_ends_heading}
           </h2>
+          {/* A line that stops. Not a bar that fills: the promise is that the practice ends, not
+              that finishing it achieves something, and a progress bar says the opposite. */}
+          <svg
+            className="mt-7 w-full max-w-md h-9 overflow-visible"
+            viewBox="0 0 420 36"
+            role="img"
+            aria-label="A line running three months and then stopping. Nothing continues past the end."
+            data-testid="it-ends-mark"
+          >
+            <line x1="1" y1="18" x2="300" y2="18" stroke="#1C1C18" strokeWidth="1.25" />
+            {[1, 100, 200, 300].map((x) => (
+              <line key={x} x1={x} y1="12" x2={x} y2="24" stroke="#1C1C18" strokeWidth="1.25" />
+            ))}
+            <line x1="300" y1="6" x2="300" y2="30" stroke="#1C1C18" strokeWidth="2.5" />
+            <text x="1" y="36" fill="#6E6E66" fontSize="10" letterSpacing="1.4">MONTH ONE</text>
+            <text x="300" y="36" fill="#1C1C18" fontSize="10" letterSpacing="1.4" textAnchor="end">
+              THREE
+            </text>
+          </svg>
           <p className="mt-5 text-base text-[#3B3B34] leading-relaxed" data-testid="it-ends-body">
             {LANDING.it_ends_body}
           </p>

@@ -44,7 +44,11 @@ BANNED = (
 # Refusals are fine and are why these are phrased as assertions: "not population percentiles"
 # says we do not do it, and stays.
 POPULATION = ("unusually", "than most people", "more common than", "rarer than", "how common your",
-              "1 in ")
+              "1 in ",
+              # A sten printed as "7 of 10" is the absolute-scale reading the pause removed: on a
+              # bidirectional trait it reads as a mark out of ten. The EI means ("4.2 of 5") are a
+              # different thing and stay — they are the reader's own answers on a five-point scale.
+              " of 10")
 
 # The one module exempt from POPULATION: it *is* the paused machinery, kept intact behind the
 # switch so restoring it is one flag rather than a rewrite.
@@ -71,10 +75,18 @@ def narrative_modules() -> list:
 
 
 def _string_literals(path: str):
+    """Every string a reader could see. Docstrings are excluded: they are notes to the next
+    engineer, and documenting a ban must not read as committing the thing banned."""
     with open(path, encoding="utf-8") as fh:
         tree = ast.parse(fh.read())
+    docs = set()
     for node in ast.walk(tree):
-        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            doc = ast.get_docstring(node, clean=False)
+            if doc:
+                docs.add(doc)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value not in docs:
             yield node.lineno, node.value
 
 

@@ -9,6 +9,8 @@ Everything here is derived at read time from stored snapshots. No rescoring, no 
 numbers: every statement quotes the two values it is comparing.
 """
 
+from services.within_person import loudest
+
 AGREE_BAND = 0.14   # normalised distance under which two measures count as converging
 TENSION_BAND = 0.30  # over which they count as pulling against each other
 
@@ -223,12 +225,24 @@ def build_synthesis(by: dict, tensions: list, agreements: list) -> dict | None:
                       if avo >= 4.5 else "recognition rather than reassurance")
             lines.append(f"Up close, the thing your selection actually runs on is {driver}.")
     if pers:
-        ranked = sorted(pers["factor_scores"].values(), key=lambda f: -f["sten"])
-        top = ranked[0]
-        bottom = ranked[-1]
-        lines.append(
-            f"The trait doing most of the noticing is {top['name'].lower()} ({top['sten']} of 10); the one you're "
-            f"most likely to look for in someone else is {bottom['name'].lower()} ({bottom['sten']} of 10).")
+        # Furthest from the reader's own middle, not highest and lowest in absolute terms, and
+        # without the number: an x-of-10 beside a bidirectional trait reads as a mark out of ten.
+        factors = pers["factor_scores"]
+        named = loudest({k: f["sten"] for k, f in factors.items()})["named"]
+        highs = [factors[k]["name"].lower() for k, d in named if d > 0]
+        lows = [factors[k]["name"].lower() for k, d in named if d < 0]
+        if highs and lows:
+            lines.append(
+                f"The trait doing most of the noticing is {highs[0]}; the one you're most likely to look for in "
+                f"someone else is {lows[0]}.")
+        elif highs:
+            lines.append(f"The trait doing most of the noticing is {highs[0]}.")
+        elif lows:
+            lines.append(f"The trait you're most likely to look for in someone else is {lows[0]}.")
+        else:
+            lines.append(
+                "No single trait sits far enough from your own middle to be doing most of the noticing — an even "
+                "profile, which spreads the selection pressure rather than concentrating it.")
     if eq:
         worst = sorted(eq["domain_scores"].values(), key=lambda d: d["score"])[0]
         lines.append(

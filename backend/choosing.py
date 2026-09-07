@@ -8,6 +8,8 @@ Derived at read time from the immutable snapshot. It never rescores, never label
 never says anything about another person — only about the reader's own choosing.
 """
 
+from services.within_person import loudest
+
 CHOOSING_LEAD = {
     "essential": "What the gap between your two lenses does at the point of choosing.",
     "MI-AS-36": "How these two settings behave when you're deciding whether to stay interested.",
@@ -149,30 +151,37 @@ def _closeness(r):
 
 
 def _personality(r):
+    """Selection is within-profile, and no sten reaches the reader.
+
+    This used to pick on sten >= 7 / <= 4 and print "At 7 of 10 …". Both were leftovers of the
+    population layer: a fixed sten threshold says "high compared with other people", and an
+    x-of-10 invites the reader to read a bidirectional trait as a mark out of ten.
+    """
     factors = r["factor_scores"]
-    ranked = sorted(factors.values(), key=lambda f: -f["sten"])
-    high = [f for f in ranked if f["sten"] >= 7][:2]
-    low = [f for f in ranked if f["sten"] <= 4][-2:]
+    picked = loudest({k: f["sten"] for k, f in factors.items()})
+    high = [factors[k] for k, d in picked["named"] if d > 0]
+    low = [factors[k] for k, d in picked["named"] if d < 0]
     points = []
 
     for f in high:
         points.append(_pt(
             f"{f['name']} does a lot of your selecting.",
-            f"At {f['sten']} of 10 you sit clearly toward {f['pole_high'].lower()}. Traits this far from the middle "
-            "don't sit quietly — they set what you notice first in someone and what you'll read as a dealbreaker. "
-            f"This may show up as over-weighting evidence of {f['pole_high'].lower()}, and as feeling the absence "
-            "of it quickly."))
+            f"You sit toward {f['pole_high'].lower()}, and further that way than most of your own profile. Traits "
+            "this far from your own middle don't sit quietly — they set what you notice first in someone and what "
+            f"you'll read as a dealbreaker. This may show up as over-weighting evidence of {f['pole_high'].lower()}, "
+            "and as feeling the absence of it quickly."))
     for f in low:
         points.append(_pt(
             f"{f['name']} is where you'll shop for a partner to compensate.",
-            f"At {f['sten']} of 10 you sit toward {f['pole_low'].lower()}. People commonly outsource their low "
-            "factors: this is the trait you're most likely to find magnetic in someone else, and most likely to "
-            f"resent later when {f['pole_high'].lower()} starts arriving as pressure rather than relief."))
+            f"You sit toward {f['pole_low'].lower()}, and further that way than most of your own profile. People "
+            "commonly outsource the ends they sit furthest from: this is the trait you're most likely to find "
+            f"magnetic in someone else, and most likely to resent later when {f['pole_high'].lower()} starts "
+            "arriving as pressure rather than relief."))
     if not high and not low:
         points.append(_pt(
             "No single trait is driving your choosing.",
-            "Your factors sit close to the middle across the board, which means selection pressure is spread rather "
-            "than concentrated. Read the Closeness and Essential Mirrors for the lever this one didn't find."))
+            "Your factors sit close to your own middle across the board, which means selection pressure is spread "
+            "rather than concentrated, and no one trait is doing the choosing. Read the Closeness and Essential Mirrors for the lever this one didn't find."))
 
     sd = (r.get("validity") or {}).get("social_desirability", {})
     if sd.get("flag") == "HIGH":

@@ -647,3 +647,78 @@ compressed line.
 `tests/` 138 passed · `backend/tests/` PDF + immutability 42 passed · testing agent iteration 12:
 **zero issues**, order verified by bounding box, banned phrases absent across nine public pages plus
 the logged-in dashboard and all four result pages, combined PDF byte-identical on repeat.
+
+---
+
+# Published note, Everyday in the combined reading, §4.1 measured · 2026-06 (branch RK)
+
+## Methodology note — PUBLISHED
+`/methodology`, `locked_copy.json → methodology_note`, hash-locked. Nine paragraphs including the
+added one accounting for readings already delivered under the comparative language. No figures, no
+parent product named, no mention of the reliability gates. Guarded by
+`tests/test_workorder_b.py::test_the_published_methodology_note_still_says_the_hard_parts`, which
+asserts the four sentences most likely to be softened and fails if a digit appears.
+
+## Everyday Mirror in the combined reading
+`report_pdf.COMBINED_ORDER` now includes `MI-EV-49`. A reader who completed it was getting a
+combined reading that silently omitted it. `DISPLAY_VERSION` carried the change; delivered PDFs
+keep their bytes.
+
+## Everyday methodology entry
+Five entries now, not four. Its stated weaknesses lead with the desirability pre-test gap:
+publishing the fullest method for the least-established instrument. The EI entry also stopped
+describing the `High / Moderate / Developing` bands the code no longer emits.
+
+## Two leftovers of the norms pause, found while doing the above
+- `choosing.py` still selected personality traits on **sten ≥ 7 / ≤ 4** and printed "At 7 of 10 you
+  sit clearly toward warm"; `crosscheck.py` printed "(7 of 10)". Both now use within-profile
+  distance and print no sten.
+- The global-dimension rows (PDF and results page) printed `x of 10`. They now say
+  above / below / at your own middle. The bar and the published equation carry the position.
+- The PDF validity line read "Social desirability: 2 of 10", an item count that still reads as a
+  mark. Now "you agreed with 2 of the 10 most flattering statements".
+- `" of 10"` added to the copy-lint POPULATION ban list; docstrings excluded from that scan so
+  documenting a ban does not read as committing it.
+
+## The snapshot trap, and the guard that closes it
+`DISPLAY_VERSION` was bumped to `disp-1.2.0` **before** the choosing fix landed, so snapshots
+written in between froze the pre-fix copy — and snapshots are write-once. Found by the testing
+agent (iteration 13), whose diagnosis was exactly right including that `choosing.py` itself was
+already correct. Fixed by version, never by editing a stored document: `disp-1.2.1`, with the
+reason recorded in the constant's comment. New guard
+`backend/tests/test_snapshot_hygiene.py` fails if any snapshot at the **current** display_version
+carries a sten-as-mark; older delivered versions are deliberately exempt, because they are a record
+of what was said. Its needles are regexes, not the substring `" of 10"`, so the Delta's
+"10.0 points", the EI "x of 5" and the item count are not false positives.
+
+**Order lesson, recorded:** bump the version *after* the copy change, or in the same commit. Never
+before.
+
+## §4.1 · decided by measurement — `docs/CENTROID_SEPARATION.md`
+**Regions work. Repair, do not replace.** On the 334 varied-answer results (the 516 uniform and
+two-value ones are test artefacts and are excluded, and the 54% tie rate they produce is discarded):
+
+- Mean centroid-distance-to-scatter ratio **1.45**; **14 of 15 pairs separate at ≥ 1.0**.
+- The exception is **Diplomat · Empath at 0.87** — the pair a tie rule will fire on most.
+- Nearest-centroid agrees with the current highest-score primary in **79%** of cases: a repair, not
+  a different instrument.
+- Top-two gap: median 7 points, **exactly tied 15%**, within 3 points 29%. The current code breaks a
+  tie by `sorted()` order, which for equal scores is **dictionary insertion order** — so ~15% of
+  readers are assigned an archetype by the order the six were typed into a JSON file. Live, and
+  arbitrary.
+
+Caveat stated in the report: this measures the instrument's internal geometry (item-set
+separability, which is what R3 asked), **not** a respondent distribution.
+
+**Not built, awaiting instruction:** nearest-region derivation, printed distances, and the
+declining tie rule. **The Archetypes nav item is held**, as B5 §3 asked — regions work, so on
+current evidence it stays.
+
+## "It ends" typography
+An SVG line with month ticks and a heavy terminal stop, labelled MONTH ONE / THREE. A line that
+stops, never a bar that fills: no fill, no percentage, no completion state.
+
+## Verification
+`tests/` 145 passed · `backend/tests/` 150 + 42 passed · testing agent iteration 13 found the
+snapshot leak (fixed by version bump) and iteration 14 verified the fix with 11 further acceptance
+tests: **zero issues outstanding**.

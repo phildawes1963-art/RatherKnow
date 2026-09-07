@@ -78,6 +78,7 @@ def test_out_of_range_is_refused():
 
 
 def test_display_version_moved_with_the_pause():
-    """Delivered narratives and PDFs are keyed on display_version. disp-1.0.0 documents keep
-    serving the population layer they were rendered with; disp-1.1.0 is the paused one."""
-    assert DISPLAY_VERSION == "disp-1.1.0"
+    """Delivered narratives and PDFs are keyed on display_version, so a bump is how a reporting
+    change ships without altering a document already sent. disp-1.0.0 documents keep serving the
+    population layer they were rendered with."""
+    assert DISPLAY_VERSION == "disp-1.2.1"

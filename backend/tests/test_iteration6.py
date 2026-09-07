@@ -207,7 +207,9 @@ def test_bug1_choosing_block_present_all_four_result_endpoint(four_user):
         assert "choosing" in data and data["choosing"] is not None, f"{inst}: no choosing block"
         c = data["choosing"]
         assert c["lead"] and c["closing"]
-        assert 2 <= len(c["points"]) <= 5, f"{inst}: {len(c['points'])} points"
+        # One point is legitimate since the norms pause: personality points are the factors
+        # furthest from the reader's own middle, and a profile can have exactly one.
+        assert 1 <= len(c["points"]) <= 5, f"{inst}: {len(c['points'])} points"
         for p in c["points"]:
             assert p["title"] and p["body"]
         # no verdicts / clinical / predictions
@@ -238,11 +240,14 @@ def test_bug1_choosing_quotes_real_numbers(four_user):
     if avo_v is not None:
         assert f"{avo_v} of 7" in body_blob or str(avo_v) in body_blob
 
-    # personality — cites stens (1–10)
+    # personality — no longer cites a sten. The norms pause replaced "At 7 of 10 …" with the
+    # reader's own middle: an x-of-10 beside a bidirectional trait reads as a mark out of ten,
+    # and the selection itself is now within-profile rather than a fixed sten threshold.
     sid, res = sids["personality"]
     c = u["session"].get(f"{API}/v2/assessments/{sid}/result").json()["choosing"]
     blob = " ".join(p["body"] for p in c["points"])
-    assert "of 10" in blob, "personality choosing must cite sten out of 10"
+    assert "of 10" not in blob, "a sten reached the reader"
+    assert "your own" in blob or "own middle" in blob, blob[:200]
 
     # eq — cites 1–5 domain scores
     sid, res = sids["eq"]

@@ -90,6 +90,75 @@ def test_the_norms_provenance_finding_is_on_the_record():
         assert needed in text, f"B3 report no longer states: {needed}"
 
 
+def test_the_published_methodology_note_still_says_the_hard_parts():
+    """The note is the account of the norms pause. These are the paragraphs most likely to be
+    softened later, so they are asserted rather than trusted."""
+    note = LOCKED["methodology_note"]
+    assert "could not establish one" in note["stopped_comparing"]
+    assert "worse than either on its own" in note["removed_not_caveated"]
+    assert "provisional choice, not a figure derived from our own data" in note["still_rests_on"]
+    assert "record of what we said at the time" in note["already_delivered"]
+    # No figures, no parent product, no mention of the shadow gates.
+    joined = " ".join(v for k, v in note.items() if not k.startswith("_")).lower()
+    assert not any(ch.isdigit() for ch in joined), "a figure crept into the note"
+    for banned in ("mymirrorreport", "my mirror report", "mrd", "shadow"):
+        assert banned not in joined, f"the note now mentions {banned}"
+
+
+def test_the_note_is_actually_on_the_page():
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    page = open(os.path.join(root, "frontend", "src", "pages", "Methodology.js"), encoding="utf-8").read()
+    for testid in ("methodology-note", "methodology-note-pause", "methodology-note-provisional",
+                   "methodology-note-delivered"):
+        assert testid in page, f"{testid} missing from the methodology page"
+
+
+def test_every_instrument_has_a_methodology_entry():
+    """The Everyday Mirror had none — the least-established instrument was the one with no
+    published method."""
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    page = open(os.path.join(root, "frontend", "src", "pages", "Methodology.js"), encoding="utf-8").read()
+    theme = open(os.path.join(root, "frontend", "src", "lib", "mirrorTheme.js"), encoding="utf-8").read()
+    keys = [line.split("'")[1] for line in theme.splitlines() if line.strip().startswith("key: '")]
+    assert len(keys) == 5
+    for key in keys:
+        assert f"key: '{key}'" in page, f"no methodology entry for {key}"
+
+
+def test_the_everyday_entry_carries_the_pre_test_gap():
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    page = open(os.path.join(root, "frontend", "src", "pages", "Methodology.js"), encoding="utf-8").read()
+    everyday = page[page.index("key: 'everyday'"):page.index("export default")]
+    assert "desirability pre-test has not been run" in everyday
+    assert "more flattering" in everyday
+
+
+def test_the_ei_page_no_longer_describes_bands_it_does_not_emit():
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    page = open(os.path.join(root, "frontend", "src", "pages", "Methodology.js"), encoding="utf-8").read()
+    assert "banded High / Moderate / Developing" not in page
+    assert "have been withdrawn" in page
+
+
+def test_the_combined_reading_includes_every_instrument():
+    """A reader who completed an instrument and gets a combined reading without it is the
+    clearest kind of defect. Everyday was missing from the order."""
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    pdf = open(os.path.join(root, "backend", "report_pdf.py"), encoding="utf-8").read()
+    order = pdf[pdf.index("COMBINED_ORDER = ("):pdf.index("ordered = [r for key in COMBINED_ORDER")]
+    bodies = pdf[pdf.index("BODIES = {"):pdf.index("BODIES = {") + 260]
+    for key in ("essential", "MI-EV-49", "MI-AS-36", "personality", "eq"):
+        assert f'"{key}"' in order, f"{key} is missing from the combined reading"
+        assert f'"{key}"' in bodies, f"{key} has no PDF body"
+
+
+def test_the_centroid_finding_is_on_the_record():
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    report = open(os.path.join(root, "docs", "CENTROID_SEPARATION.md"), encoding="utf-8").read()
+    for needed in ("Regions work", "0.87", "Diplomat", "insertion order", "not a respondent sample"):
+        assert needed in report, f"the centroid report no longer states: {needed}"
+
+
 def test_the_snapshot_still_carries_no_population_metadata():
     """If this fails, provenance has been added — good. Update the B3 report and this test."""
     with open(os.path.join(BACKEND, "constants", "p150_norms_snapshot.json"), encoding="utf-8") as fh:

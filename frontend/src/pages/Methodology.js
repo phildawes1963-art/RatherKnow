@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import Shell from '../components/Shell';
 import { TIER_STATEMENTS } from '../lib/mirrorTheme';
-import { TIER_CHIPS, DISCLAIMER, FLAG, ATTRIBUTION } from '../content/register';
+import { TIER_CHIPS, DISCLAIMER, FLAG, ATTRIBUTION, METHOD_NOTE } from '../content/register';
 import { breadcrumbJsonLd } from '../lib/siteMeta';
 
 const SECTIONS = [
@@ -52,10 +52,23 @@ const SECTIONS = [
     measures:
       'Emotional intelligence across Goleman’s four domains — self-awareness, self-management, social awareness, relationship management — with fourteen sub-dimensions.',
     scoring:
-      '140 Likert items, roughly a third reverse-keyed. Sub-dimension and domain scores are straight means on the 1–5 scale, banded High / Moderate / Developing at published thresholds (4.0 and 3.0).',
+      '140 Likert items, roughly a third reverse-keyed. Sub-dimension and domain scores are straight means on the 1–5 scale, and that is what the reader is shown. The band words this instrument used to carry — High, Moderate, Developing, at cut-offs of 4.0 and 3.0 — have been withdrawn: a band word implies a standard, and no reference sample is documented for those cut-offs.',
     weaknesses: [
       'A self-perception read, not an ability test — it tells you how you believe you operate.',
-      'Bands are descriptive thresholds, not norm-referenced percentiles.',
+      'The mean of your own answers in a domain is a fact; how that compares with other people is not something this instrument can tell you.',
+    ],
+  },
+  {
+    key: 'everyday',
+    name: 'Everyday Mirror',
+    measures:
+      'Where you sit on seven dimensions of ordinary life — pace, people, order, novelty, money, recovery and time together — and then which of them you would actually need a partner to share.',
+    scoring:
+      'Forty-nine forced choices in two blocks. Block A places you on each dimension by making you pick between two ways of living rather than rate a statement about yourself; Block B asks which dimensions you would protect, and ranks them by how often you chose to protect them. Positions are reported as a lean toward one named end, never as a score out of anything, and the priority ranking is ordinal — first, second, third — with no interval claim attached to the gaps.',
+    weaknesses: [
+      'The desirability pre-test has not been run. Forced choice controls for the tendency to agree with everything, but only if the two options are equally attractive to say — and we have not yet tested whether one option in each pair sounds more flattering than the other. Until we have, a lean may partly reflect which answer sounded better rather than which one is true of you. This is the least-established instrument here and it is the one whose method we are publishing in most detail, deliberately.',
+      'It is the only instrument here that can contradict what you said about yourself elsewhere, which is the point of it — but a contradiction is a finding to sit with, not an error to resolve in favour of one side.',
+      'Seven dimensions of ordinary life are not all of ordinary life. The bank was written to cover the differences that recur, not to be exhaustive.',
     ],
   },
 ];
@@ -79,6 +92,21 @@ export default function Methodology() {
           properties are still being established. The word “validated” is reserved: it is used only of Established
           instruments, and never of the product as a whole.
         </p>
+
+        <section className="mt-10 border-y border-[#1C1C18] py-8" data-testid="methodology-note">
+          <h2 className="mi2-serif text-2xl text-[#1C1C18]">{METHOD_NOTE.heading}</h2>
+          <div className="mt-5 space-y-4 text-base text-[#3B3B34] leading-relaxed max-w-2xl">
+            <p>{METHOD_NOTE.lead}</p>
+            <p>{METHOD_NOTE.established}</p>
+            <p>{METHOD_NOTE.developmental}</p>
+            <p data-testid="methodology-note-pause">{METHOD_NOTE.stopped_comparing}</p>
+            <p className="text-[#1C1C18]">{METHOD_NOTE.removed_not_caveated}</p>
+            <p>{METHOD_NOTE.what_is_left}</p>
+            <p data-testid="methodology-note-provisional">{METHOD_NOTE.still_rests_on}</p>
+            <p data-testid="methodology-note-delivered">{METHOD_NOTE.already_delivered}</p>
+            <p className="text-[#1C1C18]">{METHOD_NOTE.if_ever}</p>
+          </div>
+        </section>
 
         <div className="mt-10 space-y-8">
           {SECTIONS.map((s) => {

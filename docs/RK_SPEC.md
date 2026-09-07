@@ -256,7 +256,7 @@ versioned programme with parity coverage.
 |---|---|---|
 | `ALGO_VERSION` | `rk-1.0.0` | scoring |
 | `bank_version` | `1.0.0` | Closeness and Everyday item banks |
-| `DISPLAY_VERSION` | `disp-1.1.0` | position mapping (`disp-1.0.0` = the population layer, paused) |
+| `DISPLAY_VERSION` | `disp-1.2.1` | position mapping · `1.0.0` the population layer, `1.1.0` the norms pause, `1.2.0` Everyday joins the combined reading, `1.2.1` the last sten leaks out of the reader-facing copy |
 | `within_person` | `wp-1.0.0` | within-profile position and loudest selection (floor 1.5 sten) |
 | `junction_bank` | `1.0.0` | Junction Check items (`RK-JC-6`, unscored) |
 | `CONTENT_VERSION` | `copy-1.1.0` | narrative copy |
