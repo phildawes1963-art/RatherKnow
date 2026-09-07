@@ -469,7 +469,7 @@ def build_combined_pdf(*, results: list, user: dict, findings: list, situation_n
         Paragraph("Your mirrors", S["h1"]),
         Paragraph("Everything you’ve measured, read side by side", S["lead"]),
         Paragraph(
-            f"{len(ordered)} of four instruments completed. Where they agree, that’s signal. Where they "
+            f"{len(ordered)} instruments read side by side. Where they agree, that’s signal. Where they "
             "disagree, that’s not an error — it’s a finding, and usually the more interesting one.", S["body"]),
     ]
     contents = [[Paragraph("<b>Instrument</b>", S["cellb"]), Paragraph("<b>Evidence tier</b>", S["cellb"]),

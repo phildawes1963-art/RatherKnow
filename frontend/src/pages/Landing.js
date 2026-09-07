@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import Shell from '../components/Shell';
 import { INSTRUMENTS } from '../lib/mirrorTheme';
 import { SITE } from '../lib/siteMeta';
-import { FLAG, SAFETY, REGISTER } from '../content/register';
+import { FLAG, SAFETY, REGISTER, LANDING } from '../content/register';
 
 const Tier = ({ tier }) => (
   <span
@@ -15,46 +15,19 @@ const Tier = ({ tier }) => (
   </span>
 );
 
-const PRICES = [
-  {
-    key: 'archetype',
-    name: 'Your Archetype',
-    price: 'Free',
-    time: '13 minutes',
-    body: 'The Essential Mirror. Your archetype, your Delta, and the full description. No card.',
-    live: true,
-  },
-  {
-    key: 'everyday',
-    name: 'The Everyday Reading',
-    price: '$14',
-    time: '+7 minutes',
-    body: 'Forty-nine either/or choices about ordinary life: where you sit, and what you would actually protect.',
-    live: false,
-  },
-  {
-    key: 'full',
-    name: 'The Full Reading',
-    price: '$29',
-    time: '+40 minutes',
-    body: 'The Personality, EI and Closeness Mirrors, and the whole thing read together rather than reported separately.',
-    live: false,
-  },
-];
-
 export default function Landing() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: SITE.name,
     url: SITE.baseUrl,
-    description: 'Four psychometric instruments that measure how you choose in relationships.',
+    description: 'Five psychometric instruments that measure how you choose in relationships.',
   };
 
   return (
     <Shell
       title=""
-      description="Four psychometric instruments that measure how you choose in relationships. Free to start, and honest about their own evidence."
+      description="Five psychometric instruments that measure how you choose in relationships. Free to start, and honest about their own evidence."
       jsonLd={jsonLd}
     >
       {/* 1 · Hero — one job: start the Essential Mirror. One time figure, and it's the first step's. */}
@@ -71,7 +44,7 @@ export default function Landing() {
               For people who’d rather <em className="text-[#5B7284]">know</em> than be reassured.
             </h1>
             <p className="mi2-fade-slow mt-7 text-base md:text-lg text-[#3B3B34] leading-relaxed max-w-xl">
-              Four instruments that measure the one thing you actually control in a relationship: how you choose. Not
+              Five instruments that measure the one thing you actually control in a relationship: how you choose. Not
               who’s out there. Who’s doing the choosing.
             </p>
             <div className="mi2-fade-slow mt-9 flex flex-wrap items-center gap-4">
@@ -83,8 +56,8 @@ export default function Landing() {
                 Start free — 13 minutes
               </Link>
             </div>
-            <p className="mi2-fade-slow mt-4 text-sm text-[#6E6E66]">
-              No card. No profiles. Nobody else involved.
+            <p className="mi2-fade-slow mt-4 text-sm text-[#6E6E66]" data-testid="hero-sub">
+              {LANDING.hero_sub}
             </p>
           </div>
 
@@ -219,84 +192,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* 5 · How it's built. No per-instrument doors: there is one way in. */}
-      <section id="instruments" className="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
-        <p className="text-xs uppercase tracking-[0.18em] text-[#6E6E66]">How it’s built</p>
-        <h2 className="mi2-serif mt-3 text-2xl md:text-3xl text-[#1C1C18]">Four mirrors, cross-checked.</h2>
-        <p className="mt-4 text-base text-[#3B3B34] max-w-2xl leading-relaxed">
-          Each measures something different. Where they agree, that’s signal. Where they disagree, that’s a finding —
-          and usually the more interesting one.
-        </p>
-
-        <dl className="mt-10 divide-y divide-[#E4E4DE] border-y border-[#E4E4DE]">
-          {INSTRUMENTS.map((ins, i) => (
-            <div
-              key={ins.key}
-              data-testid={`instrument-${ins.key}`}
-              className="mi2-fade grid gap-2 sm:grid-cols-[minmax(0,15rem)_1fr_auto] sm:items-baseline py-5"
-              style={{ animationDelay: `${i * 70}ms` }}
-            >
-              <dt className="mi2-serif text-lg text-[#1C1C18] flex items-center gap-3">
-                {ins.name}
-                <Tier tier={ins.tier} />
-              </dt>
-              <dd className="text-sm text-[#3B3B34] leading-relaxed">{ins.blurb}</dd>
-              <dd className="text-xs text-[#6E6E66] sm:text-right whitespace-nowrap">{ins.items}</dd>
-            </div>
-          ))}
-        </dl>
-
-        <p className="mt-6 text-sm text-[#3B3B34] max-w-2xl leading-relaxed">
-          Two are established instruments with published norms. Two are ours, built on established research, and still
-          being established — we label them that way on every page they appear.{' '}
-          <Link to="/methodology" data-testid="methodology-link" className="underline underline-offset-4 text-[#1C1C18] hover:opacity-70">
-            How it’s scored, in full →
-          </Link>
-        </p>
-        <p className="mt-6 text-sm text-[#6E6E66] max-w-2xl leading-relaxed">
-          There’s one door in, and it’s the Essential Mirror. The rest unlock in sequence afterwards, in a fixed order
-          that’s the same for everyone.
-        </p>
-      </section>
-
-      {/* 6 · What it costs. A visitor who senses a paywall and can't find it becomes suspicious. */}
-      <section className="border-y border-[#E4E4DE] bg-white/60">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
-          <p className="text-xs uppercase tracking-[0.18em] text-[#6E6E66]">What it costs</p>
-          <h2 className="mi2-serif mt-3 text-2xl md:text-3xl text-[#1C1C18]">Free to start, and honest about the rest.</h2>
-          <div className="mt-10 grid gap-5 md:grid-cols-3" data-testid="pricing-tiers">
-            {PRICES.map((t) => (
-              <div key={t.key} data-testid={`tier-${t.key}`} className="bg-white border border-[#E4E4DE] p-6 flex flex-col">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="mi2-serif text-xl text-[#1C1C18]">{t.price}</p>
-                  <p className="text-xs text-[#6E6E66]">{t.time}</p>
-                </div>
-                <p className="mt-3 text-sm text-[#1C1C18]">{t.name}</p>
-                <p className="mt-2 text-sm text-[#3B3B34] leading-relaxed flex-1">{t.body}</p>
-                <p className="mt-5 text-[11px] uppercase tracking-[0.1em] text-[#6E6E66]">
-                  {t.live ? 'Available now' : 'Not yet purchasable'}
-                </p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-8 max-w-2xl space-y-3 text-sm text-[#3B3B34] leading-relaxed">
-            <p data-testid="price-ceiling">
-              <strong className="text-[#1C1C18]">$29 is the ceiling for the whole practice</strong> — the promise page
-              says a maximum price will be published before anything is purchasable, and that’s it. Nothing expires and
-              nothing renews.
-            </p>
-            <p data-testid="reportable-limits-line">{REGISTER.pricing.reportable_limits}</p>
-            <p className="text-[#6E6E66]">
-              Only the free tier is built today. The paid readings are published here so you can see what’s coming and
-              what it will cost — you cannot buy them yet, and nothing on this page takes a card.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* The Flag Check is free, important, and a different intent. Its own door, out of the main flow. */}
       {/* The Junction Check: free, no account, and the one object here one person sends to another. */}
-      <section className="max-w-6xl mx-auto px-5 sm:px-8 pt-14">
+      <section className="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
         <div className="border border-[#E4E4DE] bg-white p-6 sm:p-7 grid gap-5 md:grid-cols-[1.4fr_auto] md:items-center" data-testid="junction-door">
           <div>
             <p className="text-[11px] uppercase tracking-[0.12em] text-[#6E6E66]">Start here, free</p>
@@ -319,6 +216,114 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* 5 · How it's built. No per-instrument doors: there is one way in. */}
+      <section id="instruments" className="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
+        <p className="text-xs uppercase tracking-[0.18em] text-[#6E6E66]">How it’s built</p>
+        <h2 className="mi2-serif mt-3 text-2xl md:text-3xl text-[#1C1C18]" data-testid="instruments-h2">Five mirrors, cross-checked.</h2>
+        <p className="mt-4 text-base text-[#3B3B34] max-w-2xl leading-relaxed">
+          Each measures something different. Where they agree, that’s signal. Where they disagree, that’s a finding —
+          and usually the more interesting one.
+        </p>
+
+        <dl className="mt-10 divide-y divide-[#E4E4DE] border-y border-[#E4E4DE]">
+          {INSTRUMENTS.map((ins, i) => (
+            <div
+              key={ins.key}
+              data-testid={`instrument-${ins.key}`}
+              className="mi2-fade grid gap-2 sm:grid-cols-[minmax(0,15rem)_1fr_auto] sm:items-baseline py-5"
+              style={{ animationDelay: `${i * 70}ms` }}
+            >
+              <dt className="mi2-serif text-lg text-[#1C1C18] flex items-center gap-3">
+                {ins.name}
+                <Tier tier={ins.tier} />
+              </dt>
+              <dd className="text-sm text-[#3B3B34] leading-relaxed">{ins.line}</dd>
+              <dd className="text-xs text-[#6E6E66] sm:text-right whitespace-nowrap">{ins.items}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <p className="mt-6 text-sm text-[#3B3B34] max-w-2xl leading-relaxed" data-testid="tiers-line">
+          {LANDING.tiers_line}{' '}
+          <Link to="/methodology" data-testid="methodology-link" className="underline underline-offset-4 text-[#1C1C18] hover:opacity-70">
+            How it’s scored, in full →
+          </Link>
+        </p>
+        <p className="mt-4 text-sm text-[#6E6E66] max-w-2xl leading-relaxed" data-testid="banding-note">
+          {LANDING.banding_note}
+        </p>
+        <p className="mt-6 text-sm text-[#6E6E66] max-w-2xl leading-relaxed" data-testid="fixed-order">
+          {LANDING.fixed_order}
+        </p>
+      </section>
+
+      {/* It ends. Promise 03, brought forward from a page most readers never reach. */}
+      <section className="border-t border-[#E4E4DE] mt-4">
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
+        <div className="max-w-2xl">
+          <h2 className="mi2-serif text-2xl md:text-3xl text-[#1C1C18]" data-testid="it-ends-h2">
+            {LANDING.it_ends_heading}
+          </h2>
+          <p className="mt-5 text-base text-[#3B3B34] leading-relaxed" data-testid="it-ends-body">
+            {LANDING.it_ends_body}
+          </p>
+          <p className="mt-4 text-base text-[#1C1C18] leading-relaxed">{LANDING.it_ends_tail}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* What it costs. One card and prose: two unbuyable columns in a price table read as empty shelves. */}
+      <section className="border-y border-[#E4E4DE] bg-white/60">
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
+          <p className="text-xs uppercase tracking-[0.18em] text-[#6E6E66]">What it costs</p>
+          <h2 className="mi2-serif mt-3 text-2xl md:text-3xl text-[#1C1C18]">Free to start, and honest about the rest.</h2>
+
+          <div className="mt-9 max-w-md bg-white border border-[#1C1C18] p-6" data-testid="tier-free">
+            <p className="mi2-serif text-xl text-[#1C1C18]">{LANDING.free_tier_heading}</p>
+            <p className="mt-3 text-sm text-[#3B3B34] leading-relaxed">{LANDING.free_tier_body}</p>
+            <Link
+              to="/register?next=%2Ftake%2Fessential"
+              data-testid="pricing-start"
+              className="mt-5 inline-block bg-[#1C1C18] text-[#F6F6F2] px-5 py-2.5 rounded-sm text-sm hover:opacity-85"
+            >
+              Start free — 13 minutes
+            </Link>
+          </div>
+
+          <div className="mt-8 max-w-2xl space-y-4 text-sm text-[#3B3B34] leading-relaxed">
+            <p data-testid="paid-prose">{LANDING.paid_prose}</p>
+            <p data-testid="price-ceiling">
+              <strong className="text-[#1C1C18]">{LANDING.price_ceiling}</strong>
+            </p>
+            <p className="text-[#6E6E66]" data-testid="nothing-built-yet">{LANDING.nothing_built_yet}</p>
+            <p className="border-l-2 border-[#B9B9B0] pl-4 text-[#1C1C18]" data-testid="reportable-limits-line">
+              {REGISTER.pricing.reportable_limits}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Where the thinking comes from. The essays are the offer; the book is the provenance. No date. */}
+      <section className="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
+        <div className="max-w-2xl">
+          <h2 className="mi2-serif text-2xl md:text-3xl text-[#1C1C18]" data-testid="thinking-h2">
+            {LANDING.thinking_heading}
+          </h2>
+          <p className="mt-5 text-base text-[#3B3B34] leading-relaxed" data-testid="thinking-body">
+            {LANDING.thinking_body}
+          </p>
+          <p className="mt-4 text-base text-[#3B3B34] leading-relaxed">{LANDING.thinking_essays}</p>
+          <Link
+            to="/learn"
+            data-testid="thinking-essays-link"
+            className="mt-6 inline-block text-sm underline underline-offset-4 text-[#1C1C18] hover:opacity-70"
+          >
+            Read the essays →
+          </Link>
+        </div>
+      </section>
+
+      {/* The Flag Check is free, important, and a different intent. Its own door, out of the main flow. */}
       <section className="max-w-6xl mx-auto px-5 sm:px-8 py-14">
         <div className="border border-[#E4E4DE] bg-white p-6 sm:p-7 grid gap-5 md:grid-cols-[1.4fr_auto] md:items-center" data-testid="flag-check-door">
           <div>

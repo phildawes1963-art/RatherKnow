@@ -154,7 +154,7 @@ export default function Partners() {
       <Section kicker="Where we actually are" title="Honest about the stage." testid="partners-stage">
         <div className="space-y-5 text-base text-[#3B3B34] leading-relaxed max-w-2xl">
           <p>
-            Two of our instruments are established, with calibrated norms. Three are ours and still being
+            Two of our instruments are established, built on published research. Three are ours and still being
             established — we’re collecting the sample now, and we publish that status on every page they appear on.
           </p>
           <p>We’d rather tell you that than have you find out from a client.</p>

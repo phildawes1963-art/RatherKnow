@@ -585,3 +585,65 @@ job before an assertion ran.
 
 Verified by copying the tree to a different root and running there: 134 offline passed, all 182
 backend tests collected, both standalone lint scripts fine. In-pod suites still green (140 + 42).
+
+---
+
+# Addenda B4 + B5 · shipped 2026-06 (branch RK) — copy and section order only
+
+## B4 · The norms pause reaches the public pages
+Promise 07 says "no banded scores before norms exist to justify them", and the marketing pages were
+still making the claim B3 disproved. Eight strings named, thirteen changed.
+
+- **Landing**: personality card lost "scored against calibrated norms"; the two-tiers line replaced;
+  a new hash-locked `banding_note` says both established instruments report positions rather than
+  bands, cites promise 07, and states that an evidence tier describes where an instrument came from
+  and not its banding. Tier chips unchanged, as instructed.
+- **Samples**: "5–6 is the population middle" and the `sten ≥ 8` / `sten ≤ 3` rule replaced with the
+  position wording and the within-profile selection the code actually does; "against calibrated norm
+  bands" dropped from the footnote. The Closeness midline, the Delta and the "validated five-factor"
+  line left alone, as instructed.
+- **Counts**: landing hero, section heading, meta description and JSON-LD now say five.
+- **Free tier**: the Delta leads; the archetype is no longer the headline deliverable.
+
+### Surfaces B4 did not list but which carried the same claim
+`Methodology.js` (×3: "against calibrated norm bands" twice plus "norm bands are recalibrated
+periodically"), `Partners.js` ("established, with calibrated norms"), `Faq.js` (count). All fixed —
+the new lint would have failed on them anyway.
+
+## B5 · Landing order and six strings
+Order now: hero · what you get · the Delta · refusals · **Junction Check** · how it's built ·
+**It ends** · what it costs · **Where the thinking comes from** · Flag Check · safeguarding.
+S1–S6 all applied: hero sub-line names why the email exists; the three-column price table became one
+free card plus prose (no figure changed, nothing purchasable); "It ends" and "Where the thinking
+comes from" are new; the fixed order now gives its reason; the five instrument rows are compressed to
+name · tier · one line · item count via a new `line` field in `mirrorTheme.js`.
+
+## Lint additions (B4 §5)
+`test_no_norm_claims_on_the_public_pages` walks every page component plus `locked_copy.json` and
+`mirrorTheme.js` and hard-fails on the five banned phrases and both sten cut-off forms while
+`reliability_1_0_0.json` has `placeholder: true`. Plus a count test that compares the number of
+`INSTRUMENTS` entries against every page stating a total, and a test that each instrument keeps its
+compressed line.
+
+## Contradictions found and how they were resolved
+1. **B4 §1.2's replacement said "Two are ours"; three are.** Essential, Closeness and Everyday are
+   developmental. `Partners.js` already said three. Shipped as three.
+2. **B4 §1.1 and B5 §S6 pull against each other** — 1.1 adds a long banding paragraph to the
+   personality card, S6 compresses every card to one line. Resolved by putting the banding
+   clarification once, under the instrument list, where the two-tiers line already lives.
+3. **B4 §5 asked for a lint on "the landing, sample and promise page components"** — scope was
+   widened to every page component, because the claim was live on two pages the addendum did not name.
+
+## Out of scope, found while working, NOT changed
+- **The combined PDF omits the Everyday Mirror.** `report_pdf.py` builds from a hardcoded four-key
+  order (`essential`, `MI-AS-36`, `personality`, `eq`), so a reader who has completed Everyday gets a
+  combined reading that silently leaves it out. Only the false total was fixed ("N instruments read
+  side by side"). Including it changes what a combined PDF contains and needs a decision.
+- **The methodology page documents four instruments.** Everyday has no entry, so the newest and
+  least-established instrument is the one with no published method. Needs written content.
+- **The nav still promotes Archetypes** (B5 §3 flagged this) — to be decided with §4.1.
+
+## Verification
+`tests/` 138 passed · `backend/tests/` PDF + immutability 42 passed · testing agent iteration 12:
+**zero issues**, order verified by bounding box, banned phrases absent across nine public pages plus
+the logged-in dashboard and all four result pages, combined PDF byte-identical on repeat.

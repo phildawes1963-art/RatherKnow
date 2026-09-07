@@ -24,6 +24,7 @@ export const INSTRUMENTS = [
     tagline: 'Who you are — and who you say you want',
     blurb:
       'Fifty statements answered twice: once as yourself, once as the partner you think you want. The gap between the two — the Delta — is the measurement. You get a named pattern, its shadow, and the distance between your self and your stated want.',
+    line: 'Who you are, who you say you want, and the distance between them.',
     items: '50 questions × 2 lenses',
     minutes: 'About 25 minutes',
     tier: TIER_CHIPS.essential,
@@ -35,6 +36,7 @@ export const INSTRUMENTS = [
     tagline: "How you are when you're close to someone",
     blurb:
       'Thirty-six statements measuring two things: how much reassurance you need, and how easily closeness comes. The result is a single point on two axes — no boxes, no types, no labels. New, and honest about it.',
+    line: 'How much reassurance you need, and how easily closeness comes.',
     items: '36 statements',
     minutes: 'About 5 minutes',
     tier: TIER_CHIPS.closeness,
@@ -46,7 +48,8 @@ export const INSTRUMENTS = [
     name: 'Personality Mirror',
     tagline: 'A validated five-factor profile',
     blurb:
-      'A validated five-factor personality measure: fifteen primary factors and five global dimensions, scored against calibrated norms. The established backbone the other mirrors are cross-checked against.',
+      'A validated five-factor personality measure: fifteen primary factors and five global dimensions. The established backbone the other mirrors are cross-checked against.',
+    line: 'Fifteen primary factors and five global dimensions — the backbone the rest are cross-checked against.',
     items: '130 statements',
     minutes: '15–20 minutes',
     tier: TIER_CHIPS.personality,
@@ -58,6 +61,7 @@ export const INSTRUMENTS = [
     tagline: 'How you handle what you feel',
     blurb:
       'A Goleman four-domain emotional intelligence read: self-awareness, self-management, social awareness and relationship management — the capacities that decide how love actually goes, whatever else they decide along the way.',
+    line: 'Four domains of how you handle what you feel, and what you do with it near somebody else.',
     items: '140 statements',
     minutes: '15–20 minutes',
     tier: TIER_CHIPS.eq,
@@ -69,6 +73,7 @@ export const INSTRUMENTS = [
     tagline: "Where you sit, and what you'd protect",
     blurb:
       "Forty-nine either/or choices about ordinary life — pace, people, order, novelty, money, recovery, time together. It asks where you sit, then which of it you'd actually need to agree on. The only instrument here that asks you to choose rather than describe yourself, which makes it the only one that can contradict you.",
+    line: "Where you sit on ordinary life, and which of it you would actually protect.",
     items: '49 either/or choices',
     minutes: 'About 7 minutes',
     tier: TIER_CHIPS.everyday,

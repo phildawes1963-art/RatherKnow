@@ -226,6 +226,101 @@ def test_the_paused_population_layer_is_still_isolated():
     assert os.path.exists(os.path.join(BACKEND, "services", "display.py"))
 
 
+# B4: claims that put the product in breach of its own promise 07 ("no banded scores before norms
+# exist to justify them"). The pause landed in display.py and locked_copy.json in Batch B, but the
+# marketing pages were never in scope and the claims stayed live there.
+NORM_CLAIMS = ("calibrated norms", "calibrated norm bands", "published norms", "population middle",
+               "norm bands", "sten \u2265", "sten \u2264", "sten >=", "sten <=")
+
+PUBLIC_PAGES = ("Landing.js", "Samples.js", "Promise.js", "Methodology.js", "Partners.js", "Faq.js",
+                "Instruments.js", "Learn.js", "Home.js")
+
+
+def public_surfaces() -> list:
+    """Reader-facing pages plus the locked register. A page added here is covered by default."""
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    src = os.path.join(root, "frontend", "src")
+    found = [os.path.join(src, "content", "locked_copy.json"),
+             os.path.join(src, "lib", "mirrorTheme.js")]
+    for base, _dirs, files in os.walk(os.path.join(src, "pages")):
+        if "node_modules" in base:
+            continue
+        found += [os.path.join(base, f) for f in files if f.endswith((".js", ".jsx"))]
+    return found
+
+
+def test_the_public_pages_are_in_lint_scope():
+    names = {os.path.basename(p) for p in public_surfaces()}
+    missing = [p for p in PUBLIC_PAGES if p in ("Landing.js", "Samples.js", "Promise.js",
+                                                "Methodology.js", "Partners.js", "Faq.js")
+               and p not in names]
+    assert not missing, f"public pages missing from lint scope — did they move? {missing}"
+    assert "locked_copy.json" in names
+
+
+def test_no_norm_claims_on_the_public_pages():
+    """Promise 07 in the product's own words: no banded scores before norms exist to justify them.
+    docs/B3_NORMS_PROVENANCE.md establishes that no reference sample is documented, so these
+    strings are a breach of a published commitment rather than a matter of taste."""
+    import json
+
+    with open(os.path.join(BACKEND, "constants", "reliability_1_0_0.json"), encoding="utf-8") as fh:
+        if not json.load(fh).get("placeholder"):
+            return
+
+    offenders = []
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for path in public_surfaces():
+        for lineno, line in enumerate(open(path, encoding="utf-8"), 1):
+            # `_note` keys are engineering notes in the register, not copy shown to a reader.
+            if line.lstrip().startswith('"_note"'):
+                continue
+            low = line.lower()
+            for term in NORM_CLAIMS:
+                if term in low:
+                    offenders.append(f"{os.path.relpath(path, root)}:{lineno} — '{term}'")
+    assert not offenders, (
+        "Norm/banding claims in reader-facing copy while no reference sample is documented:\n"
+        + "\n".join(offenders))
+
+
+def test_the_instrument_count_agrees_with_the_number_of_instruments():
+    """The landing page said four and listed five."""
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    theme = open(os.path.join(root, "frontend", "src", "lib", "mirrorTheme.js"), encoding="utf-8").read()
+    cards = theme.count("\n    key: '")
+    assert cards == 5, f"INSTRUMENTS now has {cards} entries — the copy below needs to follow"
+
+    words = {4: "four", 5: "five", 6: "six"}
+    landing = open(os.path.join(root, "frontend", "src", "pages", "Landing.js"), encoding="utf-8").read()
+    # Every page that states a total, not just the landing one: the same defect was live on the
+    # dashboard, the FAQ and the combined PDF, each of which named four while five exist.
+    pages = {"pages/Landing.js", "pages/Mirrors.js", "pages/Faq.js"}
+    wrong = []
+    for rel in pages:
+        text = open(os.path.join(root, "frontend", "src", rel), encoding="utf-8").read().lower()
+        for n, w in words.items():
+            if n == cards:
+                continue
+            for phrase in (f"{w} instruments", f"{w} mirrors"):
+                if phrase in text:
+                    wrong.append(f"{rel}: '{phrase}'")
+    assert not wrong, f"a page names the wrong number of instruments: {wrong}"
+    assert f"{words[cards]} mirrors" in landing.lower(), "the landing page no longer states the count"
+
+    pdf = open(os.path.join(BACKEND, "report_pdf.py"), encoding="utf-8").read()
+    for n, w in words.items():
+        if n != cards:
+            assert f"of {w} instruments" not in pdf, f"the combined PDF claims {w} instruments"
+
+
+def test_every_instrument_has_a_compressed_one_line_summary():
+    """B5 S6: the cards carry a line each, with the paragraph kept for the methodology page."""
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    theme = open(os.path.join(root, "frontend", "src", "lib", "mirrorTheme.js"), encoding="utf-8").read()
+    assert theme.count("\n    line: ") == 5, "an instrument is missing its one-line summary"
+
+
 def test_no_canned_string_renders_twice():
     """A paragraph that repeats verbatim reveals itself as boilerplate. The shadow-pull warning
     used to render twice within two pages of one report; this stops it recurring."""
@@ -259,6 +354,10 @@ if __name__ == "__main__":
     test_no_claims_about_a_third_party()
     test_no_guarantee_language_while_alpha_is_placeholder()
     test_no_population_claims_while_norms_are_paused()
+    test_the_public_pages_are_in_lint_scope()
+    test_no_norm_claims_on_the_public_pages()
+    test_the_instrument_count_agrees_with_the_number_of_instruments()
+    test_every_instrument_has_a_compressed_one_line_summary()
     test_the_paused_population_layer_is_still_isolated()
     test_no_canned_string_renders_twice()
     print("COPY LINT OK")

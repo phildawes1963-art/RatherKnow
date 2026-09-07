@@ -10,5 +10,7 @@ export const REFUSALS = LOCKED.refusals;
 export const SAFETY = LOCKED.safety;
 export const FLAG = LOCKED.flag_check;
 export const POSITION_COPY = LOCKED.position;
+export const LANDING = LOCKED.landing;
+export const SAMPLES_COPY = LOCKED.samples;
 export const ATTRIBUTION = LOCKED.attribution;
 export const DISCLAIMER = LOCKED.disclaimer;

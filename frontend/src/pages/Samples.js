@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Shell from '../components/Shell';
 import { TIER_STATEMENTS } from '../lib/mirrorTheme';
-import { TIER_CHIPS } from '../content/register';
+import { TIER_CHIPS, SAMPLES_COPY } from '../content/register';
 
 const Chip = ({ tier }) => (
   <span
@@ -189,7 +189,7 @@ export default function Samples() {
             tier={TIER_CHIPS.personality}
             takeTo="/take/personality"
             takeLabel="Take the Personality Mirror"
-            note={`${TIER_STATEMENTS.personality} The full result scores fifteen primary factors and five global dimensions against calibrated norm bands, with validity checks.`}
+            note={`${TIER_STATEMENTS.personality} ${SAMPLES_COPY.personality_note}`}
           >
             <div className="space-y-4">
               <FactorRow low="Reserved" name="Warmth" sten={7} high="Warm" />
@@ -198,8 +198,7 @@ export default function Samples() {
               <FactorRow low="Traditional" name="Openness to change" sten={8} high="Open to change" />
             </div>
             <p className="mt-4 text-xs text-[#6E6E66]">
-              Four of fifteen factors shown. Sten scores run 1–10; 5–6 is the population middle. Marked strengths
-              (sten ≥ 8) and strong leanings (sten ≤ 3) are called out separately in the full result.
+              Four of fifteen factors shown. {SAMPLES_COPY.sten_explainer} {SAMPLES_COPY.loudest_line}
             </p>
           </SampleFrame>
 

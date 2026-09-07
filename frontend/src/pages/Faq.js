@@ -10,7 +10,7 @@ const FAQS = [
   },
   {
     q: 'Do I need an account?',
-    a: 'For the four instruments, yes — three fields: a name, an email and where you are right now (single & dating, in a relationship, or post-breakup). That last one changes how the report is written, which is the point of asking. No card, no social login, and nothing is emailed at you: results appear on screen and stay retrievable by logging back in. The Flag Check needs no account at all.',
+    a: 'For the five instruments, yes — three fields: a name, an email and where you are right now (single & dating, in a relationship, or post-breakup). That last one changes how the report is written, which is the point of asking. No card, no social login, and nothing is emailed at you: results appear on screen and stay retrievable by logging back in. The Flag Check needs no account at all.',
     links: [{ to: '/register', label: 'Create an account — free' }],
   },
   {
@@ -36,7 +36,7 @@ const FAQS = [
   },
   {
     q: 'What does “developmental” mean on an instrument?',
-    a: 'It means the questions are ours and their statistical properties are still being established — so we say so, on the instrument itself, before you take it. Two of the four mirrors are built on established, validated measures; two are developmental. The word “validated” is only ever applied to the first kind.',
+    a: 'It means the questions are ours and their statistical properties are still being established — so we say so, on the instrument itself, before you take it. Two of the five mirrors are built on established, validated measures; three are developmental. The word “validated” is only ever applied to the first kind.',
     links: [{ to: '/methodology', label: 'Every tier, published' }],
   },
   {

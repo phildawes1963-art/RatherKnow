@@ -200,5 +200,29 @@
     "_note": "C1 · the Junction Check closing line, fixed and hash-locked. The instrument produces no score, no band and no statement about a second person; this is the sentence that says what it is for.",
     "closing_lead": "A junction passed is passed. You cannot re-route from the middle of a section.",
     "closing_body": "None of this tells you who to be with. It is six things worth saying out loud early, when asking still costs a fortnight of mild awkwardness rather than four years."
+  },
+  "landing": {
+    "_note": "B4/B5 · the public-page claims. Locked because these are the strings that put the product in breach of its own promise 07 when they drift: promise 07 says no banded scores before norms exist to justify them, and docs/B3_NORMS_PROVENANCE.md establishes that no reference sample is documented. 'calibrated norms', 'published norms', 'population middle' and 'norm bands' are banned in reader-facing copy by tests/test_copy_lint.py while reliability_1_0_0.json has placeholder=true.",
+    "hero_sub": "No card. An email, so the reading is still here when you come back. No profiles, and nobody else involved.",
+    "tiers_line": "Two are established instruments built on published research. Three are ours, built on established research and still being established — we label them that way on every page they appear.",
+    "banding_note": "Both established instruments report positions rather than bands. The reference sample that would justify banding — the Personality Mirror's stens and the EI Mirror's cut-offs alike — is not yet established, and promise 07 says we won't band before it is. An evidence tier describes where an instrument came from, not its banding.",
+    "fixed_order": "There's one door in, and it's the Essential Mirror. The rest follow in a fixed order, because each one changes how you read the one before it — the Everyday Mirror is the only instrument here that can contradict what you said about yourself, and it comes second for exactly that reason.",
+    "it_ends_heading": "It ends.",
+    "it_ends_body": "Anything paid runs three months and then stops. No renewal, nothing to cancel, nothing that quietly becomes a subscription while you are not looking. The practice is finite and completable — built to be finished and left rather than to keep you.",
+    "it_ends_tail": "Which is also why there is no inner circle, no next level, and nobody here who will phone you.",
+    "free_tier_heading": "Free · 13 minutes · The Essential Mirror",
+    "free_tier_body": "Your Delta, your pattern, and the full description. No card.",
+    "paid_prose": "Two paid readings will follow — the Everyday Reading at $14 for a further seven minutes, and the Full Reading at $29, which adds the Personality, EI and Closeness Mirrors and reads the whole thing together rather than reporting it separately.",
+    "price_ceiling": "$29 is the ceiling for the whole practice. The promise page commits us to publishing a maximum before anything is purchasable, and that is it.",
+    "nothing_built_yet": "Neither is built yet. They are described here so you can see what is coming and what it will cost. Nothing on this page takes a card, and nothing renews.",
+    "thinking_heading": "Where the thinking comes from",
+    "thinking_body": "These instruments came out of a book — Relationship Tracks — which makes the argument at length, using railway signalling as a way of thinking about how people choose and why they stay. It isn't published yet.",
+    "thinking_essays": "Five essays drawn from it are free to read, and they will tell you inside a paragraph whether this is for you."
+  },
+  "samples": {
+    "_note": "B4 §2 · the sample page's population claims. 'the population middle' named a reference population that is not documented, and the sten>=8 / sten<=3 rule was replaced in code by services/within_person.py. Locked so the page cannot drift back ahead of the code.",
+    "sten_explainer": "Sten scores run 1–10. We show your position, not a verdict: establishing the reference sample that would make ‘high’ or ‘low’ mean something is work we have not finished, and until it is we don't say it.",
+    "loudest_line": "The full result names the factors sitting furthest from your own middle, in either direction — the ones doing most of the selecting.",
+    "personality_note": "The full result scores fifteen primary factors and five global dimensions, with validity checks."
   }
 }

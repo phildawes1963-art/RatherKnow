@@ -77,7 +77,7 @@ export default function Mirrors() {
           The cross-check.
         </h1>
         <p className="mt-4 text-base text-[#3B3B34] max-w-2xl leading-relaxed">
-          Four instruments, kept for you and retrievable by logging in. Where they agree, that’s signal. Where they
+          Five instruments, kept for you and retrievable by logging in. Where they agree, that’s signal. Where they
           disagree, that’s not an error: it’s a finding, and usually the more interesting one.
         </p>
         {completeCount >= 2 && (

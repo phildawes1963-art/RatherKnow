@@ -35,12 +35,12 @@ const SECTIONS = [
     key: 'personality',
     name: 'Personality Mirror',
     measures:
-      'A validated five-factor personality profile: fifteen primary factors, each scored 1–10 (sten) against calibrated norm bands, aggregated into five global dimensions.',
+      'A validated five-factor personality profile: fifteen primary factors, each placed on a 1–10 scale (sten), aggregated into five global dimensions. Positions, not bands: no reference sample is documented for the band boundaries, so we do not report them as bands.',
     scoring:
-      '130 Likert items (120 personality + 10 social-desirability checks). Reverse-keyed items inverted, factor raw scores converted to stens via calibrated norm bands, global dimensions computed as weighted factor composites. Two validity indices — social desirability and central tendency — are reported, never hidden.',
+      '130 Likert items (120 personality + 10 social-desirability checks). Reverse-keyed items inverted, factor raw scores converted to stens via the frozen band table, global dimensions computed as weighted factor composites. The band table carries no documented reference sample, which is why the reader is shown a position within their own profile rather than a band — see the scoring specification. Two validity indices — social desirability and central tendency — are reported, never hidden.',
     weaknesses: [
       'Self-report: it measures how you see yourself, honestly answered or not.',
-      'Norm bands are recalibrated periodically; results are comparable within a bank version.',
+      'The band table has no documented reference sample (no n, no group, no date), so nothing here is reported as high or low relative to other people. Results are comparable within a bank version.',
       'The five global dimensions are derived, not measured: each is a weighted sum of the primary factors — global = 5.5 + Σ(weight × (sten − 5.5)) — so a composite can only be as good as the primaries feeding it, and it can legitimately differ from another 16PF-style report that uses different weights or different norms. Every report here publishes the exact equation behind each dimension.',
       'Two composites are known to sit further from other 16PF-style instruments than the rest: Receptivity and Self-Control. We publish that residual rather than fitting the equation to a single sheet — a gain calibrated to one person would bake one person’s distortion into everyone’s score. It is flagged on the result itself.',
       'Receptivity is the same axis that other reports publish as Tough-Mindedness, read from the opposite end: a high Receptivity and a low Tough-Mindedness are the same finding, not a contradiction.',
@@ -151,7 +151,7 @@ export default function Methodology() {
         <div className="mt-6 border border-[#E4E4DE] bg-white px-6 py-5" data-testid="methodology-spec-link">
           <p className="text-[11px] uppercase tracking-[0.12em] text-[#6E6E66]">The full working</p>
           <p className="mt-2 text-sm text-[#3B3B34] leading-relaxed max-w-2xl">
-            Every formula, item count, keying rule, norm band and threshold behind all four instruments and the Flag
+            Every formula, item count, keying rule, band table and threshold behind the instruments and the Flag
             Check — including exactly which of them a percentile could honestly be derived from, and which of them
             have no population norms at all.
           </p>
