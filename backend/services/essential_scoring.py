@@ -77,10 +77,42 @@ def calculate_dimension_scores(answers: List[QuizAnswer]) -> Dict[str, int]:
     return results
 
 
+TIE_MARGIN = 5
+"""Points within which the top two archetypes are not ranked, only named together.
+
+A provisional design choice, like the 1.5-sten loudest-trait floor — not a derived figure, and
+to be re-derived when the item-bank alphas are measured. It is not the conservative option:
+archetype scores have an SD of 11-13 points, so at the placeholder alpha the standard error of a
+difference between two of them is around 8 points and a 90% interval on that is around 13. Five
+is already generous to the instrument; three would have been chosen to hold the fire rate down,
+which optimises for the archetype's prominence rather than for what the instrument can tell
+apart. It fires on roughly 39% of varied stored responses. That costs less than it would have
+before the Delta became the headline finding.
+
+Below the margin the previous code broke ties by whatever `sorted(..., reverse=True)` returned
+first, which for equal scores is dictionary insertion order — a 15% share of readers assigned an
+archetype by the order the six were typed into a JSON file.
+"""
+
+
+def rank_archetypes(archetype_scores: Dict[str, dict]) -> dict:
+    """Deterministic ordering plus the tie state. Ties break on key, never on insertion order."""
+    ordered = sorted(archetype_scores.items(), key=lambda kv: (-kv[1]["score"], kv[0]))
+    gap = ordered[0][1]["score"] - ordered[1][1]["score"]
+    return {
+        "order": [k for k, _ in ordered],
+        "primary": ordered[0][0],
+        "secondary": ordered[1][0],
+        "gap": gap,
+        "tied": gap < TIE_MARGIN,
+        "margin": TIE_MARGIN,
+    }
+
+
 def get_blend_result(archetype_scores: Dict[str, dict], quiz_type: str) -> dict:
-    sorted_archetypes = sorted(archetype_scores.items(), key=lambda x: x[1]["score"], reverse=True)
-    primary = sorted_archetypes[0][0]
-    secondary = sorted_archetypes[1][0]
+    ranked = rank_archetypes(archetype_scores)
+    primary = ranked["primary"]
+    secondary = ranked["secondary"]
 
     key = "|".join(sorted([primary, secondary]))
     if key in _BLEND:

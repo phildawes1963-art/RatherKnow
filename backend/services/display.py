@@ -18,9 +18,15 @@ norm in the first place.
 """
 from math import erf, sqrt
 
-DISPLAY_VERSION = "disp-1.2.1"
+DISPLAY_VERSION = "disp-1.3.2"
 # 1.0.0 the population layer · 1.1.0 the norms pause · 1.2.0 the Everyday Mirror joins the
-# combined reading · 1.2.1 the last sten leaks out of "how you choose" and the global rows.
+# combined reading · 1.2.1 the last sten leaks out of "how you choose" and the global rows ·
+# 1.3.0 the Essential tie state: where the top two archetypes sit inside the margin the reading
+# names both instead of ranking them, and prints the gap either way · 1.3.1 the tie note is
+# labelled per lens and not printed twice when both lenses tie the same way. Same rule as 1.2.1:
+# snapshots are write-once, so a rendering fix is a new version, never an edit to a stored file ·
+# 1.3.2 a tied reading prints both archetype descriptions: a header naming two patterns above a
+# body voicing only the first ranks them again in the reader's ear.
 # Snapshots are keyed on this, so a bump means new renders differ and every document already
 # delivered keeps exactly the bytes it was sent with.
 #

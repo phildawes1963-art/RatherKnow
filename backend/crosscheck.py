@@ -206,8 +206,12 @@ def build_synthesis(by: dict, tensions: list, agreements: list) -> dict | None:
     if ess:
         overall = ess["delta"]["overall"]
         shape = ("a wide gap" if overall >= 15 else "a close match" if overall <= 6 else "a moderate gap")
-        self_name = ess["self"]["primary"]["name"]
-        ideal_name = ess["ideal"]["primary"]["name"]
+        self_tie = ess["self"].get("tie") or {}
+        ideal_tie = ess["ideal"].get("tie") or {}
+        self_name = (" and ".join(self_tie["names"]) if self_tie.get("tied")
+                     else ess["self"]["primary"]["name"])
+        ideal_name = (" and ".join(ideal_tie["names"]) if ideal_tie.get("tied")
+                      else ess["ideal"]["primary"]["name"])
         pairing = (
             f"you read as {self_name} and you describe wanting the same thing back"
             if self_name == ideal_name

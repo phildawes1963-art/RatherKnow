@@ -722,3 +722,99 @@ stops, never a bar that fills: no fill, no percentage, no completion state.
 `tests/` 145 passed · `backend/tests/` 150 + 42 passed · testing agent iteration 13 found the
 snapshot leak (fixed by version bump) and iteration 14 verified the fix with 11 further acceptance
 tests: **zero issues outstanding**.
+
+---
+
+# Session · June 2026 · CI unblock, the Essential tie state, and the assignment-free test
+
+## CI failure diagnosed — the requirements file, not the tests
+Both GitHub jobs died at `pip install -r backend/requirements.txt` in 18 and 22 seconds, before a
+single test ran. Two pod-only pins:
+
+- `litellm @ https://customer-assets.emergentagent.com/internal-asset/library/...` — 403 outside the pod.
+- `emergentintegrations==0.2.0` — not on PyPI; pip reports "from versions: none".
+
+Neither was imported anywhere in the repository. Both removed; the remaining 126 pins resolve from
+the public index. New guard `tests/test_requirements_portability.py` fails on any URL, local path,
+VCS or unpinned requirement, and on the known pod-only package names.
+
+**Third defect of one class in a week** — `/app` paths, then a missing conftest, now a pod-only
+wheel. Something true only inside the pod, baked into a thing that has to run outside it. The A0
+gate is doing exactly what it was built for. Still unverified: an actual GitHub Actions run. The
+user must push the `RK` branch via Save to GitHub.
+
+## The Essential tie state — shipped (region work, step 1)
+`TIE_MARGIN = 5` points in `backend/services/essential_scoring.py`. `rank_archetypes()` sorts on
+`(-score, key)`, so an exact tie can no longer be broken by dictionary insertion order — which was
+assigning an archetype to ~15% of readers by the order the six were typed into a JSON file. Inside
+the margin the reading **names both and declines to rank**; the gap is printed either way, so a
+declined rank reads as information rather than evasion.
+
+Five is a provisional design choice, on the model of the 1.5-sten floor, and deliberately not the
+conservative option: SD 11–13 puts the standard error of a difference around 8 points and a 90%
+interval around 13. Three would have been chosen to hold the fire rate down, optimising for the
+archetype's prominence rather than for what the instrument can tell apart. Fires on ~39% of varied
+stored responses — affordable now the Delta is the headline. Re-derive when alpha lands.
+
+Carried through every surface that names an archetype: result page (`essential-self-tie`,
+`essential-ideal-tie`), PDF, `choosing._lens_name`, `crosscheck.build_synthesis`. Prose must never
+quietly rank two patterns the reading declined to rank. `DISPLAY_VERSION` 1.2.1 → **1.3.2**
+(1.3.0 the tie state · 1.3.1 the note labelled per lens and printed once · 1.3.2 both archetype
+descriptions voiced, not just the first-named). No scoring, item or weight changed.
+
+**Reader-facing copy is the consequence, not the ratio** — on `/methodology`: *"Two of our six
+patterns sit closer together than the others; where a profile falls between them we name both
+rather than choosing."* The ratios and correlations stay internal.
+
+## The correlation matrix — the assignment-free test (`docs/CENTROID_SEPARATION.md` §6)
+The centroid figures group results by whichever score is largest, which **guarantees separation by
+construction**: 1.45 says the assignment rule is self-consistent, not that six item sets measure
+six things. R3's claim was independence, so: Pearson matrix of the six scores, self lens, varied
+answers, n = 370.
+
+**Off-diagonal |r|: mean 0.17, median 0.09, max 0.56. One pair of fifteen reaches 0.5.** The six
+are largely not redundant and there is no general factor with six names on it — the region model is
+not in a degenerate space. Two pairs share variance, and §5 predicted both:
+`adventurer`·`visionary` **+0.56** (the largest item overlap, showing up as arithmetic) and
+`empath`·`diplomat` **+0.48** (the same pair that failed the centroid ratio at 0.87). Two
+independent methods agree those two are least distinguishable — hence naming both rather than
+reallocating items on weak evidence.
+
+§5 restated with `key → "Display Name"` throughout: `adventurer` → The Voyager, `visionary` → The
+Torchbearer. There is no seventh archetype called Visionary.
+
+## Corpus quarantine, and the suppression rate re-checked (§7)
+1,587 of 3,499 stored results (45%) come from sessions answering on fewer than four distinct
+points. All flagged `data_quality: "low_variation"` and **excluded by default** in
+`scripts/analyze_stored_corpus.py` — a flag nothing honours is documentation, not a control.
+
+Then the number that started the guarantee investigation. The suppression rate of 1.0 was computed
+across everything, and a uniform-answer session produces a perfectly flat profile, which is what
+the flat-profile gate exists to suppress. Recomputed on varied answers only:
+
+| scale set | all | varied |
+|---|---|---|
+| personality | 0.995 (n=581) | **0.992 (n=356)** |
+| EI | 0.840 (n=630) | **0.781 (n=462)** |
+
+**Not an artefact.** Personality is unchanged to three decimals; EI improves six points and is
+still suppressed four readings in five. Removing the guarantee was right regardless. The hope that
+enforcement becomes viable on a clean corpus is closed: at these thresholds it would not. MRD stays
+in shadow, and the decision still turns on measured alpha.
+
+## Verification
+Full suite **373 passed, 2 warnings**. Testing agent iteration 15: 13/13 backend acceptance tests
+against the deployed preview, tied and non-tied result pages, PDF, prose, ownership, combined PDF,
+Junction and Flag Check all green — **zero issues, `retest_needed: false`**. Its one observation
+(a tied header above a body voicing only the first archetype) was fixed in disp-1.3.2 and
+re-verified on screen and in the PDF.
+
+## Open, in priority order
+1. **Region work items 1 and 3**: nearest-region derivation with printed distances. Not started.
+   The Archetypes nav item stays held until a live region outcome supports it.
+2. **The 50-item allocation** — `visionary` shares eight of ten items, and items 7, 34 and 36 feed
+   no archetype. Now with a measured correlate (+0.56). A scoring change; needs its own version.
+3. **Push `RK` and watch the first real Actions run.**
+4. Everyday desirability pre-test (20–30 people). Disclosed as a gap on `/methodology`.
+5. Production redirects; `/mirror` stays until externally verified.
+6. Payments/entitlements and the partner dashboard: not built.

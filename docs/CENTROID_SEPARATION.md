@@ -34,9 +34,9 @@ which is why the question is answerable from what we hold.
 | Rock | 50.3 | 11.3 |
 | Challenger | 49.3 | 10.5 |
 | Empath | 47.6 | 11.2 |
-| Voyager | 45.7 | 11.6 |
+| Voyager (`adventurer`) | 45.7 | 11.6 |
 | Diplomat | 44.6 | 12.9 |
-| Visionary | 43.7 | 13.4 |
+| Torchbearer (`visionary`) | 43.7 | 13.4 |
 
 Means within six points of each other and comparable spread. No archetype is a near-constant, and
 none is dead: the item sets do respond to answers.
@@ -49,26 +49,26 @@ distance from a member to its own centroid. **Ratio = centroid distance ÷ mean 
 groups** — the figure that matters, because a large distance between two loose clouds is not
 separation.
 
-Within-group scatter: Rock 13.9 · Challenger 19.1 · Voyager 20.6 · Visionary 22.7 · Diplomat 24.0
+Within-group scatter: Rock 13.9 · Challenger 19.1 · Voyager 20.6 · Torchbearer 22.7 · Diplomat 24.0
 · Empath 25.9
 
 | pair | distance | ratio |
 |---|---|---|
 | Diplomat · Empath | 21.8 | **0.87** |
-| Challenger · Visionary | 22.1 | 1.06 |
+| Challenger · Torchbearer | 22.1 | 1.06 |
 | Voyager · Empath | 25.5 | 1.10 |
-| Voyager · Visionary | 26.6 | 1.23 |
-| Empath · Visionary | 30.2 | 1.24 |
+| Voyager · Torchbearer | 26.6 | 1.23 |
+| Empath · Torchbearer | 30.2 | 1.24 |
 | Voyager · Challenger | 26.0 | 1.31 |
 | Empath · Rock | 26.4 | 1.33 |
 | Voyager · Diplomat | 30.9 | 1.39 |
 | Challenger · Empath | 35.0 | 1.56 |
-| Diplomat · Visionary | 36.7 | 1.57 |
+| Diplomat · Torchbearer | 36.7 | 1.57 |
 | Challenger · Rock | 27.7 | 1.68 |
 | Diplomat · Rock | 33.5 | 1.77 |
 | Voyager · Rock | 31.3 | 1.82 |
 | Challenger · Diplomat | 40.0 | 1.86 |
-| Rock · Visionary | 36.9 | 2.01 |
+| Rock · Torchbearer | 36.9 | 2.01 |
 
 **Mean ratio 1.45. Fourteen of fifteen pairs separate at 1.0 or better. One pair — Diplomat and
 Empath — does not.**
@@ -98,16 +98,26 @@ Keep the hundred items, keep the Delta, and change only how the archetype is der
 2. **A tie rule that declines to rank** when the top two sit closer together than a stated
    margin, naming both instead. That closes R3 by construction and removes the insertion-order
    assignment.
-3. **Diplomat and Empath are the pair that rule will fire on most**, at ratio 0.87. Two honest
-   options, and this one is a decision rather than a measurement: either the tie rule simply
-   names both, which is truthful and costs nothing, or the two item sets are reallocated to pull
-   them apart — which is a scoring change and needs its own version.
+3. **Diplomat and Empath are the pair that rule will fire on most**, at ratio 0.87 and r = +0.48.
+   Decided: **the tie rule names both, and the item sets are not reallocated.** Reallocating on a
+   0.87 measured against a 1.0 threshold — where the threshold is a choice and the corpus is
+   synthetic — would be a scoring change bought with weak evidence.
 
-The one number worth putting on the methodology page whichever way this went: on varied responses,
-fourteen of the fifteen archetype pairs separate by more than the spread within each of them, and
-the one that does not is Diplomat and Empath, which is why we decline to choose between those two
-when a profile sits between them. That is a real statement about our own instrument's structure,
-and it is the first one we have been able to make.
+**Shipped so far: item 2, the tie rule.** `TIE_MARGIN = 5` points in
+`backend/services/essential_scoring.py`, with the gap printed either way. Five is a provisional
+design choice on the model of the 1.5-sten floor, and deliberately not the conservative option:
+the archetype scores carry an SD of 11–13, so at placeholder alpha the standard error of a
+difference between two of them is around 8 points and a 90% interval on that is around 13. Five
+is already generous to the instrument; three would have been chosen to hold the fire rate down,
+which optimises for the archetype's prominence rather than for what the instrument can tell
+apart. It fires on roughly 39% of varied stored responses — affordable now that the Delta, not
+the archetype, is the headline finding. Re-derive when alpha lands. Items 1 and 3 remain open.
+
+**What goes on the methodology page is the consequence, not the ratio:** *two of our six patterns
+sit closer together than the others; where a profile falls between them we name both rather than
+choosing.* True, useful to a reader who needs to know why the product sometimes declines to name
+one archetype, and not resting on a number that has not yet earned that much confidence. The
+ratio and the correlations stay in this internal document.
 
 ## 5. What this does not answer
 
@@ -115,7 +125,84 @@ and it is the first one we have been able to make.
   not validity.
 - How **people** distribute across the six. That needs real respondents, and the honest position
   until then is that we do not know.
-- The 50-item lens overlap in `docs/ARCHETYPES_SPEC.md` §2 — Torchbearer/Visionary sharing eight
-  of ten items with other archetypes, and items 7, 34 and 36 feeding no archetype at all. Region
-  assignment does not fix that; it makes it visible, because a printed distance derived from
-  overlapping item sets invites the question.
+- The 50-item lens overlap in `docs/ARCHETYPES_SPEC.md` §2. Stated unambiguously, because this
+  section identifies the deeper defect and the table above mixes naming systems: the data keys
+  and their display names are `rock` → "The Rock", `challenger` → "The Challenger", `empath` →
+  "The Empath", `adventurer` → **"The Voyager"**, `diplomat` → "The Diplomat", `visionary` →
+  **"The Torchbearer"**. Voyager and Torchbearer are `adventurer` and `visionary`; there is no
+  seventh archetype called Visionary. The defect is that **`visionary` ("The Torchbearer") shares
+  eight of its ten items with other archetypes, and items 7, 34 and 36 feed no archetype at
+  all.** Region assignment does not fix that; it makes it visible, because a printed distance
+  derived from overlapping item sets invites the question.
+
+---
+
+## 6. Correlation matrix — the assignment-free test (added after §4)
+
+§2 groups results by whichever of the six scores is largest. **That partition guarantees
+separated centroids by construction**: take six independent random variables, group by whichever
+is highest, and the centroids separate every time. The Rock group has high Rock because that is
+what put it in the Rock group. So 1.45 says the assignment rule is self-consistent. It does not
+say the six item sets measure six things.
+
+R3's claim was about independence, and the assignment-free test for it is the correlation matrix
+between the six scores on the same results. Self lens, varied answers only, n = 370
+(`scripts/analyze_stored_corpus.py`):
+
+|  | rock | chall | empath | voyager | diplo | torch |
+|---|---|---|---|---|---|---|
+| **rock** | 1.00 | 0.09 | -0.01 | -0.06 | -0.29 | -0.08 |
+| **challenger** | 0.09 | 1.00 | -0.20 | 0.08 | -0.15 | **0.34** |
+| **empath** | -0.01 | -0.20 | 1.00 | -0.11 | **0.48** | -0.07 |
+| **adventurer / Voyager** | -0.06 | 0.08 | -0.11 | 1.00 | -0.03 | **0.56** |
+| **diplomat** | -0.29 | -0.15 | **0.48** | -0.03 | 1.00 | -0.00 |
+| **visionary / Torchbearer** | -0.08 | **0.34** | -0.07 | **0.56** | -0.00 | 1.00 |
+
+Off-diagonal |r|: mean **0.17**, median 0.09, max 0.56. **One of fifteen pairs reaches 0.5.**
+
+Read plainly: the six are largely not redundant. Thirteen of fifteen pairs share under a tenth
+of their variance, several are mildly *negative*, and there is no single general factor with six
+names hung on it. The region model is not operating in a degenerate space.
+
+Two pairs do share variance, and §5 predicted both:
+
+- **Voyager · Torchbearer, r = +0.56** — the pair whose item sets overlap most. This is the item
+  overlap showing up as arithmetic, exactly as expected, and it is the strongest quantitative
+  case yet for fixing the 50-item allocation.
+- **Empath · Diplomat, r = +0.48** — the same pair that failed the centroid ratio at 0.87. Two
+  independent methods now agree these two are the least distinguishable, which is why the tie
+  rule names both instead of reallocating items.
+
+So the §4 verdict survives the harder test, with a correction to its final paragraph: what we can
+say is that the six scores are close to independent on varied responses, and that two pairs are
+not. The centroid ratio is not the number to publish. The consequence is.
+
+## 7. The corpus quarantine, and what it did to the MRD suppression rate
+
+The junk is worse than "over half". Across 3,499 stored results, **1,587 (45%) come from sessions
+answering on fewer than four distinct points**, and for Essential specifically the split was 262
+sessions answering every item identically and 254 using two values. All of them now carry
+`data_quality: "low_variation"`, and `scripts/analyze_stored_corpus.py` excludes them by default
+rather than merely labelling them — a flag nothing honours is documentation, not a control.
+
+Then the number this was really about. The **suppression rate of 1.0 that made R1 SEVERE was
+computed across everything**, and a session with every item answered identically produces a
+perfectly flat profile, which is precisely what the flat-profile gate exists to suppress. So it
+was worth checking whether the finding was substantially an artefact of test data. Recomputed
+with the low-variation results excluded:
+
+| scale set | all results | varied only |
+|---|---|---|
+| personality primaries + globals | 0.995 (n=581) | **0.992 (n=356)** |
+| EI domains + subdimensions | 0.840 (n=630) | **0.781 (n=462)** |
+
+**It was not an artefact.** Personality is unchanged to three decimals: on varied answers the
+fifteen primaries still fall into one undifferentiated cluster essentially every time. EI
+improves by six points and is still suppressed in four readings out of five.
+
+Two consequences. Removing the half-refund promise was right regardless — it rested on
+placeholder alpha whatever the rate — and it stays right. And the hope that enforcement might
+become viable once the corpus was clean is now closed: at these thresholds it would not. The
+enforcement decision therefore still turns on measured alpha, not on data hygiene, and MRD stays
+in shadow.
+

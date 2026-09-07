@@ -28,6 +28,15 @@ def _pt(title, body):
     return {"title": title, "body": body}
 
 
+def _lens_name(lens: dict, primary: dict) -> str:
+    """Both names where the top two sit inside the tie margin — the reading declines to rank
+    them, so the prose must not quietly rank them anyway."""
+    tie = lens.get("tie") or {}
+    if tie.get("tied"):
+        return f"{tie['names'][0]} and {tie['names'][1]}"
+    return primary["name"]
+
+
 def _essential(r):
     delta = r["delta"]
     scores = r["self"]["archetype_scores"]
@@ -80,8 +89,9 @@ def _essential(r):
 
     points.append(_pt(
         "The two lenses were you both times.",
-        f"You read as {self_p['name']}, and you described {ideal_p['name']}. Both sets of answers came from you, "
-        "which is why this is a study of how you choose rather than a verdict on who's available."))
+        f"You read as {_lens_name(r['self'], self_p)}, and you described {_lens_name(r['ideal'], ideal_p)}. Both "
+        "sets of answers came from you, which is why this is a study of how you choose rather than a verdict on "
+        "who's available."))
 
     ideal_key = ideal_p.get("key")
     if ideal_key and abs(per.get(ideal_key, 1)) < 1:

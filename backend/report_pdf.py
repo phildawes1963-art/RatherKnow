@@ -107,13 +107,30 @@ def _essential(result, flow):
     self_p = result["self"]["primary"]
     ideal_p = result["ideal"]["primary"]
     delta = result["delta"]
+
+    def _named(lens, fallback):
+        tie = result[lens].get("tie") or {}
+        if tie.get("tied"):
+            return f"{tie['names'][0]} and {tie['names'][1]}"
+        return f"{fallback['name']} — {fallback['subtitle']}"
+
     flow += [
         Paragraph("As yourself, and as the partner you say you want", S["h2"]),
         Paragraph(
-            f"<b>You:</b> {self_p['name']} — {self_p['subtitle']}<br/>"
-            f"<b>The partner you describe:</b> {ideal_p['name']} — {ideal_p['subtitle']}",
+            f"<b>You:</b> {_named('self', self_p)}<br/>"
+            f"<b>The partner you describe:</b> {_named('ideal', ideal_p)}",
             S["body"]),
-        Paragraph(self_p.get("description", ""), S["body"]),
+    ]
+    seen = set()
+    for lens, prefix in (("self", "As yourself"), ("ideal", "In the partner you describe")):
+        tie = result[lens].get("tie") or {}
+        if tie.get("tied") and tie["note"] not in seen:
+            seen.add(tie["note"])
+            flow.append(Paragraph(f"{prefix}: {tie['note']}", S["small"]))
+    flow += [
+        *[Paragraph(d, S["body"])
+          for d in ((result["self"].get("tie") or {}).get("descriptions")
+                    or [self_p.get("description", "")]) if d],
         Paragraph("The Delta", S["h2"]),
         Paragraph(
             f"Overall distance between the two lenses: <b>{delta['overall']} points</b>. "

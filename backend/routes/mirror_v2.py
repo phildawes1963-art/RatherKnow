@@ -30,7 +30,7 @@ from situation_notes import situation_note
 from services.essential_scoring import (
     SELF_ASSESSMENT_QUESTIONS, IDEAL_PARTNER_QUESTIONS, ARCHETYPES,
     QuizAnswer, calculate_archetype_scores, calculate_dimension_scores,
-    get_blend_result,
+    get_blend_result, rank_archetypes,
 )
 from constants.p150_data import P150_PERSONALITY_ITEMS, P150_VALIDITY_ITEMS
 from services.p150_lite import P150_FACTORS
@@ -384,11 +384,12 @@ def _score_essential(responses: dict) -> dict:
                 raise HTTPException(status_code=400, detail=f"Missing answers in the '{lens}' lens")
             answers.append(QuizAnswer(question_id=qid, answer=r["v"]))
         arch_scores = calculate_archetype_scores(answers)
-        ordered = sorted(arch_scores.items(), key=lambda x: x[1]["score"], reverse=True)
+        ranked = rank_archetypes(arch_scores)
         lens_results[lens] = {
             "archetype_scores": arch_scores,
-            "primary": ordered[0][0],
-            "secondary": ordered[1][0],
+            "ranked": ranked,
+            "primary": ranked["primary"],
+            "secondary": ranked["secondary"],
             "blend": get_blend_result(arch_scores, quiz_type),
             "dimensions": calculate_dimension_scores(answers),
         }
@@ -418,6 +419,7 @@ def _score_essential(responses: dict) -> dict:
         "self": {
             "primary": {"key": self_r["primary"], **_arch_brief(self_r["primary"], "self_description")},
             "secondary": {"key": self_r["secondary"], **_arch_brief(self_r["secondary"], "self_description", desc=False)},
+            "tie": _tie_block(self_r, "self_description"),
             "archetype_scores": self_r["archetype_scores"],
             "blend": self_r["blend"],
             "compatibility": self_r["blend"],
@@ -426,6 +428,7 @@ def _score_essential(responses: dict) -> dict:
         "ideal": {
             "primary": {"key": ideal_r["primary"], **_arch_brief(ideal_r["primary"], "ideal_partner_description")},
             "secondary": {"key": ideal_r["secondary"], **_arch_brief(ideal_r["secondary"], "ideal_partner_description", desc=False)},
+            "tie": _tie_block(ideal_r, "ideal_partner_description"),
             "archetype_scores": ideal_r["archetype_scores"],
             "blend": ideal_r["blend"],
             "compatibility": ideal_r["blend"],
@@ -435,6 +438,39 @@ def _score_essential(responses: dict) -> dict:
         "shadow": shadow,
         "dimension_gaps": dim_gaps,
         "evidence_tier": "developmental",
+    }
+
+
+def _tie_block(lens_r: dict, desc_field: str) -> dict:
+    """Names both when the top two sit inside the margin, instead of ranking them.
+
+    The gap is printed either way: a reader who can see how close it was reads a declined rank
+    as information rather than evasion.
+    """
+    ranked = lens_r["ranked"]
+    scores = lens_r["archetype_scores"]
+    a, b = ranked["primary"], ranked["secondary"]
+    if not ranked["tied"]:
+        return {
+            "tied": False,
+            "gap": ranked["gap"],
+            "margin": ranked["margin"],
+            "note": f"{scores[a]['name']} leads by {ranked['gap']} points.",
+        }
+    return {
+        "tied": True,
+        "gap": ranked["gap"],
+        "margin": ranked["margin"],
+        "keys": [a, b],
+        "names": [scores[a]["name"], scores[b]["name"]],
+        # Both descriptions, because a header naming two patterns above a body voicing only the
+        # first would rank them again in the reader's ear.
+        "descriptions": [ARCHETYPES[a].get(desc_field, ""), ARCHETYPES[b].get(desc_field, "")],
+        "note": (
+            f"{scores[a]['name']} and {scores[b]['name']} sit {ranked['gap']} points apart — "
+            f"closer than the {ranked['margin']} points this instrument can tell apart. "
+            "We name both rather than choosing between them."
+        ),
     }
 
 

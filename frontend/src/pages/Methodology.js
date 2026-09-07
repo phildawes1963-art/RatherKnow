@@ -9,9 +9,9 @@ const SECTIONS = [
     key: 'essential',
     name: 'Essential Mirror',
     measures:
-      'Your relational pattern, read through two lenses: fifty statements answered as yourself, then fifty answered as the partner you say you want. Output: a primary and secondary archetype per lens, the per-pattern gaps between them (the Delta), a mapped shadow attraction, and five dimension scores per lens.',
+      'Your relational pattern, read through two lenses: fifty statements answered as yourself, then fifty answered as the partner you say you want. Output: a primary and secondary archetype per lens — or two named together where they sit too close to rank — the per-pattern gaps between them (the Delta), a mapped shadow attraction, and five dimension scores per lens.',
     scoring:
-      'Each of six archetypes is keyed to ten statements. Answers map to a 0–10 contribution per statement (with reverse-keyed items inverted), summed per archetype and expressed against the maximum. The Delta is the arithmetic difference between the two lenses — no weighting, no hidden model.',
+      'Each of six archetypes is keyed to ten statements. Answers map to a 0–10 contribution per statement (with reverse-keyed items inverted), summed per archetype and expressed against the maximum. The Delta is the arithmetic difference between the two lenses — no weighting, no hidden model. Two of our six patterns sit closer together than the others; where a profile falls between them we name both rather than choosing, and the distance between the two is printed either way.',
     weaknesses: [
       'The items and the archetype framework are ours; their psychometric properties are still being established.',
       'Early internal-consistency estimates only (archetype core: exploratory, n≈90, α 0.68–0.74). No test–retest data yet.',

@@ -33,15 +33,33 @@ export default function EssentialResult({ result }) {
       <section className="grid gap-5 md:grid-cols-2">
         <div className="bg-white border border-[#E4E4DE] p-7" data-testid="essential-self">
           <p className="text-xs uppercase tracking-[0.12em] text-[#5B7284]">As a partner, you read as</p>
-          <h2 className="mi2-serif mt-2 text-2xl text-[#1C1C18]">{s.primary.name}</h2>
-          <p className="text-sm text-[#6E6E66]">{s.primary.subtitle} · with a secondary of {s.secondary.name}</p>
-          <p className="mt-4 text-sm text-[#3B3B34] leading-relaxed">{s.primary.description}</p>
+          <h2 className="mi2-serif mt-2 text-2xl text-[#1C1C18]" data-testid="essential-self-name">
+            {s.tie?.tied ? `${s.tie.names[0]} and ${s.tie.names[1]}` : s.primary.name}
+          </h2>
+          <p className="text-sm text-[#6E6E66]">
+            {s.tie?.tied ? 'Two patterns, named together' : `${s.primary.subtitle} · with a secondary of ${s.secondary.name}`}
+          </p>
+          {s.tie?.tied && (
+            <p className="mt-3 text-xs text-[#6E6E66] leading-relaxed" data-testid="essential-self-tie">{s.tie.note}</p>
+          )}
+          {(s.tie?.descriptions || [s.primary.description]).map((d, n) => (
+            <p key={n} className="mt-4 text-sm text-[#3B3B34] leading-relaxed">{d}</p>
+          ))}
         </div>
         <div className="bg-white border border-[#E4E4DE] p-7" data-testid="essential-ideal">
           <p className="text-xs uppercase tracking-[0.12em] text-[#C8AE93]">The partner you describe is</p>
-          <h2 className="mi2-serif mt-2 text-2xl text-[#1C1C18]">{i.primary.name}</h2>
-          <p className="text-sm text-[#6E6E66]">{i.primary.subtitle} · with a secondary of {i.secondary.name}</p>
-          <p className="mt-4 text-sm text-[#3B3B34] leading-relaxed">{i.primary.description}</p>
+          <h2 className="mi2-serif mt-2 text-2xl text-[#1C1C18]" data-testid="essential-ideal-name">
+            {i.tie?.tied ? `${i.tie.names[0]} and ${i.tie.names[1]}` : i.primary.name}
+          </h2>
+          <p className="text-sm text-[#6E6E66]">
+            {i.tie?.tied ? 'Two patterns, named together' : `${i.primary.subtitle} · with a secondary of ${i.secondary.name}`}
+          </p>
+          {i.tie?.tied && (
+            <p className="mt-3 text-xs text-[#6E6E66] leading-relaxed" data-testid="essential-ideal-tie">{i.tie.note}</p>
+          )}
+          {(i.tie?.descriptions || [i.primary.description]).map((d, n) => (
+            <p key={n} className="mt-4 text-sm text-[#3B3B34] leading-relaxed">{d}</p>
+          ))}
         </div>
       </section>
 

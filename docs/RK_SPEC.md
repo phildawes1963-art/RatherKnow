@@ -256,7 +256,7 @@ versioned programme with parity coverage.
 |---|---|---|
 | `ALGO_VERSION` | `rk-1.0.0` | scoring |
 | `bank_version` | `1.0.0` | Closeness and Everyday item banks |
-| `DISPLAY_VERSION` | `disp-1.2.1` | position mapping · `1.0.0` the population layer, `1.1.0` the norms pause, `1.2.0` Everyday joins the combined reading, `1.2.1` the last sten leaks out of the reader-facing copy |
+| `DISPLAY_VERSION` | `disp-1.3.2` | position mapping · `1.0.0` the population layer, `1.1.0` the norms pause, `1.2.0` Everyday joins the combined reading, `1.2.1` the last sten leaks out of the reader-facing copy, `1.3.0` the Essential tie state names both where the top two sit inside the margin, `1.3.1` the tie note is labelled per lens and printed once, `1.3.2` a tied reading voices both archetype descriptions, not just the first-named |
 | `within_person` | `wp-1.0.0` | within-profile position and loudest selection (floor 1.5 sten) |
 | `junction_bank` | `1.0.0` | Junction Check items (`RK-JC-6`, unscored) |
 | `CONTENT_VERSION` | `copy-1.1.0` | narrative copy |
