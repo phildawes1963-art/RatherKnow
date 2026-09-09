@@ -226,8 +226,8 @@
     "thinking_essays": "Five essays drawn from it are free to read, and they will tell you inside a paragraph whether this is for you."
   },
   "samples": {
-    "_note": "B4 §2 · the sample page's population claims. 'the population middle' named a reference population that is not documented, and the sten>=8 / sten<=3 rule was replaced in code by services/within_person.py. Locked so the page cannot drift back ahead of the code.",
-    "sten_explainer": "Sten scores run 1–10. We show your position, not a verdict: establishing the reference sample that would make ‘high’ or ‘low’ mean something is work we have not finished, and until it is we don't say it.",
+    "_note": "B4 §2 · the sample page's population claims, and disp-1.5.0 · the sten retired from every reader-facing surface. 'the population middle' named a reference population that is not documented; the sten>=8 / sten<=3 rule was replaced in code by services/within_person.py; and the sten itself is now shown nowhere, because its band table has band widths from 2 to 8 raw points and no documented reference sample. Locked so the page cannot drift back ahead of the code.",
+    "position_explainer": "Each factor is shown as a position on its own scale, between two named ends. There is no number and no band: a score compared with other people needs a reference sample, and establishing ours is work we have not finished. Until it is, we show where you sit and say nothing about anybody else.",
     "loudest_line": "The full result names the factors sitting furthest from your own middle, in either direction — the ones doing most of the selecting.",
     "personality_note": "The full result scores fifteen primary factors and five global dimensions, with validity checks."
   },

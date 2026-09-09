@@ -11,6 +11,9 @@ const Bar = ({ score }) => (
 export default function EqResult({ result }) {
   const domains = Object.entries(result.domain_scores);
   const named = result.named;
+  // Where no two domains clear the floor, the individual figures do not appear at all: four
+  // two-decimal values printed side by side rank them for the reader whatever the prose says.
+  const resolved = named?.resolved !== false;
 
   return (
     <div className="space-y-12">
@@ -24,19 +27,28 @@ export default function EqResult({ result }) {
         </p>
       </header>
 
+      {!resolved && named?.band && (
+        <section className="bg-white border border-[#E4E4DE] p-6" data-testid="eq-domains-band">
+          <p className="text-sm text-[#1C1C18] leading-relaxed">{named.band.sentence}</p>
+          <p className="mt-3 text-xs text-[#6E6E66] leading-relaxed" data-testid="eq-suppression-note">
+            {named.suppression_note}
+          </p>
+        </section>
+      )}
+
       <section className="space-y-6" data-testid="eq-domains">
         {domains.map(([key, d]) => (
-          <div key={key} className="bg-white border border-[#E4E4DE] p-6">
+          <div key={key} className="bg-white border border-[#E4E4DE] p-6" data-testid={`eq-domain-${key}`}>
             <div className="flex items-baseline justify-between gap-4">
               <h2 className="mi2-serif text-xl text-[#1C1C18]">{d.name}</h2>
-              <p className="text-sm text-[#5B7284] whitespace-nowrap">{d.score.toFixed(2)} of 5</p>
+              {resolved && <p className="text-sm text-[#5B7284] whitespace-nowrap" data-testid={`eq-domain-score-${key}`}>{d.score.toFixed(2)} of 5</p>}
             </div>
-            <div className="mt-3"><Bar score={d.score} /></div>
+            {resolved && <div className="mt-3"><Bar score={d.score} /></div>}
             <p className="mt-3 text-xs text-[#6E6E66] leading-relaxed">{d.description}</p>
             <div className="mt-4 grid gap-1.5 sm:grid-cols-2">
               {Object.values(result.sub_scores).filter((sSub) => sSub.domain === key).map((sSub) => (
-                <p key={sSub.name} className="text-xs text-[#3B3B34] flex justify-between border-t border-[#E4E4DE] pt-1.5">
-                  <span>{sSub.name}</span><span className="text-[#6E6E66]">{sSub.score.toFixed(2)} of 5</span>
+                <p key={sSub.name} className="text-xs text-[#3B3B34] border-t border-[#E4E4DE] pt-1.5">
+                  {sSub.name}
                 </p>
               ))}
             </div>
@@ -66,9 +78,9 @@ export default function EqResult({ result }) {
             <p className="text-sm text-[#3B3B34] leading-relaxed" data-testid="eq-named-flat">{named.flat_copy}</p>
           )}
           <p className="mt-4 text-xs text-[#6E6E66] leading-relaxed">
-            A highest or lowest is named only where two domains differ by at least {named.mrd?.toFixed(2)} on the 1–5
-            scale — the smallest difference worth reading, assuming a reliability of {named.assumed_alpha?.toFixed(2)}.
-            Provisional, and re-derived when this bank's reliability is measured.
+            A highest or lowest is named only where two domains differ by at least {named.mrd?.toFixed(1)} on the 1–5
+            scale — the smallest difference worth reading, assuming a reliability of {named.assumed_alpha?.toFixed(2)}
+            {' '}and rounded up rather than down. Provisional, and re-derived when this bank's reliability is measured.
           </p>
           <p className="mt-3 text-xs text-[#6E6E66] leading-relaxed" data-testid="eq-facet-note">{named.facet_note}</p>
         </section>

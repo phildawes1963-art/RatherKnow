@@ -19,7 +19,10 @@ from services.ratelimit import limiter
 from report_pdf import build_report_pdf, build_combined_pdf
 from choosing import build_choosing
 from composites import build_composites
-from services.reportable import EI_FLAT_COPY, FACET_SUPPRESSION_REASON, ei_named
+from services.reportable import (
+    EI_FLAT_COPY, FACET_SUPPRESSION_REASON, FACTOR_FLOOR_PP, ei_named,
+)
+from services.factor_pct import factor_pcts, loudest_entries
 
 from services.within_person import build_position
 from services.mrd import build_mrd, MODE as MRD_MODE, config as mrd_config, mrd_sd_units_for
@@ -35,7 +38,7 @@ from services.essential_scoring import (
     get_blend_result, rank_archetypes,
 )
 from constants.p150_data import P150_PERSONALITY_ITEMS, P150_VALIDITY_ITEMS
-from services.p150_lite import P150_FACTORS
+from services.p150_lite import NOT_FOR_DISPLAY, P150_FACTORS
 from constants.eimirror_data import (
     EIMIRROR_QUESTIONS, EIMIRROR_DOMAINS, EIMIRROR_REVERSE_ITEMS, EIMIRROR_SCALE,
 )
@@ -551,17 +554,20 @@ def _position(result: dict) -> dict | None:
     read time and versioned, so the mapping can be corrected without touching a delivered report.
     """
     factors = result.get("factor_scores") or {}
-    values = {k: f["sten"] for k, f in factors.items() if f.get("sten") is not None}
+    # Percent-of-scale, derived at read time so stored results move with the fix. The sten is a
+    # norm-referenced claim on a malformed band table — reportable.FACTOR_FLOOR_PP.
+    values = factor_pcts(factors)
     if not values:
         return None
     meta = {k: {"name": f.get("name", k), "pole_high": f.get("pole_high", "one end"),
                 "pole_low": f.get("pole_low", "the other end")} for k, f in factors.items()}
-    block = build_position(values, meta)
+    block = build_position(values, meta, floor=FACTOR_FLOOR_PP)
     block["note"] = (
-        "Each row shows which way you lean, and marks the three that sit furthest from your own "
-        "middle. What they do not show is how you compare with anybody else: we have not yet "
-        "established the reference sample that would make a comparison honest, so we are not "
-        "making one."
+        "Each row shows which way you lean, as a position on that factor's own scale, and marks "
+        "those sitting furthest from your own profile average — up to three, and none where none "
+        "clears the floor. What they do not show is how you compare with anybody else: we have "
+        "not yet established the reference sample that would make a comparison honest, so we are "
+        "not making one."
     )
     return block
 
@@ -654,6 +660,16 @@ def _with_choosing(result: dict) -> dict:
         position = _position(result)
         if position:
             extra["position"] = position
+        # Recomputed at read time, never served from the stored field. `result["loudest"]` on any
+        # result written before disp-1.5.0 was selected on the retired 1.5-sten floor, so serving
+        # it would let a display version publish a value the old rule produced.
+        extra["loudest"] = loudest_entries(result.get("factor_scores") or {})
+        extra["strengths"] = [e for e in extra["loudest"] if e["deviation"] > 0]
+        extra["blind_spots"] = [e for e in extra["loudest"] if e["deviation"] < 0]
+        extra["loudest_floor"] = FACTOR_FLOOR_PP
+        # Attached at read time as well as at score time, so a snapshot written before disp-1.5.0
+        # carries the marker too. A renderer reading a legacy payload gets the same warning.
+        extra["not_for_display"] = NOT_FOR_DISPLAY
         # Returns None while services/display.NORM_REFERENCED is False. Kept wired so the day a
         # reference sample exists, the population layer comes back without a code change here.
         common = _commonness(result)
@@ -1011,25 +1027,45 @@ def _build_findings(by_instrument: dict) -> list:
     anx = clo["dimensions"]["anxiety"]["value"] if clo else None
     avo = clo["dimensions"]["avoidance"]["value"] if clo else None
 
-    def sten(k):
-        return pers["factor_scores"].get(k, {}).get("sten") if pers else None
+    def pers_dev(k):
+        """How far factor k sits from the reader's own profile average, in points of its scale.
+
+        These rules used to fire on an absolute sten (>= 7, <= 4). That is a claim about other
+        people, decided by a band table with no documented reference sample, and it does not
+        belong in a reading that has stopped making population statements everywhere else. Same
+        absolute floor as the loudest-trait selection: reportable.FACTOR_FLOOR_PP.
+        """
+        if not pers:
+            return None
+        pcts = factor_pcts(pers.get("factor_scores") or {})
+        if k not in pcts or not pcts:
+            return None
+        return round(pcts[k] - sum(pcts.values()) / len(pcts), 1)
+
+    def high(k):
+        d = pers_dev(k)
+        return d is not None and d >= FACTOR_FLOOR_PP
+
+    def low(k):
+        d = pers_dev(k)
+        return d is not None and d <= -FACTOR_FLOOR_PP
 
     def dom(k):
         return eq["domain_scores"][k]["score"] if eq else None
 
-    if anx is not None and sten("C") is not None and anx >= 5 and sten("C") >= 7:
+    if anx is not None and high("C") and anx >= 5:
         findings.append({
             "id": "calm-general-alarmed-close",
             "sources": ["Personality Mirror", "Closeness Mirror"],
             "title": "Calm in general. Alarmed up close.",
-            "body": f"The Personality Mirror reads you as emotionally stable across life in general. The Closeness Mirror has reassurance-seeking running clearly above the middle in close relationships specifically ({anx} on a 1–7 scale). Both can be true at once — closeness runs on its own circuitry. Worth sitting with: which of those two versions of you did the choosing, last time it mattered?",
+            "body": f"The Personality Mirror has emotional stability sitting well above your own profile average — steadiness is one of the louder things in your profile. The Closeness Mirror has reassurance-seeking running clearly above the middle in close relationships specifically ({anx} on a 1–7 scale). Both can be true at once — closeness runs on its own circuitry. Worth sitting with: which of those two versions of you did the choosing, last time it mattered?",
         })
-    if anx is not None and sten("L") is not None and anx <= 3 and sten("L") >= 7:
+    if anx is not None and high("L") and anx <= 3:
         findings.append({
             "id": "vigilant-general-settled-close",
             "sources": ["Personality Mirror", "Closeness Mirror"],
             "title": "Your guard lives somewhere unexpected.",
-            "body": f"The Personality Mirror has you running vigilant in general — slow to extend trust. The Closeness Mirror finds you settled in close relationships ({anx} on reassurance, below the middle). The two disagree about where your caution actually operates. Worth sitting with: is closeness where your vigilance switches off — and is that earned, or is it just where you stop checking?",
+            "body": f"The Personality Mirror has vigilance sitting well above your own profile average — slow to extend trust, relative to the rest of you. The Closeness Mirror finds you settled in close relationships ({anx} on reassurance, below the middle). The two disagree about where your caution actually operates. Worth sitting with: is closeness where your vigilance switches off — and is that earned, or is it just where you stop checking?",
         })
     if avo is not None and dom("relationship_management") is not None and avo >= 5 and dom("relationship_management") >= 4.0:
         findings.append({
@@ -1038,19 +1074,19 @@ def _build_findings(by_instrument: dict) -> list:
             "title": "Skilled at relationships. Distant in them.",
             "body": f"The EI Mirror has you rating your relationship management as high. The Closeness Mirror finds closeness itself sitting further away than the middle ({avo} on a 1–7 scale). Managing relationships well and letting one all the way in are different capacities — and the first can quietly substitute for the second for years without anyone noticing, including you.",
         })
-    if avo is not None and sten("A") is not None and avo >= 5 and sten("A") >= 7:
+    if avo is not None and high("A") and avo >= 5:
         findings.append({
             "id": "warm-general-guarded-close",
             "sources": ["Personality Mirror", "Closeness Mirror"],
             "title": "Warm in general. Guarded up close.",
-            "body": f"The Personality Mirror reads you as genuinely warm — attentive to people, easy to be around. The Closeness Mirror has intimacy itself kept at more of a distance ({avo} on a 1–7 scale). Warmth given widely can be a comfortable place to stand while closeness stays unentered. Worth sitting with: who gets the warmth, and who gets let in — and are they ever the same person?",
+            "body": f"The Personality Mirror has warmth sitting well above your own profile average — attentive to people, easy to be around. The Closeness Mirror has intimacy itself kept at more of a distance ({avo} on a 1–7 scale). Warmth given widely can be a comfortable place to stand while closeness stays unentered. Worth sitting with: who gets the warmth, and who gets let in — and are they ever the same person?",
         })
-    if avo is not None and sten("Q2") is not None and avo >= 5 and sten("Q2") <= 4:
+    if avo is not None and low("Q2") and avo >= 5:
         findings.append({
             "id": "leans-on-people-not-partner",
             "sources": ["Personality Mirror", "Closeness Mirror"],
             "title": "You lean on people. Just not on a partner.",
-            "body": "The Personality Mirror has you group-oriented — comfortable relying on others in general life. The Closeness Mirror finds leaning on a partner specifically coming much less easily. The disagreement is the finding: support isn't hard for you, partnership-shaped support is. Worth sitting with: what does a partner represent that a friend doesn't?",
+            "body": "The Personality Mirror has self-reliance sitting well below your own profile average — comfortable relying on others in general life. The Closeness Mirror finds leaning on a partner specifically coming much less easily. The disagreement is the finding: support isn't hard for you, partnership-shaped support is. Worth sitting with: what does a partner represent that a friend doesn't?",
         })
     if anx is not None and dom("self_management") is not None and anx >= 5 and dom("self_management") >= 4.0:
         findings.append({

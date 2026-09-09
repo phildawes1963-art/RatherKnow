@@ -1,4 +1,4 @@
-"""Iteration 16 acceptance tests — DISPLAY_VERSION disp-1.4.0.
+"""Iteration 16 acceptance tests — updated at DISPLAY_VERSION disp-1.5.0.
 
 Runs against the deployed preview (REACT_APP_BACKEND_URL).
 
@@ -114,7 +114,7 @@ def test_display_version_disp_1_4_0(sample):
     body = r.json()
     delta = body.get("delta") or {}
     # elevation is derived at read time and stamped with the current display version.
-    assert delta.get("display_version") == "disp-1.4.0", delta.get("display_version")
+    assert delta.get("display_version") == "disp-1.5.1", delta.get("display_version")
 
 
 # ---------- Essential: elevation + shadow basis ------------------------------
@@ -159,11 +159,11 @@ def test_ei_named_block_present(sample):
     r = s.get(f"{BASE}/api/v2/assessments/{SAMPLE_SESSIONS['eq']}/result")
     body = r.json()
     named = body.get("named") or {}
-    assert named.get("mrd") in (0.764, 0.765), named.get("mrd")
+    assert named.get("mrd") == 0.8, named.get("mrd")  # 0.765 derived, rounded up
     assert named.get("assumed_alpha") == 0.70
-    assert named.get("facet_note", "").startswith("Sub-dimension scores are shown without")
+    assert named.get("facet_note", "").startswith("The fourteen sub-dimensions are named but not scored")
     # sample.reader domains are within measurement error → no highest/lowest
-    if named.get("spread") is not None and named["spread"] < 0.764:
+    if named.get("spread") is not None and named["spread"] < 0.8:
         assert named.get("highest") is None
         assert named.get("lowest") is None
 

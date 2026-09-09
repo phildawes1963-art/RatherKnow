@@ -9,9 +9,11 @@ const FactorRow = ({ f, position }) => (
       <p className="text-xs text-[#6E6E66] shrink-0">{f.pole_low} ← → {f.pole_high}</p>
     </div>
     <div className="mt-2 h-1.5 bg-[#EDEDE8] relative" aria-hidden="true">
+      {/* Percent of this factor's own scale. Never the sten: a sten is a norm-referenced figure
+          and the band table behind ours has no documented reference sample. */}
       <div
         className="absolute top-0 bottom-0 w-1.5 bg-[#5B7284]"
-        style={{ left: `calc(${((f.sten - 1) / 9) * 100}% - 3px)` }}
+        style={{ left: `calc(${position?.value ?? 50}% - 3px)` }}
       />
     </div>
     <p className="mt-2.5 text-sm text-[#3B3B34] leading-relaxed" data-testid="factor-position">
@@ -27,7 +29,7 @@ const COUNT_WORD = ['none', 'One', 'Two', 'Three'];
 // carry the position; the label says where it sits against the reader's own five.
 const POSITION = (g, meanOfFive) => {
   const d = (g.score ?? g.score_precise ?? 0) - meanOfFive;
-  if (Math.abs(d) <= 1.0) return 'at your own middle'; // one full sten step: adjacent stens can't split
+  if (Math.abs(d) <= 1.0) return 'at your own middle'; // one full step of the composite's own scale
   return d > 0 ? 'above your own middle' : 'below your own middle';
 };
 
@@ -110,6 +112,11 @@ export default function PersonalityResult({ result }) {
                 <details className="mt-3 border-t border-[#E4E4DE] pt-3" data-testid={`global-provenance-${Object.keys(result.global_scores)[gi]}`}>
                   <summary className="text-xs text-[#5B7284] cursor-pointer">How this number is built</summary>
                   <p className="mt-2 text-[11px] text-[#6E6E66]">{prov.equation}</p>
+                  <p className="mt-2 text-[11px] text-[#9C9C93] leading-relaxed" data-testid={`global-sten-note-${Object.keys(result.global_scores)[gi]}`}>
+                    The units below are stens — the internal units these five composites are computed in. They are
+                    here so the arithmetic can be checked, and nowhere else in this report: a sten compares you with
+                    a reference sample, and no reference sample for these bands is documented.
+                  </p>
                   <ul className="mt-2 space-y-1">
                     {prov.contributions.map((c) => (
                       <li key={c.factor} className="text-xs text-[#3B3B34] flex justify-between gap-3">

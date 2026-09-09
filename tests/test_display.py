@@ -81,4 +81,4 @@ def test_display_version_moved_with_the_pause():
     """Delivered narratives and PDFs are keyed on display_version, so a bump is how a reporting
     change ships without altering a document already sent. disp-1.0.0 documents keep serving the
     population layer they were rendered with."""
-    assert DISPLAY_VERSION == "disp-1.4.0"
+    assert DISPLAY_VERSION == "disp-1.5.1"

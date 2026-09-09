@@ -916,3 +916,116 @@ zero issues and `retest_needed: false`**.
 5. Push `RK` and watch the first real Actions run.
 6. Everyday desirability pre-test (20–30 people); production redirects; payments/entitlements; the
    partner dashboard. All unchanged.
+
+---
+
+# Session · June 2026 (part three) · The sten retired · `disp-1.5.0`
+
+The user's ten decisions on the report-validity round. No scoring change; `ALGO_VERSION` stays
+`rk-1.0.0`, `DISPLAY_VERSION` 1.4.0 → **1.5.1**, `within_person` wp-1.0.0 → **wp-1.1.0**.
+Full record in **`docs/REPORTABLE_FLOORS.md`** §0, §3, §3a, §4, §4a, §8, §9.
+
+## The rule that governs the rest
+**Derive, then round up. Never down.** A provisional floor rounded down loosens a threshold
+already resting on an assumption; rounded up it costs only claims that could not be defended. Both
+floors in a combined report are now rounded by the same logic: EI 0.765 → **0.8**, Personality
+19.109 → **20 points of scale**.
+
+## Q1 · No sten reaches a reader
+The band table is not merely un-normed, it is malformed: Factor A's ten band widths run
+3,2,3,3,4,3,**8**,2,3,2 across raw 8–40 — one sten spanning a quarter of the raw range — with
+provenance recorded only as "super-admin config over defaults". Retired from the reader-facing
+layer rather than recalibrated (recalibration is a scoring change and needs a reference sample).
+
+- Reader-facing unit is **percent of each factor's own scale**, described as a distance from the
+  reader's **own profile average**.
+- Floor is **absolute**: 20 points of scale, from an assumed scale SD of 15 points and α = 0.70,
+  rounded up. A floor set as a fraction of the reader's own profile SD was rejected — standardise
+  fifteen factors by their own spread and the largest always lands near +1.8, for everybody,
+  including the even profile that should name nothing.
+- **15 rather than range/6 (16.67 → floor 22)** is a declared choice, documented: it is the same
+  assumption the EI floor already uses (0.60 of a four-point span *is* 15% of range), and one
+  shared assumption across two instruments in one document beats a slightly stricter floor on one.
+  15 is the more permissive of the two, and it says so.
+- **An even profile names nothing** and prints why. No fallback to the highest.
+- **Stens stay scored and stored** (raw material for rebuilding the table; removing them would be
+  a scoring change) and are marked `not_for_display` **in the payload**, with the reason — because
+  the way a sten reached a reader was sitting in the payload unmarked.
+- Surfaces changed: Personality result page (bar now percent-of-scale), combined + individual
+  PDFs (global-dimension figures suppressed, factor table on the position layer), `choosing.py`,
+  `crosscheck.py`, Samples, Methodology, locked copy (`samples.position_explainer`).
+- **One documented exemption:** the global-dimension equation `5.5 + Σ(w × (sten − 5.5))` inside
+  the collapsed "How this number is built" panel and its PDF equivalent — the published equation
+  cannot be audited without it. Labelled as arithmetic, not a comparison. `tests/
+  test_no_sten_display.py` walks every surface and allows only that one.
+- **Also converted:** five hand-written cross-instrument findings fired on absolute `sten ≥ 7 / ≤ 4`.
+  Same absolute 20-point rule now, and their copy no longer says "reads you as emotionally stable
+  across life in general".
+- `result["loudest"]` is **recomputed at render**, never served from the stored field: every result
+  written before 1.5.0 selected on the retired 1.5-sten floor.
+
+## Q2 · EI, two branches, and the presentation follows the branch
+Gating the sentences was not enough — four figures to two decimals in descending order rank
+themselves whatever the prose says, and nearest-0.5 still prints 3.5 against 3.0.
+- **Resolved** (some pair clears 0.8): figures, bars, and the named highest/lowest return.
+- **Suppressed**: one **shared band** ("All four domains fall between 3.0 and 3.5 on the 1–5
+  scale") plus the two audit numbers — observed spread and the floor — so the reader can check the
+  suppression. Domain names and descriptions stay; the overall mean stays (one figure, ranks
+  nothing).
+- **Facets: names only, no figures.** Shorter scales, lower α, larger floor than the domains have
+  already failed; fourteen numbers are a ranking whatever the order.
+
+## Q3/Q8 · The corpus, and what wrote it — ANSWERED
+`scripts/patterned_provenance.py`. Three flags on `pattern_flags`, tagged independently, **nothing
+excluded** (no threshold is derived from this corpus, so exclusion buys nothing and would destroy
+the provenance evidence): `sd_fixed_agreement` 616, `cyclic_sequence` 334 (all period 1),
+`duplicate_sequence` 3,636.
+
+The third flag was not predicted and is the one that answered the question. Only **1,787 distinct
+answer vectors** exist across 5,454 answered sessions; **3,717 sessions share their exact answer
+sequence** with another, one closeness vector appearing **653 times**. The accounts are
+`E2E User`, `Pytest User`, `Reset User`, `Iter6`, all `@ratherknow.com`, across ten days.
+
+**It is our own test suite, writing into the collection the corpus is counted from.** Not a
+seeding script, not outside traffic. A data-integrity finding, because it touches every count this
+product will ever quote from `results`. **On the backlog, not fixed in this pass.**
+
+Consequence recorded in code (`reportable.SD_CORPUS_STATUS`) and docs: **the corpus cannot
+validate the social-desirability null.** Excluding the fixed-count class leaves n = 232, of which
+5 reach 7+ — 2.16% against the null's 5.48%. Attrition recorded as a sequence: 5,206 → 3,619 →
+891 → 275, and essentially all of the remainder still carries `duplicate_sequence`. There is no
+clean remainder large enough to calibrate anything at any stage.
+
+## Q4 · The asymmetry is stated
+Closeness clears an absolute **position** rule (outside the middle third of its 1–7 scale);
+Personality clears an absolute **distance from the reader's own profile average** (20 points of
+scale). Both absolute, absolute about different things. Every agreement, tension and single
+reading now names the test each side passed.
+
+## disp-1.5.1, and why there is a point release
+The testing agent (iteration 18: zero critical, zero UI issues) found the `not_for_display` marker
+missing from the API payload for snapshots written before 1.5.0. It is now attached at read time
+as well as at score time — but 1.5.0 narrative snapshots had already been written, and a snapshot
+is write-once. So the fix is a version, never an edit to a stored document: **`disp-1.5.1`**. Same
+lesson as 1.2.1, recorded again.
+
+## Verification
+`tests/` **204 passed** · `backend/tests/` **246 passed** (all iteration suites updated to the new
+basis rather than deleted). Both result pages rendered on the preview, desktop and mobile: the EI
+suppressed branch shows the band + 0.25 spread + 0.8 floor and no domain figures; the Personality
+page shows percent-of-scale markers and the loudest-none copy, with the only "sten" on the page
+inside the composite equation.
+
+## Open, in priority order
+1. **Stop the test suite writing into `results`** — a per-run database, or a `synthetic: true`
+   stamp every count honours. Until then no figure quoted from `results` means anything.
+2. **Measure α** on the EI and archetype banks. Four provisional constants wait on it: the EI
+   floor (0.8), the Personality factor floor (20 pp), the 5-point Essential tie margin, and the
+   assumed SDs behind the first two.
+3. `rk-1.1.0`, carrying every queued scoring change at once: centred Delta gaps, the 50-item
+   archetype reallocation (`adventurer`·`visionary` r = +0.56), the tie state's live behaviour.
+   Rebuilding the sten band table belongs here too, if a reference sample ever exists.
+4. Region derivation with printed distances; the Archetypes nav item stays held.
+5. Validate 300 ms/word against real timing.
+6. Push `RK` and watch the first real Actions run · Everyday desirability pre-test · production
+   redirects · payments/entitlements · partner dashboard. All unchanged.

@@ -9,7 +9,7 @@ never says anything about another person — only about the reader's own choosin
 """
 
 from services.reportable import ei_named
-from services.within_person import loudest
+from services.factor_pct import loudest_entries
 
 CHOOSING_LEAD = {
     "essential": "What the gap between your two lenses does at the point of choosing.",
@@ -173,16 +173,18 @@ def _closeness(r):
 
 
 def _personality(r):
-    """Selection is within-profile, and no sten reaches the reader.
+    """Selection is within-profile, on an absolute floor, and no sten reaches the reader.
 
     This used to pick on sten >= 7 / <= 4 and print "At 7 of 10 …". Both were leftovers of the
     population layer: a fixed sten threshold says "high compared with other people", and an
-    x-of-10 invites the reader to read a bidirectional trait as a mark out of ten.
+    x-of-10 invites the reader to read a bidirectional trait as a mark out of ten. It now picks on
+    distance from the reader's own profile average, against an absolute floor in points of scale —
+    absolute, so a flat profile names nothing rather than always producing a winner.
     """
     factors = r["factor_scores"]
-    picked = loudest({k: f["sten"] for k, f in factors.items()})
-    high = [factors[k] for k, d in picked["named"] if d > 0]
-    low = [factors[k] for k, d in picked["named"] if d < 0]
+    named = loudest_entries(factors)
+    high = [factors[e["factor"]] for e in named if e["deviation"] > 0]
+    low = [factors[e["factor"]] for e in named if e["deviation"] < 0]
     points = []
 
     for f in high:
@@ -251,10 +253,10 @@ def _eq(r):
     if not points:
         points.append(_pt(
             "No single emotional capacity is doing most of the work.",
-            f"Your four domains fall within {named['mrd']:.2f} of one another on the 1–5 scale, which is the "
-            "smallest difference this instrument can report. Naming a strongest or a weakest from that would be "
-            "ranking measurement error. What it tells you instead is real: there is no one capacity to lean on "
-            "here, and none to shore up first."))
+            f"The widest gap between any two of your four domains is {named['spread']:.2f} on the 1–5 scale, and "
+            f"the smallest gap this instrument can resolve is {named['mrd']:.1f}. Naming a strongest or a weakest "
+            "from that would be ranking measurement error. What it tells you instead is real: there is no one "
+            "capacity to lean on here, and none to shore up first."))
     overall = r.get("overall_score")
     if overall is not None and overall >= 4.0:
         points.append(_pt(

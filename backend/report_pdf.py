@@ -80,8 +80,14 @@ def _tier_chip(tier_key):
     return tbl
 
 
-def _bar_table(rows, width=160 * mm, maximum=100.0, suffix="", value_format="{}"):
-    """rows: (label, value, sublabel). Draws a proportional bar with no invented banding."""
+def _bar_table(rows, width=160 * mm, maximum=100.0, suffix="", value_format="{}",
+               show_value=True):
+    """rows: (label, value, sublabel). Draws a proportional bar with no invented banding.
+
+    `show_value=False` draws the bar and the sublabel only. The five global dimensions use it:
+    they are computed in sten units, and a sten is a norm-referenced figure this product no
+    longer shows a reader.
+    """
     data = []
     for label, value, sub in rows:
         pct = 0 if value is None else max(0.0, min(1.0, float(value) / maximum))
@@ -95,7 +101,8 @@ def _bar_table(rows, width=160 * mm, maximum=100.0, suffix="", value_format="{}"
             ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
         ]))
         value_text = "not scored" if value is None else value_format.format(value) + suffix
-        data.append([Paragraph(label, S["cell"]), holder, Paragraph(f"<b>{value_text}</b> {sub or ''}", S["cell"])])
+        third = f"<b>{value_text}</b> {sub or ''}" if show_value else (sub or "")
+        data.append([Paragraph(label, S["cell"]), holder, Paragraph(third, S["cell"])])
     tbl = Table(data, colWidths=[46 * mm, 72 * mm, width - 118 * mm])
     tbl.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
@@ -267,7 +274,7 @@ def _personality(result, flow):
     globals_ = result["global_scores"]
     mean_of_five = sum(g["score"] for g in globals_.values()) / max(len(globals_), 1)
     flow += [_bar_table([(g["name"], g["score"], _global_position(g["score"], mean_of_five))
-                         for g in globals_.values()], maximum=10.0)]
+                         for g in globals_.values()], maximum=10.0, show_value=False)]
     from composites import build_composites
     prov = build_composites(result)
     if prov:
@@ -280,6 +287,11 @@ def _personality(result, flow):
         flow += [
             Paragraph("How each global dimension is built", S["h3"]),
             Paragraph(prov["note"], S["body"]),
+            Paragraph(
+                "The equation is written in stens — the internal units these five composites are "
+                "computed in, and the only place a sten appears in this document. It is here so "
+                "the arithmetic can be checked; it is not a comparison with other people, and no "
+                "reference sample for those bands is documented.", S["small"]),
         ]
         rows = [[Paragraph("<b>Dimension</b>", S["cellb"]), Paragraph("<b>Built from</b>", S["cellb"])]]
         for key, g in prov["globals"].items():
@@ -305,10 +317,13 @@ def _personality(result, flow):
             "Nothing in this table compares you with other people: the bands behind these scores have no "
             "published reference sample yet, so a comparison would be a number without a population.", S["small"]),
     ]
+    from services.factor_pct import factor_pcts, loudest_entries
+    from services.reportable import FACTOR_FLOOR_PP
     from services.within_person import build_position
     scales = build_position(
-        {k: f["sten"] for k, f in result["factor_scores"].items() if f.get("sten") is not None},
+        factor_pcts(result["factor_scores"]),
         {k: f for k, f in result["factor_scores"].items()},
+        floor=FACTOR_FLOOR_PP,
     ).get("scales", {})
     rows = [[Paragraph("<b>Factor</b>", S["cellb"]), Paragraph("<b>Low pole</b>", S["cellb"]),
              Paragraph("<b>High pole</b>", S["cellb"]), Paragraph("<b>Where you sit</b>", S["cellb"])]]
@@ -325,7 +340,9 @@ def _personality(result, flow):
         ("LEFTPADDING", (0, 0), (0, -1), 0),
     ]))
     flow.append(tbl)
-    loud = result.get("loudest") or []
+    # Recomputed here, not read from result["loudest"]: any result written before disp-1.5.0
+    # selected its loudest factors on the retired 1.5-sten floor.
+    loud = loudest_entries(result["factor_scores"])
     # Heading and partial line both come from the locked register, keyed by how many actually
     # cleared the floor — the same strings the result page uses. Duplicating them here is how the
     # PDF came to promise three above a list of one.
@@ -366,13 +383,14 @@ def _eq(result, flow):
             f"Overall: <b>{result['overall_score']:.2f}</b> on a 1–5 scale. Each number is the mean of your own "
             "answers in that domain. There is no grade attached to it: a band word would imply a standard, "
             "and no reference sample is documented for these thresholds.", S["body"]),
-        _bar_table([(d["name"], d["score"], "") for d in result["domain_scores"].values()],
-                   maximum=5.0, suffix=" of 5", value_format="{:.2f}"),
     ]
-    # A highest or a lowest is named only where it clears the minimum reportable difference
-    # against the one next to it. Four domains spanning a third of a point is an ordering of
-    # measurement error, and the Personality Mirror has held its factors to a floor since 1.1.0.
-    if named["highest"] or named["lowest"]:
+    # Two branches, and the presentation follows the branch. Where the domains separate they are
+    # named and their figures shown. Where they do not, four figures printed in descending order
+    # to two decimals rank them for the reader whatever the prose says — so the figures go, the
+    # shared band takes their place, and the two audit numbers are printed beside it.
+    if named["resolved"]:
+        flow += [_bar_table([(d["name"], d["score"], "") for d in result["domain_scores"].values()],
+                            maximum=5.0, suffix=" of 5", value_format="{:.2f}")]
         flow += [Paragraph("What separates from the rest", S["h3"])]
         if named["highest"]:
             h = named["highest"]
@@ -383,14 +401,16 @@ def _eq(result, flow):
             flow += [Paragraph(f"— Lowest: {lo['name']} ({lo['score']:.2f} of 5), clear of the next by "
                                f"{lo['margin']:.2f}.", S["body"])]
     else:
+        flow += [Paragraph(", ".join(sorted(d["name"] for d in result["domain_scores"].values()))
+                           + ".", S["body"])]
+        flow += [Paragraph(f"<b>{named['band']['sentence']}</b> {named['suppression_note']}", S["body"])]
         flow += [Paragraph(EI_FLAT_COPY, S["body"])]
     flow += [Paragraph(
-        f"Named only where two domains differ by at least {named['mrd']:.2f} on the 1–5 scale — the smallest "
-        f"difference worth reading, assuming a reliability of {named['assumed_alpha']:.2f}. Provisional: it is "
-        "re-derived when the reliability of this bank is measured.", S["small"])]
+        f"Named only where two domains differ by at least {named['mrd']:.1f} on the 1–5 scale — the smallest "
+        f"difference worth reading, assuming a reliability of {named['assumed_alpha']:.2f} and rounded up rather "
+        "than down. Provisional: it is re-derived when the reliability of this bank is measured.", S["small"])]
     flow += [Paragraph("Fourteen sub-dimensions", S["h2"])]
-    flow += [_bar_table([(s["name"], s["score"], "") for s in result["sub_scores"].values()],
-                        maximum=5.0, suffix=" of 5", value_format="{:.2f}")]
+    flow += [Paragraph(", ".join(s["name"] for s in result["sub_scores"].values()) + ".", S["body"])]
     flow += [Paragraph(FACET_SUPPRESSION_REASON, S["small"])]
 
 

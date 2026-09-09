@@ -101,8 +101,8 @@ def test_personality_result_has_position_block_and_no_commonness(demo_token, dem
     # position block present with version + floor + one row per factor
     pos = result.get("position")
     assert pos is not None, "no position block"
-    assert pos["version"] == "wp-1.0.0"
-    assert float(pos["floor"]) == 1.5
+    assert pos["version"] == "wp-1.1.0"
+    assert float(pos["floor"]) == 20.0  # points of scale, absolute (disp-1.5.0)
     assert set(pos["scales"].keys()) == set(result["factor_scores"].keys())
 
     # sentence wording: "Toward the ..." or "Between the ..." (Between covers 'Between the ends' /

@@ -18,7 +18,7 @@ norm in the first place.
 """
 from math import erf, sqrt
 
-DISPLAY_VERSION = "disp-1.4.0"
+DISPLAY_VERSION = "disp-1.5.1"
 # 1.0.0 the population layer · 1.1.0 the norms pause · 1.2.0 the Everyday Mirror joins the
 # combined reading · 1.2.1 the last sten leaks out of "how you choose" and the global rows ·
 # 1.3.0 the Essential tie state: where the top two archetypes sit inside the margin the reading
@@ -36,6 +36,21 @@ DISPLAY_VERSION = "disp-1.4.0"
 # and EI facets not at all, the social-desirability cut moves above the content-blind null,
 # speeding is measured per item instead of as a mean, and the Delta reports its elevation
 # separately from its shape.
+# 1.5.0 the sten stops reaching a reader anywhere, and both floors are rounded up rather than to
+# the nearest value. The sten is norm-referenced by construction and its band table is malformed
+# (Factor A band widths run 2 to 8 raw points; one sten spans a quarter of the raw range), so the
+# reader-facing Personality layer is now percent-of-scale against the reader's own profile
+# average, on an ABSOLUTE floor of 20 points — a relative floor would fire for everyone including
+# the flat profile that should name nothing. The five hand-written cross-instrument findings that
+# fired on sten >= 7 / <= 4 use the same floor. Stens stay stored and are marked not-for-display.
+# The EI floor rounds 0.765 up to 0.8, and where no two domains clear it the four individual
+# figures are replaced by one shared band plus the observed spread and the floor, because four
+# two-decimal figures in descending order rank them whatever the prose says. EI facets keep their
+# names and lose their figures until alpha is measured.
+# 1.5.1 the not-for-display marker on the sten is attached at read time as well as at score time,
+# so a personality payload scored before 1.5.0 carries the warning too. Same rule as 1.2.1: a
+# snapshot is write-once, so a payload fix is a new version and never an edit to a stored
+# document — and 1.5.0 snapshots had already been written when this was found.
 # Snapshots are keyed on this, so a bump means new renders differ and every document already
 # delivered keeps exactly the bytes it was sent with.
 #

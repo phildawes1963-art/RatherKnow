@@ -1,6 +1,6 @@
 # Reportable floors — what is large enough to say
 
-**Added June 2026 · `disp-1.4.0` · no scoring change**
+**Added June 2026 · `disp-1.4.0` · updated `disp-1.5.1` · no scoring change**
 
 Every number in this document answers one question: how big does a difference have to be before
 the reading is allowed to name it? Three floors existed only in the Personality Mirror. This
@@ -8,6 +8,18 @@ records where the others came from, and what they cost.
 
 The rule for every provisional constant here: **set it so it is more conservative than the derived
 value is likely to be.** A claim withdrawn later is worse than a claim never made.
+
+## 0. Two rules that apply to everything below
+
+**Derive, then round up. Never down.** Rounding a provisional floor down loosens a threshold that
+is already resting on an assumption; rounding up costs only claims that could not have been
+defended anyway. So the EI domain floor derives at 0.765 and ships at **0.8**, and the Personality
+factor floor derives at 19.109 points of scale and ships at **20**. Both floors in the same
+combined report are now rounded by the same logic, which is the other half of the reason: a reader
+comparing two sections should not be reading two different roundings.
+
+**No constant here is derived from the stored corpus.** §4 explains why it cannot be. Where a
+figure below is an assumption, it says so, and it says what would make it a measurement.
 
 ---
 
@@ -65,26 +77,47 @@ derivation would be the same error as a norm without a reference sample, so the 
 the plausible range is assumed instead: **α = 0.70**. A low α produces a *larger* floor, so the
 assumption can only suppress claims that would otherwise be retracted.
 
-The other input is real, with one caveat. The observed between-person SD of an EI domain score
-across the quarantined-clean corpus is **0.294** (n = 560) — but that corpus is still
-overwhelmingly machine-generated, and random answers under-disperse relative to people. Taking
-0.294 would give MRD = 0.375 and name differences the derived floor will later suppress. So
-`EI_DOMAIN_SD = 0.60`, the plausible SD for a domain mean among real respondents and the larger of
-the two.
+The other input is an assumption too, and this is the correction to the first version of this
+section. It said the SD was "real, with one caveat": the observed between-person SD across the
+"quarantined-clean" corpus was 0.294. That figure is not usable — see §4 — and taking it would
+have set a floor of 0.375 and named differences the derived floor will later suppress. So
+`EI_DOMAIN_SD = 0.60`, **an assumed** plausible SD for a domain mean among real respondents, and
+the larger of the two.
 
-**`EI_DOMAIN_MRD = 0.765`** on the 1–5 scale. A highest or lowest is named only where it clears
-that against **the domain next to it**, not against the mean: a score can beat the average of four
-comfortably and still be indistinguishable from its neighbour.
+Derived: 0.765. Shipped: **`EI_DOMAIN_MRD = 0.8`** on the 1–5 scale, rounded up per §0. A highest
+or lowest is named only where it clears that against **the domain next to it**, not against the
+mean: a score can beat the average of four comfortably and still be indistinguishable from its
+neighbour.
 
-On the September sample the four domains ran 3.40 / 3.20 / 3.17 / 3.04 — a total spread of 0.36.
-Nothing is named, and the approved flat-profile copy fires instead.
+**Non-provisional when:** α is measured on this bank and the between-person SD comes from real
+respondents. Both then replace the assumptions and the floor is re-derived, in either direction.
 
-**Sub-dimensions are not ranked at all.** Fourteen facets on a handful of items each: lower α,
-larger floor, quite possibly larger than the whole usable spread. The September report printed a
-"highest three" containing two values tied at 3.6 as an ordered list, and a "lowest three"
-separated by 0.1 and 0.1. The numbers stay; the order between them is not information yet.
+### 3a. The suppressed branch shows its working
 
-## 4. The social-desirability cut moves above chance
+On the September sample the four domains ran 3.40 / 3.20 / 3.17 / 3.04 — a total spread of 0.36,
+and nothing is named. The first version of this fix stopped at the sentences: the four figures
+were still printed, to two decimals, in descending order. **That is the ranking, restored
+visually.** Four numbers in order rank themselves whatever the prose above them says, and rounding
+each to the nearest half point does not help — 3.5 printed against 3.0 is exactly the distinction
+the floor just refused to make, and alphabetical order does not stop anyone re-sorting four
+numbers in their head.
+
+So the suppressed branch prints **one shared band** — *"All four domains fall between 3.0 and 3.5
+on the 1–5 scale"* — followed by the two numbers that let a reader audit the suppression: the
+**observed spread** (0.36) and the **floor** (0.8). The domains keep their names and their
+descriptions. The overall mean stays: it is one figure about the reader's own answers and ranks
+nothing.
+
+Where the domains *do* separate, the figures and the bars come back and the highest or lowest is
+named. Two branches, one condition, and the presentation follows the branch rather than
+contradicting it.
+
+**Sub-dimensions are named and not scored at all.** "Numeric but unranked" was self-defeating:
+fourteen numbers on a page are a ranking however they are ordered, and facet scales are *shorter*
+than the domain scales whose floor those figures have already failed — lower α, larger floor. The
+fourteen names stay so the reader knows what was measured. The figures return when α is measured.
+
+## 4. The social-desirability cut moves above chance — and the corpus does not check it
 
 "Agreed" here is a Likert threshold — 4 or 5 on a 1–5 scale, 1 or 2 reversed — so under
 content-blind responding p = 0.4, giving a null of **mean 4.0, SD 1.55** on ten items. The old cut
@@ -94,10 +127,53 @@ New cuts: **ELEVATED at 7** (≈ +1.9 SD), **HIGH at 9** (≈ +3.2 SD). Derived 
 null, not from a percentile of our own distribution — norming a validity index to your own corpus
 fixes the flag rate by construction, forever.
 
-The corpus then checks the cut rather than generating it. Across 446 clean stored profiles the
-counts run `{5: 252, 4: 62, 3: 48, 2: 39, 6: 27, 7: 8, 1: 6, 8: 2, 9: 1, 0: 1}`, so 7+ catches 11
-of 446. **n = 446 is provisional twice over**: the corpus was 60.7% degenerate before quarantine,
-and what remains is still mostly synthetic.
+**The previous version of this section then said "the corpus checks the cut". It does not, and
+that sentence was wrong.** Three things, in the order they were found:
+
+1. **Low variation.** 1,587 of 5,206 stored results come from sessions answering on fewer than
+   four distinct points. Flagged `data_quality: "low_variation"` and excluded by default in
+   `scripts/analyze_stored_corpus.py`.
+2. **A collapsed distribution.** Of the personality profiles, **616 of 891 sit at exactly five
+   agreements** — `{5: 616, 4: 91, 3: 65, 2: 45, 6: 39, 1: 12, 7: 11, 0: 8, 8: 3, 9: 1}`. No
+   binomial produces that. Excluding the fixed-count records leaves **n = 232**, of which 5 reach
+   7+ — **2.16% against the 5.48% the null expects**. So the remainder does not reconcile with the
+   null either, and the hope that it would is closed.
+3. **The reason, found by `scripts/patterned_provenance.py`.** The answers are *replayed*. Only
+   1,787 distinct answer vectors exist across 5,454 answered sessions, and **3,717 of those
+   sessions share their exact answer sequence with another session**; one closeness vector appears
+   **653 times**. The account names on them are `E2E User`, `Pytest User`, `Reset User`, `Iter6`,
+   all `@ratherknow.com`, across ten days.
+
+**So the provenance question has an answer: it is our own test suite.** Not an undocumented
+seeding script, and not automated traffic from outside. That is a data-integrity finding rather
+than housekeeping, because it touches *every count this product will ever quote from `results`*.
+Recorded here, and the obligation it creates — test runs must not write into the collection the
+corpus is counted from — is on the backlog rather than fixed in this pass.
+
+**The corpus n, as a sequence rather than a current figure:** 5,206 results → 3,619 after the
+low-variation flag → 891 personality profiles → 275 once the fixed-count class is set aside → and
+of those, essentially all still carry a `duplicate_sequence` flag. The shape of the loss is the
+point: there is no clean remainder large enough to calibrate anything, at any stage.
+
+**Non-provisional when:** there are real respondents. The cut is theoretical and stays
+theoretical; `reportable.SD_CORPUS_STATUS` says so in the code.
+
+### 4a. Three flags, tagged separately, nothing excluded
+
+`pattern_flags` on the result document, alongside `data_quality`:
+
+| flag | what it means | count |
+|---|---|---|
+| `sd_fixed_agreement` | agreement count sits on the spike value (5) | 616 |
+| `cyclic_sequence` | the answer sequence repeats a cycle of ≤ 8 | 334 (all period 1) |
+| `duplicate_sequence` | the exact answer sequence appears in another session | 3,636 |
+
+Three flags rather than one merged "patterned" class, because the overlap is the evidence: a
+strict subset would mean one generator, disjoint classes would mean two sources. They overlap
+partially (331 carry both A and B), and the third — which was not predicted, and is the one that
+identified the source — subsumes most of both. Nothing is excluded on these flags: no threshold is
+derived from this corpus any more, so exclusion buys nothing this week and would destroy the
+provenance information permanently.
 
 ## 5. Speeding is per item, from the item
 
@@ -147,12 +223,80 @@ carries everything queued for scoring at once: centring, the 50-item archetype r
 `visionary` overlap now has a measured correlate at r = +0.56), and anything the tie state's live
 behaviour turns up.
 
+## 8. The sten stops reaching a reader (`disp-1.5.0`)
+
+A sten is a norm-referenced claim by construction: mean 5.5, SD 2, against a reference population.
+This product has paused every population claim for want of a documented reference sample, and was
+still printing `6 (1–10 sten)` on the Personality result — the same claim in a different costume,
+two sections after the sentence explaining why no band is shown.
+
+Inspecting the band table made it worse than a mismatch. `p150_norms_snapshot.json` records its
+whole provenance as `source: "mymirrorreport backend effective bands (super-admin config over
+defaults)"` — no n, no group, no date — and the bands are **not internally coherent**. On Factor A,
+across raw 8–40, the ten band widths run **3, 2, 3, 3, 4, 3, 8, 2, 3, 2**: sten 7 alone spans 8
+raw points, a quarter of the entire raw range. Factor C carries a width-6 band, E a width-5. The
+observed distribution follows the band widths, which is what you would expect if the widths were
+hand-set rather than mapped from percentiles.
+
+So the sten is retired from the reader-facing layer rather than recalibrated. Recalibration is a
+scoring change and needs a reference sample; retirement needs neither and costs nothing true.
+
+**What the reader sees instead:** each factor as a **percent of its own usable range** (0 = every
+item at the low end, 100 = every item at the high end), described as a position between two named
+poles and as a distance from **their own profile average**.
+
+**The floor for naming a factor is absolute.** A floor set as a fraction of the reader's own
+profile SD was rejected: standardise fifteen factors by their own spread and the largest always
+lands near +1.8, for everybody, including the even profile that should name nothing. So the SD
+comes from the scale — **15 points of a 100-point range** — giving `SEM = 15·√0.30 = 8.22` and
+`MRD = 1.645·√2·8.22 = 19.11`, shipped rounded up at **20 points of scale**.
+
+*Why 15 and not range/6.* The standard normal-range assumption is range ≈ 6 SD, i.e. 16.67 points,
+which derives 21.2 and would ship at 22. Both are defensible and **15 is the more permissive of
+the two**. It is kept because it is the same assumption the EI domain floor already uses — 0.60 of
+a four-point span *is* 15% of range — and one shared assumption across the two instruments in a
+combined report is worth more than a slightly stricter floor on one of them. It is an assumption,
+not a measurement, and it is deliberately not taken from the stored corpus (§4).
+
+**A flat profile names nothing, and says so.** No fallback to "the highest one anyway": that is
+the always-fires defect in its purest form, and the copy for the empty state already exists
+(`position.loudest_none`). An empty section is the finding.
+
+**Stens are still scored, still stored, and marked not-for-display.** They are the raw material
+for rebuilding the band table, and removing them from scoring would be a scoring change. The
+payload carries `not_for_display` naming the field and the reason — because the way the sten
+reached a reader in the first place was sitting in the payload with nothing marking it.
+
+**One documented exemption**, on both the result page and the PDF: the five global dimensions are
+computed *in* sten units (`5.5 + Σ(weight × (sten − 5.5))`), so the published equation cannot be
+checked without them. It appears inside the collapsed "How this number is built" panel, labelled
+as an audit of our own arithmetic and not a comparison with anyone.
+
+**Also gone, same reason:** five hand-written cross-instrument findings fired on absolute
+`sten ≥ 7` / `≤ 4`. They now use the same absolute 20-point distance from the reader's own profile
+average, and their copy says "well above your own profile average" rather than "reads you as
+emotionally stable across life in general".
+
+**Non-provisional when:** α and a real between-person SD are measured on this bank.
+
+## 9. Which test each side of a cross-check passed
+
+The two sides of a construct pair do not pass the same test, and the copy no longer sounds as if
+they do. The Closeness side clears an **absolute position** rule — outside the middle third of its
+own 1–7 scale. The Personality side clears an **absolute distance from the reader's own profile
+average** — 20 points of that factor's scale. Both are absolute; they are absolute about different
+things. Every agreement and every tension now names both tests in its body, and a single displaced
+reading names the one test it passed. The asymmetry is smaller than it was, and it is stated
+rather than smoothed over.
+
 ---
 
 ## What this cost
 
 Claims the reader used to get and no longer does: two agreements that were two mid-scale numbers,
 a strongest and weakest EI domain, three highest and three lowest facets, a driver for the
-selection sourced from two nulls, and a "most reliable thing in this document". Everything on that
-list was an ordering of noise or a superlative about the instrument. What replaced them — the
-nulls, the single readings, the floor quoted beside the suppression — is shorter and true.
+selection sourced from two nulls, a "most reliable thing in this document", every sten, the four
+EI domain figures where none of them separates, and fourteen facet figures. Everything on that
+list was an ordering of noise, a superlative about the instrument, or a comparison with a
+population we cannot describe. What replaced them — the nulls, the single readings, the shared
+band, the floor quoted beside the suppression — is shorter and true.

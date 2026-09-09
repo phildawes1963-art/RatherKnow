@@ -9,8 +9,8 @@ Everything here is derived at read time from stored snapshots. No rescoring, no 
 numbers: every statement quotes the two values it is comparing.
 """
 
-from services.reportable import ei_named
-from services.within_person import loudest
+from services.factor_pct import factor_pcts, loudest_entries
+from services.reportable import FACTOR_FLOOR_PP, ei_named
 
 # Retired as the deciding test, kept because stored code paths and tests still reference the
 # idea: proximity on a normalised 0-1 scale was the old proxy for agreement. It cannot be mixed
@@ -74,15 +74,31 @@ def _tier_and_confidence(by: dict, *instruments) -> dict:
     }
 
 
-# The Personality Mirror's own floor, reused: a factor has to sit this far from the reader's
-# profile mean before it is named, so it is also how far it has to sit before it counts as
-# displaced in a cross-instrument comparison. Provisional, like the floor itself.
-LOUDEST_FLOOR_STEN = 1.5
+# Retired: the Personality Mirror's floor used to be expressed in stens, and so did this. Both
+# are now `reportable.FACTOR_FLOOR_PP` — points of the factor's own scale, from the reader's own
+# profile average. The old name is gone rather than left pointing at a different unit.
 
 
 def _displacement(reading: dict) -> float:
     """Signed displacement in units where 1.0 is the edge of "worth reporting"."""
     return reading["displacement"]
+
+
+def _test_phrase(reading: dict) -> str:
+    """Which test this side of the pair passed, in words.
+
+    The two sides do not pass the same test and the copy must not sound as if they do. Both
+    thresholds are absolute, but they are absolute about different things: one is a position on
+    the instrument's own scale, the other a distance from the reader's own profile average. The
+    asymmetry is smaller than it was — the Personality side used to be relative to nothing at all
+    — and it is stated rather than smoothed over.
+    """
+    if reading["instrument"] == "personality":
+        return (f"{reading['label']} sits at least {FACTOR_FLOOR_PP:g} points of its own scale "
+                f"from your own profile average, which is the smallest distance this instrument "
+                f"can resolve")
+    return (f"{reading['label']} sits outside the middle third of its own "
+            f"{reading['scale'].split(',')[0]} scale")
 
 
 def _displaced(reading: dict) -> bool:
@@ -139,18 +155,22 @@ def _readings(by):
                 1 - _norm(avo["value"], 1, 7), polarity="inverted")
     if pers:
         f = pers["factor_scores"]
-        stens = [v["sten"] for v in f.values() if v.get("sten") is not None]
-        own_mean = sum(stens) / len(stens) if stens else 5.5
-
-        def _pers_disp(key):
-            return (f[key]["sten"] - own_mean) / LOUDEST_FLOOR_STEN
-
+        # No sten reaches the reader, and none decides a claim about them either. A sten is a
+        # norm-referenced statement — mean 5.5, SD 2, against a reference population — and one
+        # printed two sections after "no band is shown, because the norms to justify one do not
+        # exist" is the same claim in a different costume. Percent-of-scale instead, compared
+        # within the profile and thresholded absolutely at reportable.FACTOR_FLOOR_PP.
+        pcts = factor_pcts(f)
+        own_mean = sum(pcts.values()) / len(pcts) if pcts else 50.0
         for key, construct, label in (("C", "steadiness", "emotional stability"),
                                       ("A", "closeness", "warmth"),
                                       ("Q2", "self_reliance", "self-reliance")):
-            if key in f:
-                add(construct, "personality", label, f[key]["sten"], "1–10 sten",
-                    _norm(f[key]["sten"], 1, 10), displacement=_pers_disp(key))
+            if key in pcts:
+                add(construct, "personality", label, round(pcts[key]),
+                    "points of scale, against your own profile average of "
+                    f"{round(own_mean)}",
+                    pcts[key] / 100,
+                    displacement=(pcts[key] - own_mean) / FACTOR_FLOOR_PP)
     if eq:
         d = eq["domain_scores"]
         if "self_management" in d:
@@ -282,10 +302,10 @@ def build_convergences(by: dict, max_items: int = 3) -> list:
                     "evidence_tier": meta["evidence_tier"],
                     "confidence": meta["confidence"],
                     "title": f"One instrument has something to say about {copy['name']}.",
-                    "body": (f"{quoted}. Only one of those sits away from the middle of its own scale, so this is "
-                             f"one reading rather than two agreeing: your {one['label']} runs {one['raw']} "
-                             f"({one['scale']}), toward the {which} end, while the other instrument found nothing "
-                             f"to report here. {meta['caveat']}"),
+                    "body": (f"{quoted}. Only one of those clears its own instrument's "
+                             f"displacement test, so this is one reading rather than two "
+                             f"agreeing: {_test_phrase(one)}, toward the {which} end, while the "
+                             f"other instrument found nothing to report here. {meta['caveat']}"),
                 })
                 seen.add(a["construct"])
                 continue
@@ -303,7 +323,9 @@ def build_convergences(by: dict, max_items: int = 3) -> list:
                 "evidence_tier": meta["evidence_tier"],
                 "confidence": meta["confidence"],
                 "title": f"Both instruments agree on {copy['name']}.",
-                "body": (f"{quoted} — {direction} on both. {copy['agree']} {meta['caveat']}"),
+                "body": (f"{quoted} — {direction} on both, each by the test its own instrument "
+                         f"allows: {_test_phrase(a)}, and {_test_phrase(b)}. {copy['agree']} "
+                         f"{meta['caveat']}"),
             })
             seen.add(a["construct"])
     return out[:max_items]
@@ -341,7 +363,9 @@ def build_tensions(by: dict, existing: list, max_items: int = 4) -> list:
                 "title": f"The instruments disagree about {copy['name']}.",
                 "body": (
                     f"Your {hi['label']} reads {hi['raw']} ({hi['scale']}) while your {lo['label']} reads "
-                    f"{lo['raw']} ({lo['scale']}). {copy['tension']} {meta['caveat']}"),
+                    f"{lo['raw']} ({lo['scale']}) — displaced in opposite directions, each by the test its own "
+                    f"instrument allows: {_test_phrase(hi)}, and {_test_phrase(lo)}. "
+                    f"{copy['tension']} {meta['caveat']}"),
             })
     return out[:max_items]
 
@@ -392,12 +416,12 @@ def build_synthesis(by: dict, tensions: list, agreements: list) -> dict | None:
                 lines.append("Up close, the thing your selection actually runs on is room — how little someone asks "
                              "of you.")
     if pers:
-        # Furthest from the reader's own middle, not highest and lowest in absolute terms, and
-        # without the number: an x-of-10 beside a bidirectional trait reads as a mark out of ten.
-        factors = pers["factor_scores"]
-        named = loudest({k: f["sten"] for k, f in factors.items()})["named"]
-        highs = [factors[k]["name"].lower() for k, d in named if d > 0]
-        lows = [factors[k]["name"].lower() for k, d in named if d < 0]
+        # Furthest from the reader's own middle, on the absolute points-of-scale floor, and
+        # recomputed here rather than read from the stored `loudest` — that field was written
+        # under the retired sten floor.
+        named = loudest_entries(pers["factor_scores"])
+        highs = [e["name"].lower() for e in named if e["deviation"] > 0]
+        lows = [e["name"].lower() for e in named if e["deviation"] < 0]
         # The instrument is named, because the Essential section answers the same question from
         # different evidence and the reader was being handed two answers with no way to tell why.
         if highs and lows:
@@ -414,8 +438,8 @@ def build_synthesis(by: dict, tensions: list, agreements: list) -> dict | None:
                 "No single trait sits far enough from your own middle to be doing most of the noticing — an even "
                 "profile, which spreads the selection pressure rather than concentrating it.")
     if eq:
-        # Gated on the minimum reportable difference: the four domains here span 0.36 on a 1-5
-        # scale often enough that "your weakest" is an ordering of measurement error.
+        # Gated on the minimum reportable difference: the four domains span a third of a point on
+        # a 1-5 scale often enough that "your weakest" is an ordering of measurement error.
         named = ei_named(eq["domain_scores"])
         if named["lowest"]:
             low = named["lowest"]
@@ -424,8 +448,9 @@ def build_synthesis(by: dict, tensions: list, agreements: list) -> dict | None:
                 f"caught ({low['score']:.2f} of 5) — usually after the decision, not before it.")
         else:
             lines.append(
-                "Your four emotional-intelligence domains sit too close together to name one as the gap, which is "
-                "itself worth knowing: there is no single capacity to shore up here.")
+                f"Your four emotional-intelligence domains sit too close together to name one as the gap — the "
+                f"widest difference between any two is {named['spread']:.2f} against a floor of "
+                f"{named['mrd']:.1f} — which is itself worth knowing: there is no single capacity to shore up here.")
 
     if not lines:
         return None

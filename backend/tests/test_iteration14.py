@@ -144,12 +144,20 @@ def test_essential_delta_line_preserved(auth, sessions):
 
 
 def test_ei_x_of_5_preserved(auth, sessions):
+    """Superseded by disp-1.5.0 for the domains, and deliberately.
+
+    The four domain figures are only printed where two of them clear the floor. On this sample
+    they do not, so what must be there instead is the shared band plus the two audit numbers —
+    the observed spread and the floor it failed. The overall mean is still a figure about the
+    reader's own answers and still appears.
+    """
     e = sessions.get("eq")
     assert e
     r = auth.get(f"{API}/v2/assessments/{e['session_id']}/report.pdf")
     text = _pdf_text(r.content)
-    assert re.search(r"\b\d+(?:\.\d+)? of 5\b", text), \
-        f"EI 'x of 5' domain readouts missing; excerpt: {text[:600]}"
+    assert re.search(r"on a 1.5 scale", text), f"EI overall readout missing; excerpt: {text[:600]}"
+    assert "All four domains fall between" in text, f"no shared band; excerpt: {text[:900]}"
+    assert "0.8" in text, "the floor that suppressed the naming is not printed"
 
 
 def test_closeness_x_of_7_preserved(auth, sessions):
@@ -186,4 +194,4 @@ def test_methodology_page_reachable():
 
 def test_display_version_bumped():
     from services.display import DISPLAY_VERSION
-    assert DISPLAY_VERSION == "disp-1.4.0"
+    assert DISPLAY_VERSION == "disp-1.5.1"

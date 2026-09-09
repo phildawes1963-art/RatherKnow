@@ -55,13 +55,13 @@ const ClosenessPlot = () => {
   );
 };
 
-const FactorRow = ({ low, name, sten, high }) => (
+const FactorRow = ({ low, name, pct, high }) => (
   <div className="grid grid-cols-[1fr_2.2fr_1fr] items-center gap-3 text-xs">
     <span className="text-right text-[#6E6E66]">{low}</span>
     <div>
-      <div className="flex justify-between text-[10px] text-[#9C9C93] mb-0.5"><span>1</span><span className="text-[#3B3B34] font-medium">{name} · {sten}</span><span>10</span></div>
+      <div className="flex justify-between text-[10px] text-[#9C9C93] mb-0.5"><span>{low.toLowerCase()} end</span><span className="text-[#3B3B34] font-medium">{name}</span><span>{high.toLowerCase()} end</span></div>
       <div className="relative h-2 bg-[#EDEDE7]">
-        <div className="absolute top-0 bottom-0 w-2 bg-[#5B7284]" style={{ left: `calc(${((sten - 1) / 9) * 100}% - 4px)` }} />
+        <div className="absolute top-0 bottom-0 w-2 bg-[#5B7284]" style={{ left: `calc(${pct}% - 4px)` }} />
       </div>
     </div>
     <span className="text-[#1C1C18]">{high}</span>
@@ -192,13 +192,13 @@ export default function Samples() {
             note={`${TIER_STATEMENTS.personality} ${SAMPLES_COPY.personality_note}`}
           >
             <div className="space-y-4">
-              <FactorRow low="Reserved" name="Warmth" sten={7} high="Warm" />
-              <FactorRow low="Reactive" name="Emotional stability" sten={5} high="Emotionally stable" />
-              <FactorRow low="Trusting" name="Vigilance" sten={3} high="Vigilant" />
-              <FactorRow low="Traditional" name="Openness to change" sten={8} high="Open to change" />
+              <FactorRow low="Reserved" name="Warmth" pct={72} high="Warm" />
+              <FactorRow low="Reactive" name="Emotional stability" pct={50} high="Emotionally stable" />
+              <FactorRow low="Trusting" name="Vigilance" pct={22} high="Vigilant" />
+              <FactorRow low="Traditional" name="Openness to change" pct={81} high="Open to change" />
             </div>
             <p className="mt-4 text-xs text-[#6E6E66]">
-              Four of fifteen factors shown. {SAMPLES_COPY.sten_explainer} {SAMPLES_COPY.loudest_line}
+              Four of fifteen factors shown. {SAMPLES_COPY.position_explainer} {SAMPLES_COPY.loudest_line}
             </p>
           </SampleFrame>
 

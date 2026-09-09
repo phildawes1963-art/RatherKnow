@@ -27,8 +27,28 @@ from constants.p150_data import (
     P150_FACTORS, P150_REVERSED_ITEMS, P150_VALIDITY_ITEMS,
     P150_PERSONALITY_ITEMS, compute_global_scores,
 )
-from services.reportable import sd_flag as _sd_flag, sd_null_note
+from services.reportable import (
+    FACTOR_FLOOR_PP, factor_pct, sd_flag as _sd_flag, sd_null_note,
+)
 from services.within_person import loudest
+
+# The safeguard, because this is exactly how the sten got back onto a reader's page: it was in the
+# payload with nothing marking it, and a renderer picked it up. It stays in the payload — it is the
+# raw material for rebuilding the band table — and it is labelled. Attached at read time too
+# (routes/mirror_v2._with_choosing), so a snapshot written before disp-1.5.0 carries it as well.
+NOT_FOR_DISPLAY = {
+    "fields": ["factor_scores.*.sten"],
+    "reason": ("A sten is a norm-referenced claim: mean 5.5, SD 2, against a reference "
+               "population. This product has no documented reference sample, and the band table "
+               "behind these stens is an undocumented override with band widths from 2 to 8 raw "
+               "points. Stens are stored so the table can be rebuilt; they are not shown to a "
+               "reader."),
+    "documented_exemption": (
+        "composites.globals.*.contributions[].sten, inside the collapsed 'How this number is "
+        "built' panel only. The five global dimensions are computed in sten units, so the "
+        "published equation cannot be checked without them. Shown as an audit of our own "
+        "arithmetic, never as a position claim, and labelled as such."),
+}
 
 _SNAPSHOT_PATH = os.path.join(os.path.dirname(__file__), "..", "constants", "p150_norms_snapshot.json")
 
@@ -98,11 +118,20 @@ def score_p150_lite(all_responses: dict) -> dict:
     midpoint_pct = round(midpoint_n / len(likert_ids) * 100, 1)
     ct_flag = "HIGH" if midpoint_pct >= 55 else ("ELEVATED" if midpoint_pct >= 40 else "NORMAL")
 
-    picked = loudest({k: v["sten"] for k, v in factor_scores.items()})
+    # Percent-of-scale, not stens: see services/reportable.FACTOR_FLOOR_PP for why the sten was
+    # retired from every reader-facing layer. The sten is still scored and still stored — it is
+    # the raw material for rebuilding the band table, and removing it would be a scoring change.
+    pcts = {k: factor_pct(v["raw_score"], len(P150_FACTORS[k]["items"]))
+            for k, v in factor_scores.items() if k in P150_FACTORS}
+    for k, v in factor_scores.items():
+        if k in pcts:
+            v["pct_of_scale"] = pcts[k]
+    picked = loudest(pcts, floor=FACTOR_FLOOR_PP)
 
     def _entry(key, dev):
         f = factor_scores[key]
-        return {"factor": key, "name": f["name"], "sten": f["sten"], "deviation": dev,
+        return {"factor": key, "name": f["name"],
+                "pct_of_scale": f.get("pct_of_scale"), "deviation": dev,
                 "pole": f["pole_high"] if dev > 0 else f["pole_low"]}
 
     loudest_named = [_entry(k, d) for k, d in picked["named"]]
@@ -120,6 +149,9 @@ def score_p150_lite(all_responses: dict) -> dict:
         "loudest": loudest_named,
         "profile_mean": picked["profile_mean"],
         "loudest_floor": picked["floor"],
+        # The safeguard, because this is exactly how the sten got back onto a reader's page: it
+        # was in the payload with nothing marking it, and a renderer picked it up.
+        "not_for_display": NOT_FOR_DISPLAY,
         # Carried in parallel under the old names: the named factors that lean high, and those
         # that lean low. Same objects, nothing to coordinate.
         "strengths": [e for e in loudest_named if e["deviation"] > 0],

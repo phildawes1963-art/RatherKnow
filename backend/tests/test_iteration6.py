@@ -247,6 +247,7 @@ def test_bug1_choosing_quotes_real_numbers(four_user):
     c = u["session"].get(f"{API}/v2/assessments/{sid}/result").json()["choosing"]
     blob = " ".join(p["body"] for p in c["points"])
     assert "of 10" not in blob, "a sten reached the reader"
+    assert "sten" not in blob.lower(), "a sten reached the reader"
     assert "your own" in blob or "own middle" in blob, blob[:200]
 
     # eq — cites 1-5 domain scores, OR states the floor when nothing clears it. The four domains
@@ -325,29 +326,38 @@ def test_bug2_agreements_only_when_close():
     """Convergent user should produce agreements (values close on shared constructs)."""
     from crosscheck import build_convergences, AGREE_BAND
     # craft synthetic by-instrument dict with two measures of 'steadiness' close together
+    # Raw scores, not stens (disp-1.5.0): the reader-facing layer is percent of each factor's own
+    # scale, and the filler factors give the profile an average to be displaced from —
+    # displacement is within-profile, so a lone factor has nothing to measure against.
     by = {
-        "personality": {"factor_scores": {"C": {"sten": 8, "name": "Emotional stability",
-                                                "pole_high": "Steady", "pole_low": "Reactive"}}},
+        "personality": {"factor_scores": {
+            "C": {"raw_score": 38.4, "name": "Emotional stability",
+                  "pole_high": "Steady", "pole_low": "Reactive"},
+            **{k: {"raw_score": 24, "name": k, "pole_high": "High", "pole_low": "Low"}
+               for k in ("A", "E", "F", "G")}}},
         "eq": {"domain_scores": {"self_management": {"name": "Self-management", "score": 4.5}}},
     }
     ags = build_convergences(by)
-    # sten 8 → norm ~0.78, score 4.5 → norm ~0.875 → distance ~0.09 < AGREE_BAND(0.14)
+    # C at 95% of its own scale against a profile average of 59, and 4.5 of 5: both displaced,
+    # both the same way, so the pair earns an agreement.
     assert any(a["construct"] == "steadiness" if "construct" in a else "steadiness" in a["id"]
                for a in ags), f"expected steadiness agreement, got {ags}"
     # each body quotes both real values
     for a in ags:
-        assert "8" in a["body"] and "4.5" in a["body"]
+        assert "95" in a["body"] and "4.5" in a["body"]
 
 
 def test_bug2_tensions_only_when_far():
     from crosscheck import build_tensions
-    # personality warmth sten=10 (norm 1.0), essential Emotional=0 (norm 0.0) → dist 1.0.
-    # The filler factors give the profile a mean: personality displacement is measured within
-    # the reader's own profile, so a lone factor has nothing to be displaced from.
+    # personality warmth at the top of its own scale, essential Emotional at 0: displaced in
+    # opposite directions. The filler factors give the profile an average — personality
+    # displacement is measured within the reader's own profile, so a lone factor has nothing to
+    # be displaced from.
     by = {
-        "personality": {"factor_scores": {"A": {"sten": 10, "name": "Warmth",
+        "personality": {"factor_scores": {"A": {"raw_score": 40, "name": "Warmth",
                                                 "pole_high": "Warm", "pole_low": "Reserved"},
-                                          **{k: {"sten": 5, "name": k} for k in ("C", "E", "F", "G")}}},
+                                          **{k: {"raw_score": 24, "name": k, "pole_high": "High",
+                                                 "pole_low": "Low"} for k in ("C", "E", "F", "G")}}},
         "essential": {"self": {"dimensions": {"Emotional": 0}}, "delta": {"overall": 0}},
     }
     tens = build_tensions(by, existing=[])

@@ -254,17 +254,26 @@ def test_eq_numbers_match(sessions, user_a):
 
 
 def test_personality_numbers_match(sessions, user_a):
+    """What the PDF must carry is the position layer, not the stens.
+
+    This test used to look for the factor stens in the text — a coincidence test in any case,
+    since a sten is a single digit and the page is full of digits. At disp-1.5.0 no sten reaches
+    the reader, so what is checked is that every factor name and its own position sentence made
+    it into the document.
+    """
     sid = sessions["personality"]["sid"]
     result = requests.get(f"{API}/assessments/{sid}/result",
                           headers={"Authorization": f"Bearer {user_a['token']}"}, timeout=30).json()
     r = _fetch_pdf(user_a["token"], sid)
     text, _ = _pdf_text(r.content)
-    # verify at least a majority of factor stens appear in the PDF
-    stens = [f["sten"] for f in result["factor_scores"].values()]
-    # each sten is 1..10 — just verify their exact strings appear as tokens
-    # find them as whole tokens in text
-    found = sum(1 for s in stens if re.search(rf"(^|[\s\W]){s}(\s|$|[\W])", text))
-    assert found >= len(stens) * 0.6, f"only {found}/{len(stens)} factor stens found"
+    for f in result["factor_scores"].values():
+        assert f["name"] in text, f"factor {f['name']} missing from the PDF"
+    rows = (result.get("position") or {}).get("scales") or {}
+    assert rows, "no position layer on the result"
+    found = sum(1 for row in rows.values() if row["sentence"][:24] in text)
+    assert found >= len(rows) * 0.8, f"only {found}/{len(rows)} position sentences found"
+    assert not re.search(r"sten\s*\d", text), "a sten value reached the reader"
+    assert " of 10" not in text, "a sten-as-mark reached the reader"
 
 
 def test_closeness_numbers_match(sessions, user_a):

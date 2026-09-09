@@ -12,9 +12,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "backend"))
 
 from services.reportable import (  # noqa: E402
-    ASSUMED_ALPHA, EI_DOMAIN_MRD, EI_DOMAIN_SD, FACET_NAMING_ALLOWED, MIN_ITEM_FLOOR_MS,
-    MS_PER_WORD, SD_ELEVATED_AT, SD_HIGH_AT, SD_NULL_P, ei_named, item_floor_ms, mrd, sd_flag,
-    speeding,
+    ASSUMED_ALPHA, EI_DOMAIN_MRD, EI_DOMAIN_MRD_DERIVED, EI_DOMAIN_SD, FACET_FIGURES_ALLOWED,
+    FACET_NAMING_ALLOWED, FACTOR_FLOOR_PP, FACTOR_MRD_PP_DERIVED, FACTOR_SD_PP,
+    MIN_ITEM_FLOOR_MS, MS_PER_WORD, SD_CORPUS_STATUS, SD_ELEVATED_AT, SD_HIGH_AT, SD_NULL_P,
+    ei_named, item_floor_ms, mrd, round_up, sd_flag, speeding,
 )
 
 
@@ -27,8 +28,28 @@ def _domains(**scores):
 def test_the_floor_is_derived_not_picked():
     """SEM = SD*sqrt(1-alpha); MRD = 1.645*sqrt(2*SEM^2). One assumption, stated."""
     assert ASSUMED_ALPHA == 0.70
-    assert EI_DOMAIN_MRD == mrd(EI_DOMAIN_SD, 0.70)
-    assert 0.7 < EI_DOMAIN_MRD < 0.8
+    assert EI_DOMAIN_MRD_DERIVED == mrd(EI_DOMAIN_SD, 0.70) == 0.765
+    assert EI_DOMAIN_MRD == 0.8
+
+
+def test_every_floor_is_rounded_up_never_down():
+    """The rule, applied to both floors in the same document so they are not rounded by two
+    different logics. Rounding a provisional threshold down loosens something already resting on
+    an assumption; rounding up costs only claims that could not have been defended."""
+    assert EI_DOMAIN_MRD > EI_DOMAIN_MRD_DERIVED
+    assert FACTOR_FLOOR_PP > FACTOR_MRD_PP_DERIVED
+    assert round_up(0.765, 0.1) == 0.8
+    assert round_up(19.109, 1.0) == 20.0
+    assert round_up(0.8, 0.1) == 0.8, "an exact value must not be pushed a step further"
+
+
+def test_the_personality_floor_shares_the_ei_assumption_and_is_absolute():
+    """15 points of a 100-point scale is the same 15% of range as 0.60 of the EI four-point span.
+    One assumption across the two instruments in a combined report, and neither of them taken
+    from the stored corpus, which cannot validate anything."""
+    assert FACTOR_SD_PP == 15.0
+    assert EI_DOMAIN_SD / 4 * 100 == FACTOR_SD_PP
+    assert FACTOR_MRD_PP_DERIVED == mrd(FACTOR_SD_PP, ASSUMED_ALPHA)
 
 
 def test_a_pessimistic_alpha_produces_a_larger_floor():
@@ -51,7 +72,25 @@ def test_a_third_of_a_point_names_nothing():
                               self_management=3.17, relationship_management=3.04))
     assert named["highest"] is None and named["lowest"] is None
     assert named["blocked"] is True
+    assert named["resolved"] is False
     assert named["spread"] == 0.36
+
+
+def test_the_suppressed_branch_gives_one_band_and_the_two_audit_numbers():
+    """Not the four values rounded to the nearest half point: 3.5 printed against 3.0 is exactly
+    the distinction the floor refused to make. One interval, plus the spread and the floor, so a
+    reader can check the suppression instead of taking it on trust."""
+    named = ei_named(_domains(self_awareness=3.40, social_awareness=3.20,
+                              self_management=3.17, relationship_management=3.04))
+    assert named["band"] == {"low": 3.0, "high": 3.5,
+                             "sentence": "All four domains fall between 3.0 and 3.5 on the 1–5 scale."}
+    assert "0.36" in named["suppression_note"] and "0.8" in named["suppression_note"]
+
+
+def test_the_resolved_branch_carries_no_band():
+    named = ei_named(_domains(a=4.60, b=3.20, c=3.10, d=2.10))
+    assert named["resolved"] is True
+    assert named["band"] is None and named["suppression_note"] is None
 
 
 def test_a_genuinely_spread_profile_still_names():
@@ -71,8 +110,12 @@ def test_the_margin_is_against_the_next_one_not_the_mean():
     assert named["lowest"] is None
 
 
-def test_facets_are_never_ranked():
+def test_facets_are_neither_ranked_nor_numbered():
+    """"Numeric but unranked" is self-defeating: fourteen numbers are a ranking whatever order
+    they are printed in, and facet scales are shorter than the domain scales whose floor these
+    figures already fail."""
     assert FACET_NAMING_ALLOWED is False
+    assert FACET_FIGURES_ALLOWED is False
 
 
 # --- speeding --------------------------------------------------------------------------------
@@ -113,6 +156,15 @@ def test_the_cut_sits_above_the_content_blind_null(count, flag):
     """Agreement here is a Likert threshold (4 or 5 of 5), so p = 0.4 under content-blind
     answering: mean 4.0, SD 1.55. The old cut flagged 4 as elevated, which is chance itself."""
     assert sd_flag(count) == flag
+
+
+def test_the_corpus_is_not_claimed_as_a_check_on_the_null():
+    """It was, and it could not be. Low variation in 1,587 of 5,206 results, then 377 of 639 of
+    the survivors at exactly five agreements — variance collapse, not a binomial. The n = 232
+    unknown-provenance remainder reaches 7+ at 2.16% against the null's 5.48%, so it does not
+    reconcile either."""
+    assert "not validated against a corpus" in SD_CORPUS_STATUS
+    assert "232" in SD_CORPUS_STATUS
 
 
 def test_the_null_is_where_the_cut_came_from():

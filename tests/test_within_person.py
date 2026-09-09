@@ -2,6 +2,10 @@
 
 These tests are the acceptance criteria for the pause: what stops being said, what starts being
 said instead, and the property that makes the swap safe — no score moves.
+
+Values here are PERCENT OF THE FACTOR'S OWN SCALE, not stens (disp-1.5.0). A sten is a
+norm-referenced claim and could not be the unit a norm-free reading is measured in; the floor is
+now 20 points of scale, absolute, so a flat profile names nothing however high it sits.
 """
 import os
 import sys
@@ -31,9 +35,9 @@ def _answers(value=3, overrides=None):
 # ---------------------------------------------------------------- selection
 
 def test_loudest_is_measured_from_the_readers_own_mean():
-    values = {"A": 9, "C": 5, "E": 1}
+    values = {"A": 80, "C": 50, "E": 20}
     picked = loudest(values)
-    assert picked["profile_mean"] == 5.0
+    assert picked["profile_mean"] == 50.0
     assert [k for k, _ in picked["named"]] == ["A", "E"]
     assert [k for k, _ in picked["high"]] == ["A"]
     assert [k for k, _ in picked["low"]] == ["E"]
@@ -41,50 +45,55 @@ def test_loudest_is_measured_from_the_readers_own_mean():
 
 def test_three_in_total_not_three_each_way():
     """Three above plus three below is six, and six dilutes the finding."""
-    values = {k: v for k, v in zip("ACEFGHILMNO", [10, 10, 10, 10, 1, 1, 1, 1, 5, 5, 5])}
+    values = {k: v for k, v in zip("ACEFGHILMNO", [95, 95, 95, 95, 5, 5, 5, 5, 50, 50, 50])}
     picked = loudest(values)
     assert len(picked["named"]) == LOUDEST_N == 3
     assert len(picked["high"]) + len(picked["low"]) == 3
 
 
 def test_ranking_is_on_absolute_distance_so_a_low_outlier_outranks_a_smaller_high_one():
-    values = {"A": 7, "C": 5, "E": 1, "F": 5, "G": 5}
+    values = {"A": 70, "C": 50, "E": 5, "F": 50, "G": 50}
     picked = loudest(values)
     assert [k for k, _ in picked["named"]][0] == "E"
 
 
 def test_a_high_score_in_a_high_profile_is_not_loud():
-    """The point of the change. Every factor at 9 used to be fifteen 'strengths' because 9 >= 8;
-    within-person, a profile with no spread has no loudest anything."""
-    flat_high = {k: 9 for k in "ACEFGHILMNO"}
+    """The point of the change, and the reason the floor is absolute rather than a fraction of
+    this profile's own spread. Every factor at the top used to be fifteen 'strengths'; a profile
+    with no spread has no loudest anything, and a relative floor would still have named three."""
+    flat_high = {k: 90 for k in "ACEFGHILMNO"}
     assert loudest(flat_high)["named"] == []
 
 
 def test_a_low_score_can_be_loud_upward():
-    """And the converse: in a profile that sits low, a 5 is the loudest thing in it. No sten
-    threshold can express that, which is why the threshold had to go."""
-    values = {"A": 5, "C": 2, "E": 2, "F": 2}
+    """And the converse: in a profile that sits low, a mid-scale factor is the loudest thing in
+    it. No absolute sten threshold can express that, which is why the threshold had to go."""
+    values = {"A": 50, "C": 10, "E": 10, "F": 10}
     assert [k for k, _ in loudest(values)["high"]] == ["A"]
 
 
 def test_the_floor_stops_noise_being_promoted():
-    barely = {"A": 5.4, "C": 5.0, "E": 4.6}
+    barely = {"A": 54.0, "C": 50.0, "E": 46.0}
     assert loudest(barely)["named"] == []
-    assert loudest(barely, floor=0.2)["named"] == [("A", 0.4), ("E", -0.4)]
+    assert loudest(barely, floor=2.0)["named"] == [("A", 4.0), ("E", -4.0)]
 
 
 def test_the_floor_is_the_agreed_one_and_records_why():
-    """1.5 sten: about a 93% one-tailed interval at the placeholder alpha, where 1.0 is a single
-    SEM. Provisional by decision, and it says so — it becomes per-scale-set when D1 lands."""
+    """20 points of scale: derived at 19.1 from an assumed scale SD of 15 and a pessimistic alpha
+    of 0.70, then ROUNDED UP. Rounding a provisional floor down loosens a threshold already
+    resting on an assumption; rounding up costs only claims that could not be defended."""
+    from services.reportable import FACTOR_FLOOR_PP, FACTOR_MRD_PP_DERIVED
     from services.within_person import FLOOR_BASIS
 
-    assert FLOOR == 1.5
-    assert "provisional" in FLOOR_BASIS and "D1" in FLOOR_BASIS
-    assert build_position({"A": 7, "C": 4}, META)["floor_basis"] == FLOOR_BASIS
+    assert FLOOR == FACTOR_FLOOR_PP == 20.0
+    assert 19.0 < FACTOR_MRD_PP_DERIVED < 19.2
+    assert FLOOR > FACTOR_MRD_PP_DERIVED, "the floor was rounded down"
+    assert "provisional" in FLOOR_BASIS and "rounded up" in FLOOR_BASIS
+    assert build_position({"A": 70, "C": 40}, META)["floor_basis"] == FLOOR_BASIS
 
 
 def test_ties_break_deterministically():
-    values = {"E": 8, "A": 8, "C": 2, "M": 5}
+    values = {"E": 85, "A": 85, "C": 15, "M": 50}
     first = loudest(values)
     second = loudest(dict(reversed(list(values.items()))))
     assert first["named"] == second["named"]
@@ -95,7 +104,7 @@ def test_ties_break_deterministically():
 def test_no_sentence_mentions_other_people():
     banned = ("people", "population", "percentile", "average person", "than most", "1 in ",
               "unusually", "common")
-    values = {k: v for k, v in zip("ACE", [9, 5, 1])}
+    values = {k: v for k, v in zip("ACE", [90, 50, 10])}
     block = build_position(values, META)
     for row in block["scales"].values():
         low = row["sentence"].lower()
@@ -105,12 +114,12 @@ def test_no_sentence_mentions_other_people():
 
 def test_no_ordinary_row_prints_a_distance():
     """A number invites the reader to rank things the instrument cannot rank."""
-    plain = factor_sentence("Warm", "Reserved", 2.0, is_loudest=False)
+    plain = factor_sentence("Warm", "Reserved", 30.0, is_loudest=False)
     assert plain == "Toward the warm end."
 
 
 def test_no_sentence_carries_a_band_word_or_a_number():
-    for dev in (-3.0, -1.2, -0.5, 0.0, 0.5, 1.2, 3.0):
+    for dev in (-40.0, -22.0, -5.0, 0.0, 5.0, 22.0, 40.0):
         s = factor_sentence("Warm", "Reserved", dev).lower()
         for band in ("very high", "very low", "average", "high", "low"):
             assert band not in s, f"band word in: {s}"
@@ -118,22 +127,22 @@ def test_no_sentence_carries_a_band_word_or_a_number():
 
 
 def test_the_sentence_names_the_pole_the_reader_leans_toward():
-    assert "warm" in factor_sentence("Warm", "Reserved", 2.0).lower()
-    assert "reserved" in factor_sentence("Warm", "Reserved", -2.0).lower()
+    assert "warm" in factor_sentence("Warm", "Reserved", 30.0).lower()
+    assert "reserved" in factor_sentence("Warm", "Reserved", -30.0).lower()
     assert "at your own middle" in factor_sentence("Warm", "Reserved", 0.1).lower()
 
 
 def test_named_rows_say_so_in_the_approved_words():
     """Not "one of the three": where only one or two factors clear the floor, three were never
     named, and a row claiming otherwise contradicts the list above it."""
-    assert (factor_sentence("Warm", "Reserved", 2.0, is_loudest=True)
+    assert (factor_sentence("Warm", "Reserved", 30.0, is_loudest=True)
             == "Toward the warm end, and among those furthest from your own middle.")
 
 
 def test_build_position_is_versioned():
-    block = build_position({"A": 7, "C": 4}, META)
-    assert block["version"] == WITHIN_PERSON_VERSION == "wp-1.0.0"
-    assert block["profile_mean"] == profile_mean({"A": 7, "C": 4})
+    block = build_position({"A": 70, "C": 40}, META)
+    assert block["version"] == WITHIN_PERSON_VERSION == "wp-1.1.0"
+    assert block["profile_mean"] == profile_mean({"A": 70, "C": 40})
 
 
 # ---------------------------------------------------------------- the scorer

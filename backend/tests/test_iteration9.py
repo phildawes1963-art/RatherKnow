@@ -60,8 +60,8 @@ class TestPosition:
         assert r.status_code == 200, r.text
         data = r.json()
         pos = data.get("position") or {}
-        assert pos.get("version") == "wp-1.0.0", pos.get("version")
-        assert pos.get("floor") == 1.5
+        assert pos.get("version") == "wp-1.1.0", pos.get("version")
+        assert pos.get("floor") == 20.0  # points of scale, absolute (disp-1.5.0)
         scales = pos.get("scales") or {}
         assert len(scales) == 15, f"expected 15 primary factors, got {len(scales)}"
         for k, row in scales.items():
