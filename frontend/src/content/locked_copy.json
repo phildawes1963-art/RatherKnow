@@ -193,6 +193,7 @@
     "globals_explainer": "These five are derived, not measured: each is a weighted sum of the primary factors, clipped to fit a 1–10 scale. That's why they show a position and their equation rather than a number about you on its own.",
     "loudest_heading": "The three furthest from your own middle",
     "loudest_meaning": "Traits at this distance are the ones doing the selecting — what you notice first in somebody, and what you are most likely to over-weight.",
+    "loudest_partial_one": "One factor sits far enough from your own middle to name. A flatter profile means no single trait is doing most of the selecting, which is worth knowing in itself.",
     "loudest_partial": "{count} of your factors sit far enough from your own middle to name. A flatter profile means no single trait is doing most of the selecting, which is worth knowing in itself.",
     "loudest_none": "None of your factors sits far enough from your own middle to name one confidently. That is a real result rather than a missing one."
   },

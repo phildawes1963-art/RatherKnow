@@ -68,7 +68,8 @@ def factor_sentence(pole_high: str, pole_low: str, deviation: float, is_loudest:
         return f"Between the {pole_low.lower()} and {pole_high.lower()} ends, at your own middle."
     pole = pole_high if deviation > 0 else pole_low
     if is_loudest:
-        return f"Toward the {pole.lower()} end, and one of the three furthest from your own middle."
+        # Not "one of the three": where only one or two clear the floor, three were not named.
+        return f"Toward the {pole.lower()} end, and among those furthest from your own middle."
     return f"Toward the {pole.lower()} end."
 
 

@@ -248,12 +248,27 @@ def _personality(result, flow):
     ]))
     flow.append(tbl)
     loud = result.get("loudest") or []
-    flow += [Paragraph("The three furthest from your own middle", S["h2"])]
+    # The heading and the partial line must agree with what actually cleared the floor: a
+    # heading promising three above a list of one is the norms pause leaking back in as copy.
+    # Same three states the result page carries (locked_copy position.loudest_*).
+    count_word = {1: "One", 2: "Two", 3: "Three"}
+    if len(loud) >= 3:
+        flow += [Paragraph("The three furthest from your own middle", S["h2"])]
+    elif loud:
+        flow += [Paragraph(f"{count_word[len(loud)]} furthest from your own middle", S["h2"])]
+    else:
+        flow += [Paragraph("Furthest from your own middle", S["h2"])]
     if loud:
         flow += [Paragraph(
             "Traits at this distance are the ones doing the selecting — what you notice first in somebody, "
             "and what you are most likely to over-weight.", S["small"])]
         flow += [Paragraph(f"— {e['name']}: toward the {e['pole'].lower()} end.", S["body"]) for e in loud]
+        if len(loud) < 3:
+            lead = ("One factor sits" if len(loud) == 1
+                    else f"{count_word[len(loud)]} of your factors sit")
+            flow += [Paragraph(
+                f"{lead} far enough from your own middle to name. A flatter profile means no single trait "
+                "is doing most of the selecting, which is worth knowing in itself.", S["small"])]
     else:
         flow += [Paragraph(
             "None of your factors sits far enough from your own middle to name one confidently. That is a "

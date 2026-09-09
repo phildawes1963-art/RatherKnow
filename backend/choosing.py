@@ -192,6 +192,15 @@ def _personality(r):
             "No single trait is driving your choosing.",
             "Your factors sit close to your own middle across the board, which means selection pressure is spread "
             "rather than concentrated, and no one trait is doing the choosing. Read the Closeness and Essential Mirrors for the lever this one didn't find."))
+    elif len(high) + len(low) < 2:
+        # The 2–5 contract, and a real finding: one trait clearing the floor is a flatter profile
+        # than the copy above it implies, and the reader should be told which it is.
+        points.append(_pt(
+            "Only one trait sits far enough out to be doing the selecting.",
+            "The rest of your profile sits close to your own middle, so selection pressure is concentrated in one "
+            "place rather than spread across several. That makes the trait above the load-bearing one: satisfy it "
+            "and a good deal elsewhere tends to get forgiven, because the other fourteen factors are not arguing "
+            "back."))
 
     sd = (r.get("validity") or {}).get("social_desirability", {})
     if sd.get("flag") == "HIGH":

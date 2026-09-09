@@ -157,7 +157,7 @@ export default function PersonalityResult({ result }) {
         )}
         {loud.length > 0 && loud.length < 3 && (
           <p className="mt-3 text-sm text-[#3B3B34] max-w-2xl leading-relaxed" data-testid="loudest-partial">
-            {POSITION_COPY.loudest_partial.replace('{count}', COUNT_WORD[loud.length])}
+            {loud.length === 1 ? POSITION_COPY.loudest_partial_one : POSITION_COPY.loudest_partial.replace('{count}', COUNT_WORD[loud.length])}
           </p>
         )}
         {loud.length === 0 ? (

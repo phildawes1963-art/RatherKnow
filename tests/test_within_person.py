@@ -124,8 +124,10 @@ def test_the_sentence_names_the_pole_the_reader_leans_toward():
 
 
 def test_named_rows_say_so_in_the_approved_words():
+    """Not "one of the three": where only one or two factors clear the floor, three were never
+    named, and a row claiming otherwise contradicts the list above it."""
     assert (factor_sentence("Warm", "Reserved", 2.0, is_loudest=True)
-            == "Toward the warm end, and one of the three furthest from your own middle.")
+            == "Toward the warm end, and among those furthest from your own middle.")
 
 
 def test_build_position_is_versioned():
