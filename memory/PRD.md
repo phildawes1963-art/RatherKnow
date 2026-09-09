@@ -1029,3 +1029,34 @@ inside the composite equation.
 5. Validate 300 ms/word against real timing.
 6. Push `RK` and watch the first real Actions run · Everyday desirability pre-test · production
    redirects · payments/entitlements · partner dashboard. All unchanged.
+
+---
+
+# Session · June 2026 (part four) · Answer export
+
+**Yes.** `GET /api/v2/answers/export.pdf` and `.json`, owner-only, plus a **Your data** panel on
+`/mirrors` (`data-testid="download-answers"`, buttons `download-answers-pdf-btn` /
+`download-answers-json-btn`).
+
+- `backend/answers_export.py` · `answer_records(session, items_for)` + `build_answers_pdf`.
+  Item text comes from `routes.mirror_v2._build_items`, **passed in rather than imported**, so the
+  wording and order are exactly what was on screen — including the Everyday Mirror's per-session
+  side flip, where `v = 1` means "the option rendered on the left" and reading it as "option A"
+  would report half those answers backwards.
+- Every completed **sitting**, oldest first — not one per instrument, because a retake is the
+  reader's own record too. Likert answers appear as number **and** scale word; forced-choice as the
+  option chosen, with the one not chosen kept in the JSON.
+- **Deliberately not snapshotted.** It carries no scoring, no reversal, no display version and no
+  algo version, so there is nothing in it a later change could alter — the one artefact here that
+  cannot go stale. It is also the only reader-facing document that needs no version stamp.
+- `backend/tests/test_answers_export.py` — 6 tests: owner-gated; every item carries its text and
+  its answer in words; the Likert word matches the value; the side flip is reproduced; the payload
+  shape contains no scored field (`\bsten\b`, `factor_scores`, `loudest`, `validity`, `delta`,
+  `archetype`, either version); the PDF builds and states what it is not. All pass.
+- PDF verified by rendering pages to PNG: 170 pages for the 50-sitting demo account, tables split
+  across pages with repeating headers, scale legend per instrument, lens/block headings on the
+  instruments that ask twice.
+
+**Note on the requester's own account** (`phildawes1963@googlemail.com`): 5 completed sittings —
+Essential twice, plus Closeness, Personality and EI. **No Everyday sitting**, so the export will
+show four instruments across five sittings, not five instruments.

@@ -5,6 +5,7 @@ import { API, INSTRUMENTS, readSessions, readReflections, saveSession } from '..
 import { authHeaders, useAuth } from '../lib/auth';
 import SituationSwitch from '../components/SituationSwitch';
 import DownloadCombined from '../components/DownloadCombined';
+import DownloadAnswers from '../components/DownloadAnswers';
 import { FLAG, REGISTER } from '../content/register';
 
 export default function Mirrors() {
@@ -184,6 +185,7 @@ export default function Mirrors() {
         {summaries !== null && (
           <div className="mt-12 space-y-5">
             <DownloadCombined completeCount={completeCount} />
+            <DownloadAnswers />
             <SituationSwitch />
           </div>
         )}

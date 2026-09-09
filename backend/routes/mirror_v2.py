@@ -17,6 +17,7 @@ from fastapi.responses import Response
 from auth import get_current_user, assert_session_owner
 from services.ratelimit import limiter
 from report_pdf import build_report_pdf, build_combined_pdf
+from answers_export import answer_records, build_answers_pdf
 from choosing import build_choosing
 from composites import build_composites
 from services.reportable import (
@@ -807,6 +808,52 @@ async def get_combined_pdf(user: dict = Depends(get_current_user)):
         media_type="application/pdf",
         headers={"Content-Disposition": 'attachment; filename="ratherknow-your-mirrors.pdf"'},
     )
+
+
+@router.get("/answers/export.json")
+async def export_answers_json(user: dict = Depends(get_current_user)):
+    """Your own answers, machine-readable. Every completed sitting, nothing scored."""
+    records = await _answer_export_records(user)
+    return {"user": {"name": user["name"], "email": user["email"]},
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "note": ("The raw record: every item as it was put to you and the answer you gave. "
+                     "Not scored, not reversed, not interpreted, and carrying no display or "
+                     "scoring version — it is rebuilt from your stored answers on request."),
+            "sittings": records}
+
+
+@router.get("/answers/export.pdf")
+async def export_answers_pdf(user: dict = Depends(get_current_user)):
+    sessions = await _completed_sessions_with_responses(user)
+    pdf = build_answers_pdf(
+        sessions=sessions,
+        user={"name": user["name"], "email": user["email"]},
+        items_for=_build_items,
+    )
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": 'attachment; filename="ratherknow-your-answers.pdf"'},
+    )
+
+
+async def _completed_sessions_with_responses(user: dict) -> list:
+    """Every completed sitting, oldest first. Not one per instrument — if an instrument was taken
+    twice, both sittings are the reader's own record and both belong in the export."""
+    cursor = db.mirror_v2_sessions.find(
+        {"user_id": str(user["_id"]), "status": "complete"},
+        {"_id": 0, "id": 1, "instrument": 1, "responses": 1, "presentation": 1,
+         "started_at": 1, "completed_at": 1},
+    ).sort("completed_at", 1)
+    sessions = await cursor.to_list(50)
+    if not sessions:
+        raise HTTPException(status_code=409, detail="No completed instruments to export yet")
+    return sessions
+
+
+async def _answer_export_records(user: dict) -> list:
+    sessions = await _completed_sessions_with_responses(user)
+    return [answer_records(s, _build_items) for s in sessions]
 
 
 @router.get("/assessments/{session_id}/report.pdf")
