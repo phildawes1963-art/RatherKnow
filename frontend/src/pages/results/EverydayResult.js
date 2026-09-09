@@ -39,6 +39,11 @@ const PositionRow = ({ p }) => {
 };
 
 export default function EverydayResult({ result }) {
+  // Ties are shown as ties: printing one domain at "3 of 7" while another silently shares that
+  // rank invents an order the reader's own choices did not produce.
+  const tiedWith = (c) => (result.map || [])
+    .filter((o) => o.priority_rank === c.priority_rank && o.name !== c.name)
+    .map((o) => o.name);
   const positions = Object.values(result.positions);
   const v = result.validity || {};
 
@@ -106,7 +111,9 @@ export default function EverydayResult({ result }) {
                   </span>
                 </div>
                 <p className="mt-2 text-xs text-[#6E6E66] leading-relaxed">
-                  {c.label}, and ranked {c.priority_rank} of seven for needing agreement.
+                  {c.label}, and {tiedWith(c).length > 0
+                    ? `tied at ${c.priority_rank} of seven with ${tiedWith(c).join(' and ')}`
+                    : `ranked ${c.priority_rank} of seven`} for needing agreement.
                 </p>
               </div>
             ))}
@@ -118,9 +125,13 @@ export default function EverydayResult({ result }) {
         <p className="text-[11px] uppercase tracking-[0.12em] text-[#6E6E66]">Confidence in this reading</p>
         <p className="mt-2 text-sm text-[#1C1C18]">{(result.confidence || 'not established').replace(/^./, (m) => m.toUpperCase())}</p>
         <p className="mt-3 text-sm text-[#3B3B34] leading-relaxed">
-          Three checks ran on the choices themselves rather than on anything you told us: loops in your comparisons
-          (consistency index {v.zeta ?? '—'}), how often you picked the left-hand option when the sides were
-          randomised ({v.side_bias_left_pct ?? '—'}%), and a time floor (mean {v.mean_ms ?? '—'} ms per item).
+          Three checks ran on the choices themselves rather than on anything you told us. Loops in your comparisons:
+          consistency {v.zeta ?? '—'} on a 0–1 scale where 1 means no circular preferences at all
+          {v.circular_triads != null ? ` — ${v.circular_triads} of your triples ran in a circle, and a couple is ordinary in twenty-one forced choices` : ''};
+          below about 0.70 is where the ranking softens. Timing: {v.speeding?.below_floor_pct != null
+            ? `${v.speeding.below_floor_pct}% of items came in under their own floor, which is ${v.speeding.ms_per_word ?? 300} ms per word of the item's text`
+            : 'no timings recorded'}. The side of the screen you picked from is checked too, and stays out of here
+          unless it goes far enough to mean something.
         </p>
         <p className="mt-3 text-sm text-[#3B3B34] leading-relaxed">{result.claim_limit}</p>
       </section>

@@ -373,3 +373,29 @@ if __name__ == "__main__":
     test_the_paused_population_layer_is_still_isolated()
     test_no_canned_string_renders_twice()
     print("COPY LINT OK")
+
+
+# --- dated forecasts, swept across frontend content too (iteration 16) ----------------------
+# The footer of every reading claims "no prediction". These phrases contradicted it: a dated
+# forecast ("around week six"), an outcome forecast ("most likely to resent later"), and the
+# disowned word used as an instruction ("a prediction rather than a post-mortem"). Backend copy
+# was fixed first and the same strings turned out to live in frontend content files as well.
+FORECAST_PHRASES = ("week six", "prediction, not a post-mortem",
+                    "prediction rather than a post-mortem", "most likely to resent later")
+
+FRONTEND_COPY_DIRS = ("content", "pages")
+
+
+def test_no_dated_forecasts_in_frontend_copy():
+    import pathlib
+    root = pathlib.Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) / "frontend" / "src"
+    offenders = []
+    for sub in FRONTEND_COPY_DIRS:
+        for path in (root / sub).rglob("*.js"):
+            text = path.read_text(encoding="utf-8")
+            for phrase in FORECAST_PHRASES:
+                if phrase in text:
+                    offenders.append(f"{path.relative_to(root)} — {phrase!r}")
+    assert not offenders, (
+        "Dated or outcome forecasts in reader-facing copy, while every reading's footer claims "
+        "no prediction:\n" + "\n".join(offenders))

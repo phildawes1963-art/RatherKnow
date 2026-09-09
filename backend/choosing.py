@@ -8,6 +8,7 @@ Derived at read time from the immutable snapshot. It never rescores, never label
 never says anything about another person — only about the reader's own choosing.
 """
 
+from services.reportable import ei_named
 from services.within_person import loudest
 
 CHOOSING_LEAD = {
@@ -50,34 +51,45 @@ def _essential(r):
         k, v = wants_more[0]
         points.append(_pt(
             f"You select for what {scores[k]['name']} brings — and you don't carry it yourself.",
-            f"Your stated want runs {v} points higher than your own score there. At the point of choosing, that "
+            f"Your stated want runs {v:g} points higher than your own score there. At the point of choosing, that "
             "shows up as disproportionate weight on evidence of this one quality — you'll notice it fast, rate it "
             "highly, and forgive a good deal elsewhere to keep it. Useful to know before the third date, not after."))
     if already_is:
         k, v = already_is[0]
         points.append(_pt(
             f"You quietly discount what {scores[k]['name']} brings — the thing you already are.",
-            f"You score {abs(v)} points higher on this than the partner you describe. People tend to under-value "
+            f"You score {abs(v):g} points higher on this than the partner you describe. People tend to under-value "
             "what comes free to them, so this is the quality you're most likely to overlook in someone else, or to "
             "treat as ordinary when it's actually the fit."))
 
     overall = delta["overall"]
-    if overall >= 15:
+    same_archetype = _lens_name(r["self"], self_p) == _lens_name(r["ideal"], ideal_p)
+    if same_archetype:
+        # The magnitude band and the argmax match were reaching opposite conclusions in the same
+        # section — "wanting the same thing back" against "a complement rather than a copy".
+        # Where both lenses name the same pattern, the distance is in degree, not in kind.
+        widest = scores[delta["biggest"]]["name"]
+        points.append(_pt(
+            "You described the same archetype you read as — but not the same amount of it.",
+            f"Both lenses lead with the same pattern, so the distance of {overall:g} points between them is a "
+            f"matter of degree rather than kind. It sits mostly in {widest}. What that asks is not whether you want someone "
+            "unlike you, but how much more of your own leading quality you are hoping to be met with."))
+    elif overall >= 15:
         points.append(_pt(
             "You're choosing across a wide gap, which raises the translation cost.",
-            f"An average distance of {overall} points between your two lenses means the partner you describe is "
+            f"An average distance of {overall:g} points between your two lenses means the partner you describe is "
             "meaningfully unlike you. That can work deliberately — one brings the calm, the other brings the weather "
             "— but it means more of your choosing energy goes on difference and less on recognition. Worth deciding "
             "on purpose rather than by pull."))
     elif overall <= 6:
         points.append(_pt(
             "You're choosing close to home.",
-            f"Only {overall} points separate who you are from who you say you want. Low friction, high recognition — "
+            f"Only {overall:g} points separate who you are from who you say you want. Low friction, high recognition — "
             "and worth one question: are you selecting a companion, or selecting to be agreed with?"))
     else:
         points.append(_pt(
             "You're choosing a complement rather than a copy.",
-            f"A moderate distance of {overall} points, concentrated in a couple of places. The work is naming which "
+            f"A moderate distance of {overall:g} points, concentrated in a couple of places. The work is naming which "
             "of those differences you actually want daily, and which you only want to admire."))
 
     shadow = r.get("shadow")
@@ -85,7 +97,7 @@ def _essential(r):
         points.append(_pt(
             f"The pull you'll misread as chemistry: {shadow['name']}.",
             f"{shadow.get('warning', '')} This is the part of choosing that doesn't announce itself — it arrives as "
-            "intensity around week six, not as a decision. Knowing its name is most of the defence."))
+            "intensity rather than as a decision. Knowing its name is most of the defence."))
 
     points.append(_pt(
         "The two lenses were you both times.",
@@ -184,9 +196,9 @@ def _personality(r):
         points.append(_pt(
             f"{f['name']} is where you'll shop for a partner to compensate.",
             f"You sit toward {f['pole_low'].lower()}, and further that way than most of your own profile. People "
-            "commonly outsource the ends they sit furthest from: this is the trait you're most likely to find "
-            f"magnetic in someone else, and most likely to resent later when {f['pole_high'].lower()} starts "
-            "arriving as pressure rather than relief."))
+            "commonly outsource the ends they sit furthest from: what you are short of tends to be what registers "
+            f"hardest in someone else. Whether {f['pole_high'].lower()} then stays valuable or starts arriving as "
+            "pressure is not something this measures."))
     if not high and not low:
         points.append(_pt(
             "No single trait is driving your choosing.",
@@ -214,32 +226,40 @@ def _personality(r):
 
 
 def _eq(r):
-    domains = sorted(r["domain_scores"].values(), key=lambda d: -d["score"])
-    best, worst = domains[0], domains[-1]
-    subs = sorted(r["sub_scores"].values(), key=lambda s: s["score"])
-    points = [
-        _pt(
-            f"{best['name']} is your strongest instrument while choosing.",
-            f"At {best['score']} of 5 this is the capacity most available to you when you're deciding about someone. "
-            "It's also the one you'll trust too far — a strength used as a substitute for the others is how confident "
-            "misreadings happen."),
-        _pt(
-            f"{worst['name']} is where your choosing loses information.",
-            f"At {worst['score']} of 5 this is the thinnest of the four. Whatever this domain would normally catch — "
-            "the pause, the pattern, the thing said sideways — is more likely to reach you late, which usually means "
-            "after you've already decided."),
-    ]
-    if subs:
-        s = subs[0]
+    # Named only where the difference clears the minimum reportable difference against the domain
+    # next to it. The four domains routinely span a third of a point on a 1-5 scale, and "your
+    # strongest" computed off that is an ordering of measurement error. Sub-dimensions get no
+    # highest or lowest at all until the bank's reliability is measured — shorter scales, larger
+    # floor, quite possibly larger than the whole usable spread.
+    named = ei_named(r["domain_scores"])
+    points = []
+    if named["highest"]:
+        best = named["highest"]
         points.append(_pt(
-            f"The narrowest capacity: {s['name'].lower()}.",
-            f"{s['score']} of 5. Sub-dimensions this low tend to show up as a specific blind spot rather than a "
-            "general weakness — worth watching for in the first month, when there's still a decision left to make."))
+            f"{best['name']} is your strongest instrument while choosing.",
+            f"At {best['score']:.2f} of 5 it sits {best['margin']:.2f} clear of the next domain — far enough apart to "
+            "be read as a difference. It's the capacity most available to you when you're deciding about someone, "
+            "and the one you'll trust too far: a strength used as a substitute for the others is how confident "
+            "misreadings happen."))
+    if named["lowest"]:
+        worst = named["lowest"]
+        points.append(_pt(
+            f"{worst['name']} is where your choosing loses information.",
+            f"At {worst['score']:.2f} of 5 it sits {worst['margin']:.2f} below the next domain up. Whatever this "
+            "domain would normally catch — the pause, the pattern, the thing said sideways — is more likely to reach "
+            "you late, which usually means after you've already decided."))
+    if not points:
+        points.append(_pt(
+            "No single emotional capacity is doing most of the work.",
+            f"Your four domains fall within {named['mrd']:.2f} of one another on the 1–5 scale, which is the "
+            "smallest difference this instrument can report. Naming a strongest or a weakest from that would be "
+            "ranking measurement error. What it tells you instead is real: there is no one capacity to lean on "
+            "here, and none to shore up first."))
     overall = r.get("overall_score")
     if overall is not None and overall >= 4.0:
         points.append(_pt(
             "A high read is not the same as good choosing.",
-            f"An overall of {overall} of 5 says you believe you handle feeling well — and this is a self-perception "
+            f"An overall of {overall:.2f} of 5 says you believe you handle feeling well — and this is a self-perception "
             "read, not an ability test. People who regulate well can stay in the wrong thing longer, precisely "
             "because they cope with it."))
     return points
@@ -307,8 +327,10 @@ def _everyday(r):
         points.append(_pt(
             "Read the ranking as provisional.",
             f"Your comparisons contain enough loops — preferring A to B, B to C, and C back to A — that the "
-            f"consistency index came out at {zeta}. That happens when the trade-offs are genuinely close, and it "
-            "means the order above is softer than it looks. The positions in the first half are unaffected."))
+            f"consistency index came out at {zeta:g} — on a 0–1 scale where 1 means no circular preferences at all, "
+            "and below about 0.70 is where the ranking softens. A couple of loops in twenty-one forced choices is "
+            "ordinary; this is more than that, and it usually means the trade-offs are genuinely close. The "
+            "positions in the first half are unaffected."))
     return points
 
 

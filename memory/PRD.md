@@ -818,3 +818,101 @@ re-verified on screen and in the PDF.
 4. Everyday desirability pre-test (20–30 people). Disclosed as a gap on `/methodology`.
 5. Production redirects; `/mirror` stays until externally verified.
 6. Payments/entitlements and the partner dashboard: not built.
+
+---
+
+# Session · June 2026 (part two) · The reportable floors — `disp-1.4.0`
+
+A defect report on the generated sample reading listed eighteen findings across four groups. All
+eighteen are addressed. No scoring changed; `DISPLAY_VERSION` 1.3.4 → **1.4.0**. Full record in
+**`docs/REPORTABLE_FLOORS.md`**.
+
+The organising principle for every provisional constant here, and the one to keep: **set it so it
+is more conservative than the derived value is likely to be.** A claim withdrawn later is worse
+than a claim never made.
+
+## A · Rules that were producing unsupported claims
+
+**A1 · Convergence now needs displacement, not proximity.** Two readings landing mid-scale is what
+uninformative answering produces — which is exactly why a machine-generated response set produced
+two agreements and zero tensions. Both readings must now sit outside the middle third of their own
+scale (`DISPLACEMENT_FLOOR = 1/6`) and sit the same way. Four outcomes: **agreement** (both
+displaced, same way), **tension** (both displaced, opposite ways), **one reading** (only one
+displaced — reported alone, not dressed as convergence), **nothing to report** (neither displaced,
+printed rather than hidden). The "most reliable thing in this document" superlative is deleted
+permanently: it is a claim about the instrument, made inside a personal reading, uncheckable by the
+person holding it.
+
+*Polarity is declared with the reading, never inferred.* Distance-from-closeness runs against
+warmth; reassurance-need against stability. A naive same-direction test on raw scores reads a
+genuine agreement as a disagreement. `tests/test_crosscheck_gate.py` locks the orientation.
+
+*And personality displacement is within-profile, not absolute.* The frozen band table compresses
+real answers into stens 4–8 (corpus histogram: 3–8, per-factor SD ≈ 1.0), so an absolute test
+would never fire for anyone — and the absolute sten position is the norm-referenced claim the
+product has already paused. It uses distance from the reader's own profile mean against the same
+1.5-sten floor that decides which factors get named.
+
+**A2 · A cross-instrument claim inherits the weaker input** — lower tier and lower confidence,
+stated at the claim. Both original agreements paired a Low-confidence developmental instrument with
+an established one and spoke with more authority than either.
+
+**A3 · Elevation split from shape.** Mean signed gap was +10.17 against a reported mean absolute
+gap of 10.8: the headline was mostly a level shift. **Elevation ships now** at display layer —
+additive, so no comparability cost. **Centring is queued for `rk-1.1.0`**, because it changes the
+widest gap from The Rock to The Empath and flips The Diplomat's sign. `centred_per_archetype` is
+computed and carried but read by nothing.
+
+**A4 · The EI floor.** `SEM = SD·√(1−α)`, `MRD = 1.645·√(2·SEM²)`. α assumed at a pessimistic
+**0.70** (a low α gives a larger floor, so it can only suppress). SD taken as **0.60**, not the
+observed 0.294 — the corpus is still mostly machine-generated and random answers under-disperse, so
+0.294 would have set a floor of 0.375 and named differences the derived floor later suppresses.
+**MRD = 0.765**, tested against the *next* domain rather than the mean. Facets get no ranking at
+all until α is measured.
+
+## B–D · Copy, calibration, presentation
+- Same-archetype readings say "degree rather than kind"; "complement rather than a copy" is
+  suppressed. The two rules were contradicting each other in one document.
+- Dated and outcome forecasts removed ("around week six", "most likely to resent later",
+  "a prediction rather than a post-mortem"), with a lint sweep over `frontend/src/content` and
+  `pages` — the phrase lived in **two** places, backend and frontend, which is why the first fix
+  missed one.
+- The summary inherits the lowest contributing confidence, and a line sourced solely from a
+  Low-confidence mid-scale instrument is not emitted — which removed the unsourceable
+  "recognition rather than reassurance".
+- Count-dependent phrasing swept across the whole locked register, not instance by instance
+  (`tests/test_count_phrasing.py`); the PDF now reads its headings from the register instead of
+  duplicating them.
+- **Social desirability: 4 of 10 was flagged "elevated", which is chance.** Agreement is a Likert
+  threshold, so p = 0.4 → null mean 4.0, SD 1.55. Cuts moved to **7** (~+1.9 SD) and **9**. Derived
+  from the null, not from a percentile of our own distribution, which would have fixed the flag
+  rate by construction forever. Corpus checks it: 11 of 446 clean profiles reach 7+.
+- **Speeding is per item, from the item**: 300 ms per word (1,200 ms minimum), reporting the share
+  of items below their own floor. Not yet validated against real timing — every stored timing is
+  synthetic. The mean it replaced passed anyone who raced through most of an instrument.
+- The consistency index is labelled with direction, range, triple count and what is ordinary. The
+  left-hand rate is out of reader-facing output (9 of 21 under randomisation is unremarkable).
+- Sten middle band widened to one full step, so adjacent stens cannot get labels pointing in
+  opposite directions. Everyday ties print as ties, naming the other tied domains. EI decimals
+  consistent. The shadow pull prints what selected it.
+
+## Verification
+Full suite **429 passed** (includes the testing agent's `test_iteration16.py`). Testing agent
+iteration 16 found three real frontend leaks — the duplicated situation-note string, a missing
+neutral note at count 4, and the Learn essays — all fixed; **iteration 17 confirmed all three with
+zero issues and `retest_needed: false`**.
+
+## Open, in priority order
+1. **`rk-1.1.0`**, carrying everything queued for scoring at once (an ALGO bump costs retake
+   comparability, so it is paid once): centred Delta gaps; the 50-item archetype reallocation, now
+   with a measured correlate (`adventurer`·`visionary` r = +0.56); anything the tie state's live
+   behaviour turns up.
+2. **Region derivation with printed distances** — nearest-region assignment, new results only. The
+   Archetypes nav item stays held until a live region outcome supports it.
+3. **Measure α on the EI and archetype banks.** Three provisional constants are waiting on it: the
+   EI MRD, the 1.5-sten loudest floor, the 5-point tie margin. All three are deliberately
+   conservative so that nothing they permit today has to be retracted.
+4. **Validate 300 ms/word against real timing**, once real timings exist.
+5. Push `RK` and watch the first real Actions run.
+6. Everyday desirability pre-test (20–30 people); production redirects; payments/entitlements; the
+   partner dashboard. All unchanged.

@@ -7,7 +7,7 @@ Kept server-side so the PDF never depends on the client for its wording.
 SITUATION_PDF_NOTES = {
     "single_dating": {
         "label": "Single & dating",
-        "essential": "You’re reading this with the next person still theoretical, which is the most useful moment there is. Treat the gap below as a prediction rather than a post-mortem: it says which qualities you’ll over-weight on a third date, and which you’ll forgive too quickly.",
+        "essential": "You’re reading this with the next person still theoretical, which is the most useful moment there is. Treat the gap below as something to watch for rather than something to explain: it says which qualities you’ll over-weight on a third date, and which you’ll forgive too quickly.",
         "MI-AS-36": "Where you sit on these two axes is what the early weeks tend to feel like from the inside — how quickly you need a signal back, and how long it takes before closeness stops being work.",
         "personality": "Use this as a filter on your own story rather than on other people. The factors furthest from the middle are the ones you’ll notice missing in a partner within a month.",
         "eq": "These are the capacities that decide how the early months go once novelty stops carrying the conversation.",

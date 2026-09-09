@@ -15,6 +15,8 @@ import json
 import os
 from functools import lru_cache
 
+from services.reportable import speeding
+
 SCORING_VERSION = "1.0.0"
 _BANK_PATH = os.path.join(os.path.dirname(__file__), "..", "constants", "everyday_bank_1_0_0.json")
 
@@ -150,11 +152,16 @@ def score_everyday(responses: dict, side_map: dict | None = None) -> dict:
     if side_bias is not None and (side_bias > 80 or side_bias < 20):
         flags.append("side_bias")
 
+    # Per-item floors from the length of the two options the reader had to compare, not a mean.
     ms_values = [r["ms"] for r in responses.values()
                  if isinstance(r.get("ms"), (int, float)) and r["ms"] > 0]
     mean_ms = round(sum(ms_values) / len(ms_values)) if ms_values else None
-    if mean_ms is not None and mean_ms < 3000:
-        flags.append("time_floor")
+    texts = {it["id"]: f"{it['option_a']} {it['option_b']}" for it in bank["block_a"]}
+    texts.update({it["id"]: f"{bank['domains'][it['left']]['descriptor']} "
+                            f"{bank['domains'][it['right']]['descriptor']}" for it in bank["block_b"]})
+    speed = speeding(responses, texts)
+    if speed["flagged"]:
+        flags.append("speeding")
 
     undiff = [k for k, v in positions.items() if v.get("status") == "undifferentiated"]
 
@@ -190,6 +197,7 @@ def score_everyday(responses: dict, side_map: dict | None = None) -> dict:
             "zeta": zeta,
             "side_bias_left_pct": side_bias,
             "mean_ms": mean_ms,
+            "speeding": speed,
             "undifferentiated_domains": undiff,
             "block_b_complete": complete_b,
             "flags": flags,

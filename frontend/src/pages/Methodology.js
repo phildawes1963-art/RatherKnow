@@ -52,10 +52,11 @@ const SECTIONS = [
     measures:
       'Emotional intelligence across Goleman’s four domains — self-awareness, self-management, social awareness, relationship management — with fourteen sub-dimensions.',
     scoring:
-      '140 Likert items, roughly a third reverse-keyed. Sub-dimension and domain scores are straight means on the 1–5 scale, and that is what the reader is shown. The band words this instrument used to carry — High, Moderate, Developing, at cut-offs of 4.0 and 3.0 — have been withdrawn: a band word implies a standard, and no reference sample is documented for those cut-offs.',
+      '140 Likert items, roughly a third reverse-keyed. Sub-dimension and domain scores are straight means on the 1–5 scale, and that is what the reader is shown. The band words this instrument used to carry — High, Moderate, Developing, at cut-offs of 4.0 and 3.0 — have been withdrawn: a band word implies a standard, and no reference sample is documented for those cut-offs. A strongest or weakest domain is named only where it sits at least 0.77 clear of the domain next to it on that scale; the fourteen sub-dimensions are reported as numbers and never ranked against each other, because each rests on a handful of items and the gaps between them are smaller than the error around any one of them.',
     weaknesses: [
       'A self-perception read, not an ability test — it tells you how you believe you operate.',
       'The mean of your own answers in a domain is a fact; how that compares with other people is not something this instrument can tell you.',
+      'The distance required before we name a strongest or weakest domain assumes a reliability we have not yet measured for this bank. We assume a pessimistic one deliberately, because assuming the worse figure can only stop us naming something — the alternative would name differences we would later have to take back.',
     ],
   },
   {
@@ -103,6 +104,8 @@ export default function Methodology() {
             <p className="text-[#1C1C18]">{METHOD_NOTE.removed_not_caveated}</p>
             <p>{METHOD_NOTE.what_is_left}</p>
             <p data-testid="methodology-note-provisional">{METHOD_NOTE.still_rests_on}</p>
+            <p data-testid="methodology-note-floors">{METHOD_NOTE.reportable_floors}</p>
+            <p data-testid="methodology-note-agreement">{METHOD_NOTE.agreement_floor}</p>
             <p data-testid="methodology-note-delivered">{METHOD_NOTE.already_delivered}</p>
             <p className="text-[#1C1C18]">{METHOD_NOTE.if_ever}</p>
           </div>

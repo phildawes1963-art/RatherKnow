@@ -19,6 +19,8 @@ from services.ratelimit import limiter
 from report_pdf import build_report_pdf, build_combined_pdf
 from choosing import build_choosing
 from composites import build_composites
+from services.reportable import EI_FLAT_COPY, FACET_SUPPRESSION_REASON, ei_named
+
 from services.within_person import build_position
 from services.mrd import build_mrd, MODE as MRD_MODE, config as mrd_config, mrd_sd_units_for
 from services.display import (
@@ -400,6 +402,7 @@ def _score_essential(responses: dict) -> dict:
         delta[key] = d
     overall_delta = round(sum(abs(v) for v in delta.values()) / len(delta), 1)
     biggest_key = max(delta, key=lambda k: abs(delta[k]))
+    delta_block = {"per_archetype": delta, "overall": overall_delta, "biggest": biggest_key}
     primary_arch = ARCHETYPES[self_r["primary"]]
     shadow_key = primary_arch.get("shadow")
     shadow = None
@@ -434,7 +437,7 @@ def _score_essential(responses: dict) -> dict:
             "compatibility": ideal_r["blend"],
             "dimensions": ideal_r["dimensions"],
         },
-        "delta": {"per_archetype": delta, "overall": overall_delta, "biggest": biggest_key},
+        "delta": delta_block,
         "shadow": shadow,
         "dimension_gaps": dim_gaps,
         "evidence_tier": "developmental",
@@ -589,6 +592,54 @@ def _commonness(result: dict) -> dict | None:
             "excluded": "Global dimensions carry no population statement: they are clamped composites."}
 
 
+def _elevation(result: dict) -> dict:
+    """Elevation and shape, derived at read time.
+
+    Describing an ideal partner as better on every pattern at once is a level shift, not a
+    profile difference — and where it dominates, "the widest single gap" is mostly reporting that
+    shift. Reporting the elevation is additive: it makes no existing claim untrue, so it costs no
+    comparability and needs no scoring version.
+
+    `centred_*` is computed and carried but NOT read by any reader-facing surface. Replacing the
+    table with centred gaps changes which pattern is named as the widest — a different answer
+    from the same data — and that waits for rk-1.1.0 alongside the other queued scoring work.
+    """
+    delta = result.get("delta") or {}
+    per = delta.get("per_archetype") or {}
+    if not per:
+        return {}
+    signed = list(per.values())
+    elevation = round(sum(signed) / len(signed), 1)
+    centred = {k: round(v - elevation, 1) for k, v in per.items()}
+    overall = delta.get("overall") or 0
+    return {
+        "elevation": elevation,
+        "elevation_share": round(abs(elevation) / overall, 2) if overall else None,
+        "centred_per_archetype": centred,
+        "centred_biggest": max(centred, key=lambda k: abs(centred[k])),
+        "display_version": DISPLAY_VERSION,
+    }
+
+
+def _shadow_basis(result: dict, shadow: dict) -> str:
+    """Where the shadow pull came from — the leading archetype, not the gap figures.
+
+    Without this the reader cannot tell why a pattern was named when its printed gap is one of
+    the smallest in the table.
+    """
+    primary = result["self"]["primary"]
+    scores = result["self"]["archetype_scores"]
+    own = scores.get(primary["key"], {}).get("percentage")
+    gap = (result.get("delta") or {}).get("per_archetype", {}).get(shadow["key"])
+    bits = [f"Mapped from your leading archetype, {primary['name']}"]
+    if own is not None:
+        bits.append(f"your highest score in that lens at {own:g} points")
+    line = " — ".join(bits) + ", not from the gaps in the Delta"
+    if gap is not None:
+        line += f": {shadow['name']}'s own gap reads {gap:+g} points"
+    return line + "."
+
+
 def _with_choosing(result: dict) -> dict:
     """Attach read-time interpretation (choosing, composite provenance, MRD, commonness).
     Snapshot untouched."""
@@ -608,6 +659,18 @@ def _with_choosing(result: dict) -> dict:
         common = _commonness(result)
         if common:
             extra["commonness"] = common
+    if result.get("instrument") == "essential":
+        extra["delta"] = {**result["delta"], **_elevation(result)}
+        shadow = result.get("shadow")
+        if shadow:
+            extra["shadow"] = {**shadow, "basis": _shadow_basis(result, shadow)}
+    if result.get("instrument") == "eq":
+        # Derived at read time, like the Personality within-person layer: the floor can be
+        # re-derived when the bank's reliability is measured without touching a stored result.
+        extra["named"] = {**ei_named(result["domain_scores"]),
+                          "display_version": DISPLAY_VERSION,
+                          "facet_note": FACET_SUPPRESSION_REASON,
+                          "flat_copy": EI_FLAT_COPY}
     if "mrd" not in result:
         gates = build_mrd(result)
         if gates:
@@ -697,6 +760,9 @@ async def get_combined_pdf(user: dict = Depends(get_current_user)):
     best: dict = {}
     for s in sorted(sessions, key=lambda s: s.get("completed_at") or ""):
         best[s["instrument"]] = s["result"]
+    # Read-time layers (elevation, the EI floor, the shadow's basis) are derived here too, or the
+    # combined document silently shows less than the single-instrument one it is assembled from.
+    best = {k: _with_choosing(v) for k, v in best.items()}
     results = list(best.values())
 
     findings = _build_findings(best) if len(best) >= 2 else []

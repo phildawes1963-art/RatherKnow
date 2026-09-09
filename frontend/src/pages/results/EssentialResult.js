@@ -73,6 +73,13 @@ export default function EssentialResult({ result }) {
           {' '}({delta.per_archetype[delta.biggest] > 0 ? 'you ask for much more of it than you carry yourself' : 'you carry much more of it than you ask for'}).
           A gap isn’t a problem to fix — it’s the most informative part of the measurement.
         </p>
+        {delta.elevation != null && (
+          <p className="mt-3 text-xs text-[#6E6E66] leading-relaxed max-w-2xl" data-testid="essential-elevation">
+            {delta.elevation_share != null && delta.elevation_share >= 0.6
+              ? `Most of that distance is level rather than shape: across all six patterns you describe the partner you want as ${delta.elevation > 0 ? '+' : ''}${delta.elevation} points different on average. Read the bars as which patterns run furthest ahead of that general lift, not as six separate findings.`
+              : `Averaged across all six patterns, you describe the partner you want as ${delta.elevation > 0 ? '+' : ''}${delta.elevation} points different from yourself. That figure is the level; the bars are the shape.`}
+          </p>
+        )}
         <div className="mt-6 bg-white border border-[#E4E4DE] p-6">
           {Object.entries(s.archetype_scores).map(([key, sc]) => (
             <DualBar key={key} label={sc.name} self={sc.percentage} ideal={i.archetype_scores[key].percentage} />
@@ -89,6 +96,9 @@ export default function EssentialResult({ result }) {
             The shadow isn’t a villain — at its best, the {result.shadow.name.replace('The ', '')} brings {result.shadow.gift.toLowerCase()}.
             The pull is real; the question is whether it’s choosing for you.
           </p>
+          {result.shadow.basis && (
+            <p className="mt-4 text-xs leading-relaxed text-[#F6F6F2]/60" data-testid="essential-shadow-basis">{result.shadow.basis}</p>
+          )}
         </section>
       )}
 

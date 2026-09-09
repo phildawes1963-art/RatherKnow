@@ -3,6 +3,8 @@ import json
 import os
 from functools import lru_cache
 
+from services.reportable import speeding
+
 SCORING_VERSION = "1.0.0"
 _BANK_PATH = os.path.join(os.path.dirname(__file__), "..", "constants", "closeness_bank_1_0_0.json")
 
@@ -85,10 +87,14 @@ def score_closeness(responses: dict) -> dict:
     if long_string_max >= 7:
         flags.append("long_string")
 
+    # A mean passes a respondent who raced through most of the instrument and lingered on two.
+    # The floor belongs to the item — 300 ms per word — and the statistic is the share of items
+    # answered below their own floor. The mean is kept for continuity, unflagged.
     ms_values = [r["ms"] for r in responses.values() if isinstance(r.get("ms"), (int, float)) and r["ms"] > 0]
     mean_ms = round(sum(ms_values) / len(ms_values)) if ms_values else None
-    if mean_ms is not None and mean_ms < 4000:
-        flags.append("time_floor")
+    speed = speeding(responses, {it["id"]: it["text"] for it in bank["items"]})
+    if speed["flagged"]:
+        flags.append("speeding")
 
     confidence = "high" if len(flags) == 0 else ("moderate" if len(flags) == 1 else "low")
 
@@ -103,6 +109,7 @@ def score_closeness(responses: dict) -> dict:
             "inconsistency_sum": inconsistency_sum,
             "long_string_max": long_string_max,
             "mean_ms": mean_ms,
+            "speeding": speed,
             "flags": flags,
         },
         "confidence": confidence,

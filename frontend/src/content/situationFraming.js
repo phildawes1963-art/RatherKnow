@@ -5,7 +5,7 @@ export const SITUATION_LENS = {
     label: 'Single & dating',
     lead: 'Read this before the next one, not after.',
     essential:
-      'You’re reading this with the next person still theoretical, which is the most useful moment there is. The gap below is a prediction, not a post-mortem: it says which qualities you’ll over-weight on a third date and which you’ll forgive too quickly. Watch for the shadow arriving as chemistry — the pull is strongest when nothing has gone wrong yet.',
+      'You’re reading this with the next person still theoretical, which is the most useful moment there is. The gap below is something to watch for rather than something to explain: it names the qualities you are most likely to over-weight early, and the ones you are most likely to forgive too quickly. Watch for the shadow arriving as chemistry — the pull is strongest when nothing has gone wrong yet.',
     closeness:
       'Where you sit on these two axes is what the early weeks will feel like from the inside — how quickly you need a signal back, and how long it takes before closeness stops being work. Neither position is a fault; both change what you should be watching for in someone new.',
     personality:

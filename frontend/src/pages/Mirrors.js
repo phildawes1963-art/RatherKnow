@@ -77,8 +77,9 @@ export default function Mirrors() {
           The cross-check.
         </h1>
         <p className="mt-4 text-base text-[#3B3B34] max-w-2xl leading-relaxed">
-          Five instruments, kept for you and retrievable by logging in. Where they agree, that’s signal. Where they
-          disagree, that’s not an error: it’s a finding, and usually the more interesting one.
+          Five instruments, kept for you and retrievable by logging in. Where two of them land away from the middle
+          in the same direction, that’s signal. Where they pull opposite ways, that’s not an error: it’s a finding,
+          and usually the more interesting one.
         </p>
         {completeCount >= 2 && (
           <p className="mt-3 text-sm text-[#5B7284]" data-testid="mirrors-crosscheck-note">
@@ -130,16 +131,19 @@ export default function Mirrors() {
             <h2 className="mi2-serif mt-12 text-2xl text-[#1C1C18]">The cross-check.</h2>
             <p className="mt-3 text-sm text-[#3B3B34] max-w-2xl leading-relaxed">
               Two things happen when instruments that share no questions are read together. Where they agree, that
-              convergence is signal — independent measures landing in the same place is the strongest thing here.
-              Where they pull apart, that’s a finding. Neither is a verdict.
+              convergence is signal — but only where both readings sit away from the middle of their own scale, since
+              two mid-scale numbers agreeing is what uninformative answering produces on its own. Where they pull
+              apart, that’s a finding. Neither is a verdict.
             </p>
 
             {agreements.length > 0 && (
               <div className="mt-6 space-y-5" data-testid="mirrors-agreements">
                 {agreements.map((a, i) => (
-                  <div key={a.id} data-testid={`mirrors-agreement-${i + 1}`} className="bg-white border border-[#E4E4DE] border-l-2 border-l-[#7E8E77] p-6 sm:p-7">
-                    <p className="text-[11px] uppercase tracking-[0.12em] text-[#7E8E77]">
-                      Agreement · {a.sources.join(' × ')}
+                  <div key={a.id} data-testid={`mirrors-agreement-${i + 1}`} className={`bg-white border border-[#E4E4DE] border-l-2 p-6 sm:p-7 ${a.kind === 'null' ? 'border-l-[#C8AE93]' : 'border-l-[#7E8E77]'}`}>
+                    <p className={`text-[11px] uppercase tracking-[0.12em] ${a.kind === 'null' ? 'text-[#6E6E66]' : 'text-[#7E8E77]'}`}>
+                      {a.kind === 'null' ? 'Nothing to report' : 'Agreement'} · {a.sources.join(' × ')}
+                      {a.confidence ? ` · ${a.confidence} confidence` : ''}
+                      {a.evidence_tier ? ` · ${a.evidence_tier} tier` : ''}
                     </p>
                     <h3 className="mi2-serif mt-2 text-xl text-[#1C1C18]">{a.title}</h3>
                     <p className="mt-3 text-sm text-[#3B3B34] leading-relaxed">{a.body}</p>
@@ -154,6 +158,8 @@ export default function Mirrors() {
                   <div key={f.id} data-testid={`mirrors-finding-${i + 1}`} className="bg-white border-l-2 border-[#5B7284] border border-[#E4E4DE] p-6 sm:p-7">
                     <p className="text-[11px] uppercase tracking-[0.12em] text-[#6E6E66]">
                       Finding · {f.sources.join(' × ')}
+                      {f.confidence ? ` · ${f.confidence} confidence` : ''}
+                      {f.evidence_tier ? ` · ${f.evidence_tier} tier` : ''}
                     </p>
                     <h3 className="mi2-serif mt-2 text-xl text-[#1C1C18]">{f.title}</h3>
                     <p className="mt-3 text-sm text-[#3B3B34] leading-relaxed">{f.body}</p>

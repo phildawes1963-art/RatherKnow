@@ -186,4 +186,4 @@ def test_methodology_page_reachable():
 
 def test_display_version_bumped():
     from services.display import DISPLAY_VERSION
-    assert DISPLAY_VERSION == "disp-1.3.4"
+    assert DISPLAY_VERSION == "disp-1.4.0"

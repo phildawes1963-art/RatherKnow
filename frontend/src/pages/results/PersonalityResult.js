@@ -27,7 +27,7 @@ const COUNT_WORD = ['none', 'One', 'Two', 'Three'];
 // carry the position; the label says where it sits against the reader's own five.
 const POSITION = (g, meanOfFive) => {
   const d = (g.score ?? g.score_precise ?? 0) - meanOfFive;
-  if (Math.abs(d) < 0.5) return 'at your own middle';
+  if (Math.abs(d) <= 1.0) return 'at your own middle'; // one full sten step: adjacent stens can't split
   return d > 0 ? 'above your own middle' : 'below your own middle';
 };
 
@@ -46,7 +46,11 @@ export default function PersonalityResult({ result }) {
     return subs.length ? subs.reduce((t, s2) => t + (s2.score ?? 0), 0) / subs.length : 0;
   };
   const loud = result.loudest || [...(result.strengths || []), ...(result.blind_spots || [])];
-  const sd = result.validity?.social_desirability?.flag;
+  // Recomputed from the stored count rather than read from the stored label. The count is the
+  // frozen datum; the cut that turns it into a word was set below chance (4 of 10 is exactly what
+  // content-blind answering produces) and has moved to 7. See backend/services/reportable.py.
+  const sdCount = result.validity?.social_desirability?.agree_count;
+  const sd = sdCount == null ? null : (sdCount >= 9 ? 'HIGH' : sdCount >= 7 ? 'ELEVATED' : 'NORMAL');
 
   return (
     <div className="space-y-12">
@@ -57,10 +61,18 @@ export default function PersonalityResult({ result }) {
         </h1>
       </header>
 
+      {sd === 'NORMAL' && sdCount != null && (
+        <p className="text-xs text-[#6E6E66] leading-relaxed" data-testid="personality-validity-null-note">
+          Social desirability check: you agreed with {sdCount} of the ten most flattering statements, where about four
+          is what content-blind answering produces on its own. Nothing to read into this one.
+        </p>
+      )}
+
       {sd && sd !== 'NORMAL' && (
         <p className="border border-[#C8AE93] bg-[#C8AE93]/10 px-5 py-4 text-sm text-[#3B3B34]" data-testid="personality-validity-note">
-          You agreed with most of the ten most flattering statements in this questionnaire — nothing wrong with that, but read
-          this profile as a best-self version and take it again on an ordinary day if you want the everyday one.
+          You agreed with {sdCount} of the ten most flattering statements in this questionnaire, where about four is what
+          answering without reading closely produces on its own — nothing wrong with that, but read this profile as a
+          best-self version and take it again on an ordinary day if you want the everyday one.
         </p>
       )}
 
@@ -149,7 +161,7 @@ export default function PersonalityResult({ result }) {
       </section>
 
       <section data-testid="personality-loudest">
-        <h2 className="mi2-serif text-2xl text-[#1C1C18]">{POSITION_COPY.loudest_heading}</h2>
+        <h2 className="mi2-serif text-2xl text-[#1C1C18]" data-testid="loudest-heading">{POSITION_COPY.loudest_heading_counted[String(Math.min(loud.length, 3))]}</h2>
         {loud.length === 3 && (
           <p className="mt-3 text-sm text-[#6E6E66] max-w-2xl leading-relaxed" data-testid="loudest-meaning">
             {POSITION_COPY.loudest_meaning}

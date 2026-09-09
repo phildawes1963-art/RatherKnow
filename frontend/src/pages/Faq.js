@@ -54,7 +54,7 @@ const FAQS = [
   },
   {
     q: 'What is the cross-check?',
-    a: 'Once you’ve completed two or more mirrors, the cross-check reads them side by side. Where instruments agree, that’s signal. Where they disagree, that’s a finding — and it’s usually the more interesting one.',
+    a: 'Once you’ve completed two or more mirrors, the cross-check reads them side by side. Agreement counts only where both readings sit away from the middle of their own scale and sit the same way — two mid-scale numbers landing together is what answering without much thought produces, not evidence. Where they pull opposite ways, that’s a finding, and usually the more interesting one. Where neither has moved off its own middle, you get told that instead.',
     links: [{ to: '/mirrors', label: 'Your mirrors' }],
   },
   {

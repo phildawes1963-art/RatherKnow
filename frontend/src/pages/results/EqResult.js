@@ -10,6 +10,7 @@ const Bar = ({ score }) => (
 
 export default function EqResult({ result }) {
   const domains = Object.entries(result.domain_scores);
+  const named = result.named;
 
   return (
     <div className="space-y-12">
@@ -19,7 +20,7 @@ export default function EqResult({ result }) {
           How you handle what you feel.
         </h1>
         <p className="mt-4 text-sm text-[#3B3B34]" data-testid="eq-overall">
-          Overall: <strong>{result.overall_score}</strong> of 5 — the mean of your own answers, with no grade attached
+          Overall: <strong>{result.overall_score.toFixed(2)}</strong> of 5 — the mean of your own answers, with no grade attached
         </p>
       </header>
 
@@ -28,14 +29,14 @@ export default function EqResult({ result }) {
           <div key={key} className="bg-white border border-[#E4E4DE] p-6">
             <div className="flex items-baseline justify-between gap-4">
               <h2 className="mi2-serif text-xl text-[#1C1C18]">{d.name}</h2>
-              <p className="text-sm text-[#5B7284] whitespace-nowrap">{d.score} of 5</p>
+              <p className="text-sm text-[#5B7284] whitespace-nowrap">{d.score.toFixed(2)} of 5</p>
             </div>
             <div className="mt-3"><Bar score={d.score} /></div>
             <p className="mt-3 text-xs text-[#6E6E66] leading-relaxed">{d.description}</p>
             <div className="mt-4 grid gap-1.5 sm:grid-cols-2">
               {Object.values(result.sub_scores).filter((sSub) => sSub.domain === key).map((sSub) => (
                 <p key={sSub.name} className="text-xs text-[#3B3B34] flex justify-between border-t border-[#E4E4DE] pt-1.5">
-                  <span>{sSub.name}</span><span className="text-[#6E6E66]">{sSub.score} of 5</span>
+                  <span>{sSub.name}</span><span className="text-[#6E6E66]">{sSub.score.toFixed(2)} of 5</span>
                 </p>
               ))}
             </div>
@@ -43,20 +44,35 @@ export default function EqResult({ result }) {
         ))}
       </section>
 
-      <section className="grid gap-5 sm:grid-cols-2" data-testid="eq-strengths">
-        <div className="bg-white border border-[#E4E4DE] p-6">
-          <p className="text-xs uppercase tracking-[0.12em] text-[#7E8E77]">Leading with</p>
-          <ul className="mt-3 space-y-2 text-sm text-[#3B3B34]">
-            {result.strengths.map((st) => <li key={st.name}>{st.name} — {st.score}</li>)}
-          </ul>
-        </div>
-        <div className="bg-white border border-[#E4E4DE] p-6">
-          <p className="text-xs uppercase tracking-[0.12em] text-[#C8AE93]">Worth developing</p>
-          <ul className="mt-3 space-y-2 text-sm text-[#3B3B34]">
-            {result.growth_areas.map((g) => <li key={g.name}>{g.name} — {g.score}</li>)}
-          </ul>
-        </div>
-      </section>
+      {named && (
+        <section className="bg-white border border-[#E4E4DE] p-6" data-testid="eq-named">
+          {named.highest || named.lowest ? (
+            <>
+              <p className="text-xs uppercase tracking-[0.12em] text-[#7E8E77]">What separates from the rest</p>
+              <ul className="mt-3 space-y-2 text-sm text-[#3B3B34]">
+                {named.highest && (
+                  <li data-testid="eq-named-highest">
+                    Highest: {named.highest.name} — {named.highest.score.toFixed(2)} of 5, clear of the next by {named.highest.margin.toFixed(2)}
+                  </li>
+                )}
+                {named.lowest && (
+                  <li data-testid="eq-named-lowest">
+                    Lowest: {named.lowest.name} — {named.lowest.score.toFixed(2)} of 5, clear of the next by {named.lowest.margin.toFixed(2)}
+                  </li>
+                )}
+              </ul>
+            </>
+          ) : (
+            <p className="text-sm text-[#3B3B34] leading-relaxed" data-testid="eq-named-flat">{named.flat_copy}</p>
+          )}
+          <p className="mt-4 text-xs text-[#6E6E66] leading-relaxed">
+            A highest or lowest is named only where two domains differ by at least {named.mrd?.toFixed(2)} on the 1–5
+            scale — the smallest difference worth reading, assuming a reliability of {named.assumed_alpha?.toFixed(2)}.
+            Provisional, and re-derived when this bank's reliability is measured.
+          </p>
+          <p className="mt-3 text-xs text-[#6E6E66] leading-relaxed" data-testid="eq-facet-note">{named.facet_note}</p>
+        </section>
+      )}
 
       <section className="border border-[#E4E4DE] bg-white p-6" data-testid="eq-evidence-tier">
         <p className="text-[11px] uppercase tracking-[0.1em] bg-[#1C1C18] text-[#F6F6F2] inline-block px-2 py-0.5">{TIER_CHIPS.eq}</p>

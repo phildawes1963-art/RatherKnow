@@ -133,7 +133,10 @@ def test_side_bias_flag():
 
 def test_time_floor_flag():
     res = score_everyday(_all_a(ms=1200))
-    assert "time_floor" in res["validity"]["flags"]
+    # The mean was replaced by the share of items answered under their OWN floor (300 ms per word
+    # of the item), so the flag is "speeding" and it fires on the proportion, not on an average.
+    assert "speeding" in res["validity"]["flags"]
+    assert res["validity"]["speeding"]["below_floor_pct"] >= 30.0
     assert score_everyday(_all_a(ms=6000))["validity"]["mean_ms"] == 6000
 
 

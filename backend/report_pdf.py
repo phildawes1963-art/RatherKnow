@@ -18,6 +18,11 @@ from reportlab.platypus import (
     BaseDocTemplate, Frame, PageTemplate, Paragraph, Spacer, Table, TableStyle, KeepTogether,
 )
 
+from services.reportable import (
+    EI_FLAT_COPY, FACET_SUPPRESSION_REASON, ei_named, sd_flag as _sd_flag, sd_null_note,
+)
+
+
 INK = colors.HexColor("#1C1C18")
 INK_SOFT = colors.HexColor("#3B3B34")
 MUTED = colors.HexColor("#6E6E66")
@@ -75,7 +80,7 @@ def _tier_chip(tier_key):
     return tbl
 
 
-def _bar_table(rows, width=160 * mm, maximum=100.0, suffix=""):
+def _bar_table(rows, width=160 * mm, maximum=100.0, suffix="", value_format="{}"):
     """rows: (label, value, sublabel). Draws a proportional bar with no invented banding."""
     data = []
     for label, value, sub in rows:
@@ -89,7 +94,7 @@ def _bar_table(rows, width=160 * mm, maximum=100.0, suffix=""):
             ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
             ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
         ]))
-        value_text = "not scored" if value is None else f"{value}{suffix}"
+        value_text = "not scored" if value is None else value_format.format(value) + suffix
         data.append([Paragraph(label, S["cell"]), holder, Paragraph(f"<b>{value_text}</b> {sub or ''}", S["cell"])])
     tbl = Table(data, colWidths=[46 * mm, 72 * mm, width - 118 * mm])
     tbl.setStyle(TableStyle([
@@ -133,10 +138,11 @@ def _essential(result, flow):
                     or [self_p.get("description", "")]) if d],
         Paragraph("The Delta", S["h2"]),
         Paragraph(
-            f"Overall distance between the two lenses: <b>{delta['overall']} points</b>. "
+            f"Overall distance between the two lenses: <b>{delta['overall']:g} points</b>. "
             f"The widest single gap is <b>{result['self']['archetype_scores'][delta['biggest']]['name']}</b>. "
             "A gap is not a fault — it is the part of the measurement that carries information.",
             S["body"]),
+        *_elevation_note(delta),
         Paragraph(
             "A zero gap is a finding too, and not a contradiction: where the archetype you named as the "
             "partner you want shows no gap, you are describing someone who already carries as much of that "
@@ -147,13 +153,14 @@ def _essential(result, flow):
               "you want more of this than you are" if v > 0 else
               ("you are more of this than you want" if v < 0 else "no gap"))
              for k, v in sorted(delta["per_archetype"].items(), key=lambda kv: -abs(kv[1]))],
-            maximum=100.0, suffix=" pts"),
+            maximum=100.0, suffix=" pts", value_format="{:g}"),
     ]
     shadow = result.get("shadow")
     if shadow:
         flow += [
             Paragraph("The shadow pull", S["h2"]),
             Paragraph(f"<b>{shadow['name']}</b> — {shadow.get('gift', '')}", S["body"]),
+            *([Paragraph(shadow["basis"], S["small"])] if shadow.get("basis") else []),
             Paragraph("What this pull does at the point of choosing is set out in "
                       "“How you choose”, below.", S["small"]),
         ]
@@ -167,9 +174,80 @@ def _essential(result, flow):
         ]
 
 
+# One full sten step. At half a step, sten 5 and sten 6 — the same half-point either side of the
+# scale mean of 5.5 — were being given different labels in opposite directions. Nothing smaller
+# than a step is a difference on this scale, so nothing smaller than a step gets a direction.
+MIDDLE_BAND_STEN = 1.0
+
+
+def _elevation_note(delta: dict) -> list:
+    """How much of the gap is level rather than shape.
+
+    Describing an ideal partner as better on every dimension at once is a level shift, and where
+    it dominates, "the widest single gap" is mostly reporting that shift. Printed as its own
+    quantity: additive, so nothing a previous reader was told becomes untrue. Replacing the table
+    with centred values is a scoring change and waits for the next ALGO_VERSION.
+    """
+    elevation = delta.get("elevation")
+    if elevation is None:
+        return []
+    share = delta.get("elevation_share")
+    if share is not None and share >= 0.6:
+        return [Paragraph(
+            f"Most of that distance is level rather than shape. Across all six patterns you describe the "
+            f"partner you want as {elevation:+g} points higher on average — so the gaps below are read best as "
+            f"which patterns run furthest ahead of that general lift, not as six separate findings.",
+            S["small"])]
+    return [Paragraph(
+        f"Averaged across all six patterns, you describe the partner you want as {elevation:+g} points "
+        f"different from yourself. That figure is the level; the gaps below are the shape.", S["small"])]
+
+
+def _and_list(names: list) -> str:
+    others = [n for n in names]
+    if len(others) <= 1:
+        return others[0] if others else ""
+    return ", ".join(others[:-1]) + " and " + others[-1]
+
+
+def _speed_phrase(v: dict) -> str:
+    """The share of items answered below their OWN floor — 300 ms per word of the item.
+
+    A mean is pulled up by a few slow items and passes a respondent who raced through the rest,
+    which is why the mean is no longer the statistic being judged.
+    """
+    sp = v.get("speeding") or {}
+    pct = sp.get("below_floor_pct")
+    if pct is None:
+        mean_ms = v.get("mean_ms")
+        if mean_ms:
+            # Stored before the floor existed. Say which statistic this is rather than quietly
+            # printing a mean under a per-item heading.
+            return (f"mean {mean_ms} ms per item — this reading was scored before the per-item "
+                    f"floor existed, and a mean is the weaker check")
+        return "no timings recorded"
+    return (f"{pct:g}% of items came in under their own floor, where each item's floor is "
+            f"{sp.get('ms_per_word', 300)} ms per word of its text")
+
+
+def _zeta_phrase(v: dict) -> str:
+    """Labelled, because 0.286 tells the reader nothing on its own.
+
+    Direction and range stated, plus what careful answering usually looks like: a couple of
+    circular triads in twenty-one forced choices is ordinary, not an accusation.
+    """
+    z = v.get("zeta")
+    triads = v.get("circular_triads")
+    if z is None:
+        return "not enough comparisons to check"
+    return (f"consistency {z:g} on a 0–1 scale where 1 means no circular preferences at all; "
+            f"{triads} of your triples ran in a circle, and a couple is ordinary in twenty-one "
+            f"forced choices — below about 0.70 is where the ranking softens")
+
+
 def _global_position(score: float, mean_of_five: float) -> str:
     delta = score - mean_of_five
-    if abs(delta) < 0.5:
+    if abs(delta) <= MIDDLE_BAND_STEN:
         return "at your own middle"
     return "above your own middle" if delta > 0 else "below your own middle"
 
@@ -248,31 +326,21 @@ def _personality(result, flow):
     ]))
     flow.append(tbl)
     loud = result.get("loudest") or []
-    # The heading and the partial line must agree with what actually cleared the floor: a
-    # heading promising three above a list of one is the norms pause leaking back in as copy.
-    # Same three states the result page carries (locked_copy position.loudest_*).
+    # Heading and partial line both come from the locked register, keyed by how many actually
+    # cleared the floor — the same strings the result page uses. Duplicating them here is how the
+    # PDF came to promise three above a list of one.
+    pos_copy = LOCKED["position"]
     count_word = {1: "One", 2: "Two", 3: "Three"}
-    if len(loud) >= 3:
-        flow += [Paragraph("The three furthest from your own middle", S["h2"])]
-    elif loud:
-        flow += [Paragraph(f"{count_word[len(loud)]} furthest from your own middle", S["h2"])]
-    else:
-        flow += [Paragraph("Furthest from your own middle", S["h2"])]
+    flow += [Paragraph(pos_copy["loudest_heading_counted"][str(min(len(loud), 3))], S["h2"])]
     if loud:
-        flow += [Paragraph(
-            "Traits at this distance are the ones doing the selecting — what you notice first in somebody, "
-            "and what you are most likely to over-weight.", S["small"])]
+        flow += [Paragraph(pos_copy["loudest_meaning"], S["small"])]
         flow += [Paragraph(f"— {e['name']}: toward the {e['pole'].lower()} end.", S["body"]) for e in loud]
         if len(loud) < 3:
-            lead = ("One factor sits" if len(loud) == 1
-                    else f"{count_word[len(loud)]} of your factors sit")
-            flow += [Paragraph(
-                f"{lead} far enough from your own middle to name. A flatter profile means no single trait "
-                "is doing most of the selecting, which is worth knowing in itself.", S["small"])]
+            partial = (pos_copy["loudest_partial_one"] if len(loud) == 1
+                       else pos_copy["loudest_partial"].replace("{count}", count_word[len(loud)]))
+            flow += [Paragraph(partial, S["small"])]
     else:
-        flow += [Paragraph(
-            "None of your factors sits far enough from your own middle to name one confidently. That is a "
-            "real result rather than a missing one.", S["body"])]
+        flow += [Paragraph(pos_copy["loudest_none"], S["body"])]
 
     v = result.get("validity") or {}
     sd, ct = v.get("social_desirability", {}), v.get("central_tendency", {})
@@ -282,7 +350,8 @@ def _personality(result, flow):
             # An item count, not a scale: "2 of 10" beside a name reads as a mark, so it says what
             # was counted. The check is how many of the flattering statements were agreed with.
             f"Social desirability: you agreed with {sd.get('agree_count', '—')} of the "
-            f"{sd.get('items', '—')} most flattering statements ({sd.get('flag', 'NORMAL').lower()}). "
+            f"{sd.get('items', '—')} most flattering statements "
+            f"({_sd_flag(sd.get('agree_count')).lower()}). {sd_null_note()} "
             f"Central tendency: {ct.get('flag', 'NORMAL').lower()}. "
             "These are reported rather than hidden — a flagged profile is still your profile, read with a caveat.",
             S["body"]),
@@ -290,23 +359,39 @@ def _personality(result, flow):
 
 
 def _eq(result, flow):
+    named = ei_named(result["domain_scores"])
     flow += [
         Paragraph("Four domains", S["h2"]),
         Paragraph(
-            f"Overall: <b>{result['overall_score']}</b> on a 1–5 scale. Each number is the mean of your own "
+            f"Overall: <b>{result['overall_score']:.2f}</b> on a 1–5 scale. Each number is the mean of your own "
             "answers in that domain. There is no grade attached to it: a band word would imply a standard, "
             "and no reference sample is documented for these thresholds.", S["body"]),
-        _bar_table([(d["name"], d["score"], f"{d['score']} of 5") for d in result["domain_scores"].values()],
-                   maximum=5.0),
+        _bar_table([(d["name"], d["score"], "") for d in result["domain_scores"].values()],
+                   maximum=5.0, suffix=" of 5", value_format="{:.2f}"),
     ]
-    for title, key in (("Your highest of the fourteen", "strengths"), ("Your lowest of the fourteen", "growth_areas")):
-        items = result.get(key) or []
-        if items:
-            flow += [Paragraph(title, S["h3"])]
-            flow += [Paragraph(f"— {i['name']} ({i['score']} of 5)", S["body"]) for i in items]
+    # A highest or a lowest is named only where it clears the minimum reportable difference
+    # against the one next to it. Four domains spanning a third of a point is an ordering of
+    # measurement error, and the Personality Mirror has held its factors to a floor since 1.1.0.
+    if named["highest"] or named["lowest"]:
+        flow += [Paragraph("What separates from the rest", S["h3"])]
+        if named["highest"]:
+            h = named["highest"]
+            flow += [Paragraph(f"— Highest: {h['name']} ({h['score']:.2f} of 5), clear of the next by "
+                               f"{h['margin']:.2f}.", S["body"])]
+        if named["lowest"]:
+            lo = named["lowest"]
+            flow += [Paragraph(f"— Lowest: {lo['name']} ({lo['score']:.2f} of 5), clear of the next by "
+                               f"{lo['margin']:.2f}.", S["body"])]
+    else:
+        flow += [Paragraph(EI_FLAT_COPY, S["body"])]
+    flow += [Paragraph(
+        f"Named only where two domains differ by at least {named['mrd']:.2f} on the 1–5 scale — the smallest "
+        f"difference worth reading, assuming a reliability of {named['assumed_alpha']:.2f}. Provisional: it is "
+        "re-derived when the reliability of this bank is measured.", S["small"])]
     flow += [Paragraph("Fourteen sub-dimensions", S["h2"])]
-    flow += [_bar_table([(s["name"], s["score"], f"{s['score']} of 5") for s in result["sub_scores"].values()],
-                        maximum=5.0)]
+    flow += [_bar_table([(s["name"], s["score"], "") for s in result["sub_scores"].values()],
+                        maximum=5.0, suffix=" of 5", value_format="{:.2f}")]
+    flow += [Paragraph(FACET_SUPPRESSION_REASON, S["small"])]
 
 
 def _closeness(result, flow):
@@ -339,7 +424,7 @@ def _closeness(result, flow):
         Paragraph(
             f"<b>{(result.get('confidence') or 'not established').title()}</b>. Four checks ran on your answers — an "
             f"instructed-response item, three consistency pairs, the longest identical-answer run "
-            f"({v.get('long_string_max', '—')}), and a time floor (mean {v.get('mean_ms', '—')} ms per item). "
+            f"({v.get('long_string_max', '—')}), and a per-item time floor ({_speed_phrase(v)}). "
             "They set this label; nothing was deleted or silently corrected.", S["body"]),
         Paragraph(f"Item bank {result.get('bank_version', '—')} · scoring {result.get('scoring_version', '—')}", S["small"]),
     ]
@@ -394,9 +479,18 @@ def _everyday(result, flow):
         flow += [Paragraph("Position against priority", S["h2"]),
                  Paragraph("The corners are the interesting part.", S["small"])]
         rows = [[Paragraph("<b>Domain</b>", S["cellb"]), Paragraph("<b>Reads as</b>", S["cellb"])]]
-        for c in sorted(result["map"], key=lambda x: x["priority_rank"]):
-            rows.append([Paragraph(c["name"], S["cell"]),
-                         Paragraph(f"{c['label']}, ranked {c['priority_rank']} of 7 — {CELLS[c['cell']]}", S["cell"])])
+        # Tied ranks are printed as ties, and every member of a tied group appears or none does:
+        # showing Sociability at "3 of 7" while Togetherness silently tied it invents an order.
+        by_rank = {}
+        for c in result["map"]:
+            by_rank.setdefault(c["priority_rank"], []).append(c)
+        for rank in sorted(by_rank):
+            group = sorted(by_rank[rank], key=lambda x: x["name"])
+            rank_text = (f"ranked {rank} of 7" if len(group) == 1
+                         else f"tied at {rank} of 7 with {_and_list([g['name'] for g in group])}")
+            for c in group:
+                rows.append([Paragraph(c["name"], S["cell"]),
+                             Paragraph(f"{c['label']}, {rank_text} — {CELLS[c['cell']]}", S["cell"])])
         tbl = Table(rows, colWidths=[36 * mm, 124 * mm], repeatRows=1)
         tbl.setStyle(TableStyle([
             ("LINEBELOW", (0, 0), (-1, 0), 0.7, INK),
@@ -412,9 +506,9 @@ def _everyday(result, flow):
         Paragraph("Confidence in this reading", S["h2"]),
         Paragraph(
             f"<b>{(result.get('confidence') or 'not established').title()}</b>. Three behavioural checks ran on the "
-            f"choices themselves rather than on anything you told us: loops in your comparisons (consistency index "
-            f"{v.get('zeta', '—')}), how often you picked the left-hand option when the sides were randomised "
-            f"({v.get('side_bias_left_pct', '—')}%), and a time floor (mean {v.get('mean_ms', '—')} ms per item).",
+            f"choices themselves rather than on anything you told us: loops in your comparisons "
+            f"({_zeta_phrase(v)}) and a per-item time floor ({_speed_phrase(v)}). The side of the screen you "
+            "picked from is checked too, and is kept out of here unless it goes far enough to mean something.",
             S["body"]),
         Paragraph(result.get("claim_limit", ""), S["body"]),
         Paragraph(
@@ -549,18 +643,27 @@ def build_combined_pdf(*, results: list, user: dict, findings: list, situation_n
             Paragraph("The cross-check", S["h2"]),
             Paragraph(
                 "Two things happen when instruments that share no questions are read together. Where they agree, "
-                "that convergence is signal. Where they pull apart, that’s a finding — and it’s usually the more "
-                "interesting one. Neither is a verdict.", S["body"]),
+                "that convergence is signal — but only where both readings sit away from the middle of their own "
+                "scale, since two mid-scale numbers agreeing is what uninformative answering produces on its own. "
+                "Where they pull apart, that’s a finding, and it’s usually the more interesting one. Neither is a "
+                "verdict.", S["body"]),
         ]
+        KICKER = {"agreement": "AGREEMENT", "null": "NOTHING TO REPORT", "single": "ONE READING"}
         for a in (agreements or []):
+            bits = [KICKER.get(a.get("kind"), "AGREEMENT"), " × ".join(a.get("sources", [])).upper()]
+            if a.get("confidence"):
+                bits.append(f"{a['confidence'].upper()} CONFIDENCE")
             flow.append(KeepTogether([
-                Paragraph("AGREEMENT · " + " × ".join(a.get("sources", [])).upper(), S["kicker"]),
+                Paragraph(" · ".join(bits), S["kicker"]),
                 Paragraph(a["title"], S["h3"]),
                 Paragraph(a["body"], S["body"]),
             ]))
         for f in findings:
+            fbits = ["FINDING", " × ".join(f.get("sources", [])).upper()]
+            if f.get("confidence"):
+                fbits.append(f"{f['confidence'].upper()} CONFIDENCE")
             flow.append(KeepTogether([
-                Paragraph("FINDING · " + " × ".join(f.get("sources", [])).upper(), S["kicker"]),
+                Paragraph(" · ".join(fbits), S["kicker"]),
                 Paragraph(f["title"], S["h3"]),
                 Paragraph(f["body"], S["body"]),
             ]))

@@ -249,11 +249,13 @@ def test_bug1_choosing_quotes_real_numbers(four_user):
     assert "of 10" not in blob, "a sten reached the reader"
     assert "your own" in blob or "own middle" in blob, blob[:200]
 
-    # eq — cites 1–5 domain scores
+    # eq — cites 1-5 domain scores, OR states the floor when nothing clears it. The four domains
+    # often span less than the minimum reportable difference, and naming a strongest from that
+    # would be ranking measurement error; the suppressed state quotes the floor instead.
     sid, res = sids["eq"]
     c = u["session"].get(f"{API}/v2/assessments/{sid}/result").json()["choosing"]
     blob = " ".join(p["body"] for p in c["points"])
-    assert "of 5" in blob, "eq choosing must cite score out of 5"
+    assert "of 5" in blob or "1–5 scale" in blob, "eq choosing must quote either a score or the floor"
 
     # essential — cites Delta and per-archetype gaps
     sid, res = sids["essential"]
@@ -339,10 +341,13 @@ def test_bug2_agreements_only_when_close():
 
 def test_bug2_tensions_only_when_far():
     from crosscheck import build_tensions
-    # personality warmth sten=10 (norm 1.0), essential Emotional=0 (norm 0.0) → dist 1.0
+    # personality warmth sten=10 (norm 1.0), essential Emotional=0 (norm 0.0) → dist 1.0.
+    # The filler factors give the profile a mean: personality displacement is measured within
+    # the reader's own profile, so a lone factor has nothing to be displaced from.
     by = {
         "personality": {"factor_scores": {"A": {"sten": 10, "name": "Warmth",
-                                                "pole_high": "Warm", "pole_low": "Reserved"}}},
+                                                "pole_high": "Warm", "pole_low": "Reserved"},
+                                          **{k: {"sten": 5, "name": k} for k in ("C", "E", "F", "G")}}},
         "essential": {"self": {"dimensions": {"Emotional": 0}}, "delta": {"overall": 0}},
     }
     tens = build_tensions(by, existing=[])
@@ -388,10 +393,11 @@ def test_bug2_combined_pdf_has_agreement_finding_and_synthesis(four_user):
     text = _norm(_pdf_text(pdf))
     # synthesis 'How you choose — the short version'
     assert "How you choose — the short version" in text or "the short version" in text
-    # need at least one AGREEMENT or FINDING entry (the labelled cards)
-    has_ag = "AGREEMENT" in text
-    has_fi = "FINDING" in text
-    assert has_ag or has_fi, "combined PDF cross-check has neither AGREEMENT nor FINDING entry"
+    # At least one labelled cross-check card. Since the displacement gate, a mid-scale pair is
+    # labelled NOTHING TO REPORT and a half-displaced pair ONE READING — both are real entries,
+    # and a set that produces only those is the honest outcome rather than a missing one.
+    kinds = [k for k in ("AGREEMENT", "FINDING", "NOTHING TO REPORT", "ONE READING") if k in text]
+    assert kinds, "combined PDF cross-check has no labelled entry at all"
 
 
 # ============================================================================

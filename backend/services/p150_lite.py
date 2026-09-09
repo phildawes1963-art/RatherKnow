@@ -27,6 +27,7 @@ from constants.p150_data import (
     P150_FACTORS, P150_REVERSED_ITEMS, P150_VALIDITY_ITEMS,
     P150_PERSONALITY_ITEMS, compute_global_scores,
 )
+from services.reportable import sd_flag as _sd_flag, sd_null_note
 from services.within_person import loudest
 
 _SNAPSHOT_PATH = os.path.join(os.path.dirname(__file__), "..", "constants", "p150_norms_snapshot.json")
@@ -88,7 +89,9 @@ def score_p150_lite(all_responses: dict) -> dict:
         else:
             if raw >= 4:
                 sd_agree += 1
-    sd_flag = "HIGH" if sd_agree >= 7 else ("ELEVATED" if sd_agree >= 4 else "NORMAL")
+    # The old cut read 4 of 10 as elevated, which is dead-on the content-blind null for a
+    # Likert threshold at p=0.4 — it flagged chance. See services/reportable.sd_flag.
+    sd_flag = _sd_flag(sd_agree)
 
     likert_ids = [it["id"] for it in P150_PERSONALITY_ITEMS] + [it["id"] for it in P150_VALIDITY_ITEMS]
     midpoint_n = sum(1 for i in likert_ids if int(all_responses.get(str(i), 0)) == 3)
@@ -108,7 +111,8 @@ def score_p150_lite(all_responses: dict) -> dict:
         "factor_scores": factor_scores,
         "global_scores": global_scores,
         "validity": {
-            "social_desirability": {"agree_count": sd_agree, "items": 10, "flag": sd_flag},
+            "social_desirability": {"agree_count": sd_agree, "items": 10, "flag": sd_flag,
+                                    "null_note": sd_null_note()},
             "central_tendency": {"midpoint_count": midpoint_n, "midpoint_pct": midpoint_pct,
                                  "items": len(likert_ids), "flag": ct_flag},
             "flag": sd_flag,

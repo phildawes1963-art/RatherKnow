@@ -221,7 +221,8 @@ export default function Landing() {
         <p className="text-xs uppercase tracking-[0.18em] text-[#6E6E66]">How it’s built</p>
         <h2 className="mi2-serif mt-3 text-2xl md:text-3xl text-[#1C1C18]" data-testid="instruments-h2">Five mirrors, cross-checked.</h2>
         <p className="mt-4 text-base text-[#3B3B34] max-w-2xl leading-relaxed">
-          Each measures something different. Where they agree, that’s signal. Where they disagree, that’s a finding —
+          Each measures something different. Where two land away from the middle in the same direction, that’s
+          signal. Where they pull opposite ways, that’s a finding —
           and usually the more interesting one.
         </p>
 

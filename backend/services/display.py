@@ -18,7 +18,7 @@ norm in the first place.
 """
 from math import erf, sqrt
 
-DISPLAY_VERSION = "disp-1.3.4"
+DISPLAY_VERSION = "disp-1.4.0"
 # 1.0.0 the population layer · 1.1.0 the norms pause · 1.2.0 the Everyday Mirror joins the
 # combined reading · 1.2.1 the last sten leaks out of "how you choose" and the global rows ·
 # 1.3.0 the Essential tie state: where the top two archetypes sit inside the margin the reading
@@ -28,7 +28,14 @@ DISPLAY_VERSION = "disp-1.3.4"
 # 1.3.2 a tied reading prints both archetype descriptions: a header naming two patterns above a
 # body voicing only the first ranks them again in the reader's ear · 1.3.3 the PDF's loudest-traits
 # heading no longer promises three above a list of one, and a profile with a single named trait
-# gets a second choosing point instead of one.
+# gets a second choosing point instead of one · 1.3.4 the one-factor partial line is singular ·
+# 1.4.0 the reportable floors: a convergence claim now requires both readings displaced from
+# their own midpoint and displaced the same way (two mid-scale numbers agreeing is what
+# uninformative answering produces), a cross-instrument claim inherits the weaker tier and
+# confidence of its two inputs, EI domains are named only across a minimum reportable difference
+# and EI facets not at all, the social-desirability cut moves above the content-blind null,
+# speeding is measured per item instead of as a mean, and the Delta reports its elevation
+# separately from its shape.
 # Snapshots are keyed on this, so a bump means new renders differ and every document already
 # delivered keeps exactly the bytes it was sent with.
 #
